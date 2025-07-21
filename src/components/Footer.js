@@ -6,7 +6,7 @@ const Footer = () => {
   return (
     <footer  className="container w-auto">
     <div className="text-center">
-        <small>© 2017 - {year} <a href="http://vacobinary.in/" traget="_blank">Vaco Binary Semantics</a> All Rights Reserved. </small>
+        <small>© {year} <a href="http://vacobinary.in/" traget="_blank">Highspring India</a> All Rights Reserved. </small>
     </div>
     </footer>
   );

@@ -82,9 +82,9 @@ function Home() {
         </a>
       </div>
       <div className="container text-center mt-5">
-        <h4>
+        <h3>
           Hello! <small>What skills are you looking to hire?</small>
-        </h4>
+        </h3>
       </div>
       <div className="container search_container mt-3">
         <form className="d-flex ms-3 me-3">
@@ -112,12 +112,12 @@ function Home() {
           {categoryList.map((category) => {
             return (
               <div
-                className="col-6 col-lg-2 float-left my-1 ps-1 pe-1 cursor"
+                className="col-6 col-lg-3 float-left my-1 ps-1 pe-1 cursor"
                 onClick={(e) => {
                   handleClickCategory(e, category);
                 }}
               >
-                <div className="col-12 col-lg-10 mx-0 mb-2 height_min">
+                <div className="col-12 col-lg-10 mx-0 mb-2 height_min home_cards">
                   <div className="card text-center min_height">
                     <img
                       className="cat_images mx-auto d-block"
@@ -138,22 +138,24 @@ function Home() {
             isOpen={modalIsOpen}
             onRequestClose={closeModal}
             ariaHideApp={false}
-            className={"catmodalpop"}
+            className="crm-modal"
+            overlayClassName="crm-modal-overlay"
           >
-            <div className="col-12 col-lg-4 float-left right-border">
+            {/* <div className="col-12 col-lg-4 float-left right-border">
               <button
                 onClick={closeModal}
                 className="btn btn-primary btn-xs exitarrow"
               >
                 <i className="bi bi-box-arrow-left"></i>
               </button>
-            </div>
-            <div className="col-12 float-left">
+            </div> */}
+            {/* <div className="col-12 float-left modal_container">
               <div className="col-12 col-lg-5 float-left right-border text-center">
-                <div id="photo2">
+                <div id="photo2" className="selected_category_image">
                   <img src={imageURL + selectedCategory?.image_name} alt="" />
                   <span></span>
                 </div>
+                <h4 className="selected_category_name">{selectedCategory?.category_name}</h4>
               </div>
               <div className="col-12 col-lg-7 float-left">
                 {selectedCategory?.technologies?.split(",").map((tech, key) => {
@@ -171,6 +173,27 @@ function Home() {
                     </div>
                   );
                 })}
+              </div>
+            </div> */}
+            <div className="crm-modal-content">
+              <div className="crm-modal-left">  
+                <img src={imageURL + selectedCategory?.image_name} alt="" className="crm-icon-image"/>
+                <h2 className="crm-title">{selectedCategory?.category_name}</h2>
+              </div>
+              <div className="crm-modal-right">
+                <ul className="crm-services-list">
+                  {selectedCategory?.technologies?.split(",").map((tech, key) => {
+                    return (
+                      <li 
+                        onClick={(event) => handleTechClick(event, tech)}
+                        key={key}
+                      >
+                        <img src={imageURL + selectedCategory?.image_name} alt=""/>
+                        <span>{tech}</span>
+                      </li>
+                    );
+                  })}
+                </ul>
               </div>
             </div>
           </Modal>

@@ -24,16 +24,6 @@
   and (orientation: portrait) {
 }
 
-/* Landscape */
-@media only screen 
-  and (min-device-width: 320px) 
-  and (max-device-width: 480px)
-  and (-webkit-min-device-pixel-ratio: 2)
-  and (orientation: landscape) {
-    .card_height {
-        min-height: 400px;
-    }
-}
 
 /* ----------- iPhone 5, 5S, 5C and 5SE ----------- */
 
@@ -58,16 +48,6 @@
   and (orientation: portrait) {
 }
 
-/* Landscape */
-@media only screen 
-  and (min-device-width: 320px) 
-  and (max-device-width: 568px)
-  and (-webkit-min-device-pixel-ratio: 2)
-  and (orientation: landscape) {
-    .card_height {
-        min-height: 430px;
-    }
-}
 
 /* ----------- iPhone 6, 6S, 7 and 8 ----------- */
 
@@ -93,16 +73,6 @@
 
 }
 
-/* Landscape */
-@media only screen 
-  and (min-device-width: 375px) 
-  and (max-device-width: 667px) 
-  and (-webkit-min-device-pixel-ratio: 2)
-  and (orientation: landscape) { 
-    .card_height {
-        min-height: 480px;
-    }
-}
 
 /* ----------- iPhone 6+, 7+ and 8+ ----------- */
 
@@ -123,16 +93,6 @@
 
 }
 
-/* Landscape */
-@media only screen 
-  and (min-device-width: 414px) 
-  and (max-device-width: 736px) 
-  and (-webkit-min-device-pixel-ratio: 2)
-  and (orientation: landscape) { 
-    .card_height {
-        min-height: 510px;
-    }
-}
 
 /* ----------- iPhone X ----------- */
 
@@ -153,16 +113,6 @@
 
 }
 
-/* Landscape */
-@media only screen 
-  and (min-device-width: 375px) 
-  and (max-device-width: 812px) 
-  and (-webkit-min-device-pixel-ratio: 2)
-  and (orientation: landscape) { 
-    .card_height {
-        min-height: 430px;
-    }
-}
 
 /* ----------- iPad 1, 2, Mini and Air ----------- */
 
@@ -174,16 +124,6 @@
 
 }
 
-/* Portrait */
-@media only screen 
-  and (min-device-width: 768px) 
-  and (max-device-width: 1024px) 
-  and (orientation: portrait) 
-  and (-webkit-min-device-pixel-ratio: 1) {
-    .card_height {
-        min-height: 420px;
-    }
-}
 
 /* Landscape */
 @media only screen 
@@ -235,15 +175,7 @@
 /* Portrait */
 /* Declare the same value for min- and max-width to avoid colliding with desktops */
 /* Source: https://medium.com/connect-the-dots/css-media-queries-for-ipad-pro-8cad10e17106*/
-@media only screen 
-  and (min-device-width: 834px) 
-  and (max-device-width: 834px) 
-  and (orientation: portrait) 
-  and (-webkit-min-device-pixel-ratio: 2) {
-    .card_height {
-        min-height: 450px;
-    }
-}
+
 
 /* Landscape */
 /* Declare the same value for min- and max-width to avoid colliding with desktops */
@@ -280,12 +212,3 @@
 /* Landscape */
 /* Declare the same value for min- and max-width to avoid colliding with desktops */
 /* Source: https://medium.com/connect-the-dots/css-media-queries-for-ipad-pro-8cad10e17106*/
-@media only screen 
-  and (min-device-width: 1366px) 
-  and (max-device-width: 1366px) 
-  and (orientation: landscape) 
-  and (-webkit-min-device-pixel-ratio: 2) {
-    .card_height {
-        min-height: 430px;
-    }
-}

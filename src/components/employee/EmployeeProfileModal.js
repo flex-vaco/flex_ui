@@ -1,102 +1,108 @@
 import React from "react";
-import Modal from 'react-modal';
-import * as Utils from "../../lib/Utils"
+import Modal from "react-modal";
+import * as Utils from "../../lib/Utils";
 import * as APP_FUNCTIONS from "../../lib/AppFunctions";
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom";
 
 const EmployeeProfileModal = (props) => {
+  const [modalIsOpen, setIsOpen] = React.useState(props.modalIsOpen);
+  const [hideAddInListBtn, setHideAddInListBtn] = React.useState(props.hideAddInListBtn || false);
+  const [hideHireBtn, setHideHireBtn] = React.useState(props.hideHireBtn || false);
+  const allSkills = [
+    ...(props.employee.primary_skills ? props.employee.primary_skills.split(",") : []),
+    ...(props.employee.secondary_skills ? props.employee.secondary_skills.split(",") : [])
+  ];
+  const navigate = useNavigate();
 
-    const [modalIsOpen, setIsOpen] = React.useState(props.modalIsOpen);
-    const [hideAddInListBtn, setHideAddInListBtn] = React.useState(props.hideAddInListBtn || false);
-    const [hideHireBtn, setHideHireBtn] = React.useState(props.hideHireBtn || false);
-    const navigate = useNavigate();
+  const closeModal = () => {
+    setIsOpen(false);
+  };
 
-    const closeModal = () => {
-        setIsOpen(false);
-    }
+  const handleHireClick = () => {
+    navigate(`/hireResource`, {
+      state: {
+        employee: props.employee,
+      },
+    });
+  };
 
-    const handleHireClick = () => {
-        navigate(`/hireResource`, {
-            state: {
-                employee: props.employee,
-            },
-          });
-    }
+  return (
+    <Modal
+      isOpen={props.modelstatus}
+      onRequestClose={closeModal}
+      ariaHideApp={false}
+      contentLabel="Profile Modal"
+      className="profile-modal"
+      overlayClassName="profile-modal-overlay"
+    >
+      <div className="modal-left">
+        <div className="profile-header-model">
+          <img
+            src={`${process.env.REACT_APP_API_BASE_URL}/uploads/profile_picture/${props.employee.profile_picture ? props.employee.profile_picture : 'profile_picture-default.png'}`}
+            className="profile-photo-model"
+            alt="Profile"
+          />
+          <div className="profile-info-model">
+            <h2>{props.employee.first_name} {props.employee.last_name}</h2>
+            <p className="location">Location: {props.employee.office_location_city}</p>
+            <p className="status">
+              Status {props.employee.status ? (
+                <span className={`${props.employee.status.toLowerCase()}`}>
+                  {props.employee.status.toUpperCase()}
+                </span>
+              ) : (
+                <span className="no-status">NO STATUS</span>
+              )}
+            </p>
+          </div>
+        </div>
 
-    return (
-        <Modal
-            isOpen={props.modelstatus}
-            onRequestClose={closeModal}
-            ariaHideApp={false}
-        >
-            <div>
-                <div className="col-12 float-left">
-                    <div className="col-3 col-lg-8 float-left">
-                        <button onClick={props.close} className="btn btn-primary btn-xs exitarrow"><i className="bi bi-box-arrow-left"></i></button>
-                    </div>
-                    <div className="col-9 col-lg-4 float-left">
-                        <div className="col-3 col-lg-4 float-right" hidden={hideHireBtn}>
-                            <button
-                            className="btn btn-primary btn-xs hire"
-                            onClick={handleHireClick}
-                            >
-                             Hire
-                            </button>
-                        </div>
-                        <div className="col-3 col-lg-4 float-right">
-                            <a href={(props.employee.resume) ?
-                                `${process.env.REACT_APP_API_BASE_URL}/uploads/resume/${props.employee.resume}` : null}
-                                target="_blank" className="btn btn-primary btn-xs add_in_list">Resume</a>
-                        </div>
-                    </div>
-                </div>
-                <div className="col-12 float-left mt-5">
-                    <div className="col-9 float-left">
-                        <div id="right-side">
-                            <div className="adiv">
-                                <img src={`${process.env.REACT_APP_API_BASE_URL}/uploads/profile_picture/${props.employee.profile_picture ? props.employee.profile_picture : 'profile_picture-default.png'}`} id="profilepic" />
-                                <span className="ms-3">{props.employee.first_name} {props.employee.last_name}<br /> Location: {props.employee.office_location_city}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="col-3 float-left text-right">
-                        <div className="hours_size">${props.employee.rate_per_hour} PER HOUR </div>
-                    </div>
-                </div>
-                <div className="col-12 float-left mt-5">
-                    <div className="col-12 col-lg-6 float-left">
-                        <div className="col-12">
-                            <p hidden={APP_FUNCTIONS.userIsProducer()}><b className="text-muted">Email: </b>{props.employee.email}</p>
-                            <p><b className="text-muted">Designation: </b>{props.employee.designation}</p>
-                            <p><b className="text-muted">Experience: </b>{props.employee.total_work_experience_years} years</p>
-                            <p><b className="text-muted">Rate/HR: </b>{props.employee.rate_per_hour} USD</p>
-                            <p><b className="text-muted">Vaco Joining Date: </b>{Utils.formatDateYYYYMMDD(props.employee.vaco_join_date)}</p>
-                            <p><b className="text-muted">Home Location: </b>{props.employee.home_location_city}</p>
-                            <p><b className="text-muted">Office Location: </b>{props.employee.office_location_city}</p>
-                            <p><b className="text-muted">Manager Name: </b>{props.employee.manager_name}</p>
-                            <p><b className="text-muted">Manager Email: </b> <a href={`mailto:${props.employee.manager_email}`}>{props.employee.manager_email}</a></p>
-                            <p><b className="text-muted">Is working On-site? </b>{(props.employee.is_onsite) ? "YES" : "NO"}</p>
-                        </div>
-                        <div className="col-12 education_details">
-                            <b>Education</b>
-                            <p>{props.employee.education}</p>
+        <div className="details">
+          <p>Email: {props.employee.email}</p>
+          <p>Role: {props.employee.designation}</p>
+          <p>Exp (Yrs.): {props.employee.total_work_experience_years}</p>
+          <p>Rate/HR: {props.employee.rate_per_hour}</p>
+          <p>Vaco Join Date: {Utils.formatDateYYYYMMDD(props.employee.vaco_join_date)}</p>
+          <p>Home Location: {props.employee.home_location_city}</p>
+          <p>Office Location: {props.employee.office_location_city}</p>
+          <p>
+            Supervisor: {props.employee.manager_name}
+            <button className="view-profile-btn">View Profile</button>
+          </p>
+          <p>Supervisor Email: {props.employee.manager_email}</p>
+          <p>On Site: {(props.employee.is_onsite) ? "YES" : "NO"}</p>
+        </div>
 
-                        </div>
-                    </div>
-                    <div className="col-12 col-lg-6 float-left">
-                        <div className="col-12">
-                            <h4 className="role_heading">{props.employee.designation}</h4>
-                            <p>{props.employee.profile_information}</p>
-                        </div>
-                        <div className="col-12">
-                            <h4 className="role_heading">Skills</h4>
-                            <p>{props.employee.primary_skills}, {props.employee.secondary_skills}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </Modal>
-    )
-}
+        <div className="education">
+          <h4>Education</h4>
+          <p>{props.employee.education}</p>
+        </div>
+      </div>
+
+      <div className="modal-right">
+        <div className="buttons">
+          {!hideHireBtn && <button className="hire-btn" onClick={handleHireClick}>Hire</button>}
+          {!hideAddInListBtn && <button className="add-btn">Add In List</button>}
+        </div>
+        <h3>
+            {props.employee.designation} <span className="price">$ {props.employee.rate_per_hour}/hr</span>
+        </h3>
+        <p>{props.employee.profile_information}</p>
+        <div className="skills">
+          <h4>Skills</h4>
+          
+          <div className="skill-tags">
+            
+            {allSkills.map((skill, index) => (
+              skill.trim() ? (
+                <span key={index}>{skill.trim()}</span>
+              ) : null
+            ))}
+          </div>
+        </div>
+      </div>
+    </Modal>
+  );
+};
 
 export default EmployeeProfileModal;

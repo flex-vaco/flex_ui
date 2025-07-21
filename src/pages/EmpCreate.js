@@ -30,7 +30,22 @@ function EmpCreate() {
     const [managerList, setManagerList] = useState([]);
     const navigate = useNavigate();
     const [manager_id, setSelectedManager] = useState("-select-");
-    const [locationList, setLocationList] = useState([])
+    const [locationList, setLocationList] = useState([]);
+    const [functional_focus, setFunctionalFocus] = useState('-select-');
+    const [vaco_division, setVacoDivision] = useState('-select-');
+    const [core_skillset, setCoreSkillset] = useState([]); // multiple
+    const [revenue_company_size, setRevenueCompanySize] = useState([]); // multiple
+    const [industries, setIndustries] = useState([]); // multiple
+    const [software_erp_experience, setSoftwareErpExperience] = useState([]); // multiple
+    const [hours_preference, setHoursPreference] = useState('40.00');
+
+    const functionalFocusOptions = ['A/F', 'HR', 'Technology', 'Marketing', 'Operations'];
+    const vacoDivisionOptions = ['VR', 'VS', 'VT'];
+    const coreSkillsetOptions = ['Java', 'React', 'Node', 'Python', 'Angular'];
+    const revenueCompanySizeOptions = ['<$10M', '$10M-$100M', '$100M-$1B', '$1B+'];
+    const industriesOptions = ['Healthcare', 'Finance', 'Retail', 'Technology', 'Manufacturing'];
+    const softwareErpExperienceOptions = ['SAP', 'Oracle', 'Dynamics', 'NetSuite', 'QuickBooks'];
+
 
     useEffect(() => {
         const configs = {
@@ -118,7 +133,6 @@ function EmpCreate() {
         data.append('status', status);
         data.append('email', email);
         data.append('designation', designation);
-        data.append('primary_skills', primary_skills);
         data.append('secondary_skills', secondary_skills);
         data.append('education', education);
         data.append('profile_information', profile_information);
@@ -133,6 +147,15 @@ function EmpCreate() {
         data.append('resume', selected_resume);
         data.append('profile_picture', profile_picture);
         data.append('employment_type', employment_type);
+        data.append('functional_focus_area', functional_focus);
+        data.append('highspring_division', vaco_division);
+        data.append('primary_skills', core_skillset.join(','));
+        data.append('max_company_revenue_size', revenue_company_size.join(','));
+        data.append('industries_experience', industries.join(','));
+        data.append('erp_software_experience', software_erp_experience.join(','));  
+        data.append('max_work_hours_prefered', hours_preference);
+
+
 
         axios.post('/employees/add', data, config)
           .then((response)=>{
@@ -368,6 +391,113 @@ function EmpCreate() {
                                     {locationList.map((location) => <option value={location.office_location_city}>{location.office_location_city}</option>)}    
                                 </select>
                             </div>
+                            <div className="form-group col-md-4">
+  <label htmlFor="functional_focus">Functional Focus</label>
+  <select
+    id="functional_focus"
+    className="form-control needs-validation"
+    required
+    value={functional_focus}
+    onChange={(e) => setFunctionalFocus(e.target.value)}
+  >
+    <option value="-select-">-- Select Functional Focus --</option>
+    {functionalFocusOptions.map(opt => (
+      <option key={opt} value={opt}>{opt}</option>
+    ))}
+  </select>
+</div>
+
+<div className="form-group col-md-4">
+  <label htmlFor="vaco_division">Vaco Division</label>
+  <select
+    id="vaco_division"
+    className="form-control needs-validation"
+    required
+    value={vaco_division}
+    onChange={(e) => setVacoDivision(e.target.value)}
+  >
+    <option value="-select-">-- Select Division --</option>
+    {vacoDivisionOptions.map(opt => (
+      <option key={opt} value={opt}>{opt}</option>
+    ))}
+  </select>
+</div>
+
+<div className="form-group col-md-4">
+  <label htmlFor="core_skillset">Core Skillset (Top 3)</label>
+  <select
+    id="core_skillset"
+    multiple
+    required
+    className="form-control needs-validation"
+    value={core_skillset}
+    onChange={(e) => setCoreSkillset(Array.from(e.target.selectedOptions, option => option.value))}
+  >
+    {coreSkillsetOptions.map(opt => (
+      <option key={opt} value={opt}>{opt}</option>
+    ))}
+  </select>
+</div>
+
+<div className="form-group col-md-4">
+  <label htmlFor="revenue_company_size">Revenue / Company Size Experience</label>
+  <select
+    id="revenue_company_size"
+    multiple
+    className="form-control"
+    value={revenue_company_size}
+    onChange={(e) => setRevenueCompanySize(Array.from(e.target.selectedOptions, option => option.value))}
+  >
+    {revenueCompanySizeOptions.map(opt => (
+      <option key={opt} value={opt}>{opt}</option>
+    ))}
+  </select>
+</div>
+
+<div className="form-group col-md-4">
+  <label htmlFor="industries">Industries (Top 3)</label>
+  <select
+    id="industries"
+    multiple
+    className="form-control"
+    value={industries}
+    onChange={(e) => setIndustries(Array.from(e.target.selectedOptions, option => option.value))}
+  >
+    {industriesOptions.map(opt => (
+      <option key={opt} value={opt}>{opt}</option>
+    ))}
+  </select>
+</div>
+
+<div className="form-group col-md-4">
+  <label htmlFor="software_erp_experience">Software / ERP Experience</label>
+  <select
+    id="software_erp_experience"
+    multiple
+    className="form-control"
+    value={software_erp_experience}
+    onChange={(e) => setSoftwareErpExperience(Array.from(e.target.selectedOptions, option => option.value))}
+  >
+    {softwareErpExperienceOptions.map(opt => (
+      <option key={opt} value={opt}>{opt}</option>
+    ))}
+  </select>
+</div>
+
+<div className="form-group col-md-6">
+  <label htmlFor="hours_preference">Hours Preference</label>
+  <select
+    id="hours_preference"
+    className="form-control needs-validation"
+    required
+    value={hours_preference}
+    onChange={(e) => setHoursPreference(e.target.value)}
+  >
+    <option value="40.00">40 hours</option>
+    <option value="45.00">Open to Excess Hours (&gt; 40)</option>
+  </select>
+</div>
+
                             <div className="form-group col-md-6">
                                 <label htmlFor="manager_name">Manager Name</label>
                                 <select name="manager_id" id="manager_id" value={manager_id} required className="form-control" onChange={handleManagerChange}> 

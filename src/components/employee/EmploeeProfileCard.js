@@ -25,28 +25,44 @@ function EmployeeProfileCard(props) {
     },[availability])
 
     return (<> {displayStatus && (
-        <div className="col-6 col-lg-3 float-left my-1 ps-1 pe-1 cursor" onClick={(e) => props.handleProfileClick(props.employee.emp_id)}> 
-        <div className="col-12 col-lg-12 mx-0 mb-2 card_spacing">
-            <div className="card card_height">
-                <img className="card-img-top justify-content-center align-items-center"src={`${process.env.REACT_APP_API_BASE_URL}/uploads/profile_picture/${props.employee.profile_picture ? props.employee.profile_picture : 'profile_picture-default.png'}`} alt="Card image cap"/>
-                <div className="media">
-                    <img src={`${process.env.REACT_APP_API_BASE_URL}/uploads/profile_picture/${props.employee.profile_picture ? props.employee.profile_picture : 'profile_picture-default.png'}`}  className="mr-3 rounded-pill"/>
-                    <div className="media-body">
-                        <h6 className="mt-2 mb-0">{props.employee.first_name} {props.employee.last_name}</h6>
-                        <div className="d-flex flex-row justify-content-between align-text-center">
-                            <small className="text-muted">{props.employee.designation}</small>
+        <div class="col-12 col-lg-4 col-sm-12 float-left p-4">
+                <div class="card profile-card cursor" onClick={(e) => props.handleProfileClick(props.employee.emp_id)}>
+                    <div class="profile-header">
+                        <img src={`${process.env.REACT_APP_API_BASE_URL}/uploads/profile_picture/${props.employee.profile_picture ? props.employee.profile_picture : 'profile_picture-default.png'}`}  className="profile-image"/>
+                    </div>
+                    <div class="profile-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h3 class="profile-name">{props.employee.first_name} {props.employee.last_name}</h3>
+                                <p class="profile-title">{props.employee.designation}</p>
+                            </div>
+                            <div class="rating">
+                                <i class="bi bi-star-fill"></i>
+                                <span class="rating-value">5.0</span>
+                            </div>
+                        </div>
+                        
+                        <div class="profile-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Location: </span>
+                                <span class="detail-value">{props.employee.office_location_city}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Availability: </span>
+                                <span class="detail-value"><span className={availability > 0 ? 'text-success fw-bold': 'text-danger'}>{availability}  Hrs./week</span></span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Experience: </span>
+                                <span class="detail-value">{props.employee.total_work_experience_years} years</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Starting At: </span>
+                                <span class="detail-value starting-price"><b>${props.employee.rate_per_hour} PER HOUR</b></span>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div className="card-body p-1 ps-3">
-                    <p className="card-text m-0">Location: {props.employee.office_location_city} </p>
-                    <p className="card-text m-0">Availability: <span className={availability > 0 ? 'text-success fw-bold': 'text-danger'}>{availability}  Hrs./week</span></p>
-                    <p className="card-text m-0">Expirence: {props.employee.total_work_experience_years} years</p>
-                    <p className="card-text m-0">STARTING AT: <b>${props.employee.rate_per_hour} PER HOUR </b></p> 
-                </div>
             </div>
-        </div>
-        </div>
     )
     }</>)
 }

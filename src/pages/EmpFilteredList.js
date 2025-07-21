@@ -157,9 +157,9 @@ function EmpFilteredList() {
     return (
         <Layout>
             <div className="row-offcanvas row-offcanvas-right container-fluid float-left">
-            <div className="col-xs-6 col-sm-2 sidebar-offcanvas sidebar_background float-left pt-1 px-2" id="sidebar">
+            <div className="col-xs-6 col-sm-2 sidebar-offcanvas sidebar_background float-left" id="sidebar">
             <button type="button" className="btn btn-primary btn-xs btn-close-white p-0 visible-xs" data-toggle="offcanvasclose"><i className="bi bi-chevron-left"></i></button>
-            <p className="text-center"><i className="bi bi-funnel-fill"></i> Filter</p>
+            <p><i className="bi bi-funnel-fill"></i> Filter</p>
             <div className="col-12 h-100">
                             <div className="small">
                                 Skills
