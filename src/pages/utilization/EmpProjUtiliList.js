@@ -12,7 +12,7 @@ function EmpProjUtiliList() {
     const  [empProjUtiliList, setEmpProjUtiliList] = useState([]);
     const [modalIsOpen, setIsOpen] = useState(false);
     const [empModalDetails, setEmpModalDetails] = useState({});
-    const [hasReadOnlyAccess, setHasReadOnlyAccess] = useState(AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.PRODUCER);
+    const hasReadOnlyAccess = useState(AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.PRODUCER);
 
     const navigate = useNavigate();
 
@@ -142,7 +142,7 @@ function EmpProjUtiliList() {
                           </Link>
                         </td>
                         <td>
-                            <a href='#' id={key} key={key}  onClick={(e) => openEmpDetailsModal(empProjUtili.empDetails.emp_id)}>
+                            <a href="javascript:void(0)" id={key} key={key}  onClick={(e) => openEmpDetailsModal(empProjUtili.empDetails.emp_id)}>
                               {empProjUtili.empDetails.first_name}, 
                               {empProjUtili.empDetails.last_name}
                             </a>

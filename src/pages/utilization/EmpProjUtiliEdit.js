@@ -6,7 +6,7 @@ import Layout from "../../components/Layout"
 import * as Utils from "../../lib/Utils"
  
 function EmpProjUtiliEdit() {
-    const [emp_proj_utili_id, setId] = useState(useParams().id)
+    const emp_proj_utili_id = useState(useParams().id)
     const [emp_id, setEmpId] = useState('');
     const [project_id, setProjectId] = useState('');
     const [week_starting, setWeekStart] = useState('');
@@ -156,7 +156,7 @@ function EmpProjUtiliEdit() {
                                 <label htmlFor="employee">Resource Name</label>
                                 <select name="employee" id="employee" className="form-control" onChange={handleEmpChange} > 
                                     {empList.map((emp, key) => {
-                                        const sel = (emp.emp_id == emp_id) ? true : false;
+                                        const sel = (emp.emp_id === emp_id) ? true : false;
                                         return <option key={key} value={emp.emp_id} selected={sel}>{emp.first_name}, {emp.last_name}</option>;
                                     })}
                                 </select>
@@ -165,7 +165,7 @@ function EmpProjUtiliEdit() {
                                 <label htmlFor="project">Project</label>
                                 <select name="project" id="project" className="form-control" onChange={handleProjectChange} > 
                                     {projectList.map((prj, key) => {
-                                        const sel = (prj.project_id == project_id) ? true : false;
+                                        const sel = (prj.project_id === project_id) ? true : false;
                                         return <option key={key} value={prj.project_id} selected={sel}>{prj.project_name}, {prj.project_location}</option>;
                                     })}
                                 </select>

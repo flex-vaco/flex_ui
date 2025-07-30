@@ -6,7 +6,7 @@ import Layout from "../components/Layout"
 import * as Utils from "../lib/Utils"
  
 function ProjectEdit() {
-    const [project_id, setId] = useState(useParams().id)
+    const project_id = useState(useParams().id)
     const [project_name, setProjectName] = useState('');
     const [project_location, setProjectLocation] = useState('');
     const [contact_person, setContactPerson] = useState('');
@@ -131,7 +131,7 @@ function ProjectEdit() {
                             <label htmlFor="project">Client</label>
                             <select name="client" id="client" className="form-control" onChange={handleClientChange}> 
                                 {clientList.map((client, key) => {
-                                    const sel = (client.client_id == client_id) ? true : false;
+                                    const sel = (client.client_id === client_id) ? true : false;
                                     return <option key={key} value={client.client_id} selected={sel}>{client.name}, {client.location}</option>;
                                 })}
                             </select>

@@ -10,26 +10,13 @@ import * as APP_FUNCTIONS from "../lib/AppFunctions";
 function Home() {
   const [searchSkill, setSearchSkill] = useState("");
   const [modalIsOpen, setIsOpen] = useState(false);
-  const [empModalDetails, setCatModalDetails] = useState([]);
-  const [userIsProducer, setUserIsProducer] = useState(
+  const userIsProducer = useState(
     APP_FUNCTIONS.activeUserRole === APP_CONSTANTS.USER_ROLES.PRODUCER
   );
   const imageURL = process.env.REACT_APP_API_BASE_URL + "/uploads/technologies/";
   const navigate = useNavigate();
   const [categoryList, setCategoryList] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState({});
-
-    function openModal(empId) {
-        axios.get(`/employees/${empId}`)
-            .then(function (response) {
-                setCatModalDetails(response.data.employees[0])
-            })
-            .catch(function (error) {
-              console.log(error);
-            })
-        setIsOpen(true);
-        console.log(empId);
-    }
 
   const closeModal = () => {
     setIsOpen(false);

@@ -82,7 +82,7 @@ function EmpList() {
 
     const handleSearch = (event) => {
       event.stopPropagation();
-     if (!searchKey || searchKey == "-select-") {
+     if (!searchKey || searchKey === "-select-") {
         Swal.fire({
           title: 'Select Search Key ',
           text: "Please select a key and then type value!",
@@ -108,7 +108,7 @@ function EmpList() {
 
     const handleSearchKeyChange = (event) => {
       event.stopPropagation();
-      if (event.target.value == "-select-"){
+      if (event.target.value === "-select-"){
         document.getElementById("search-value").value = "";
       } else {
         setSearchKey(event.target.value);
@@ -259,7 +259,7 @@ function EmpList() {
                                 ? `${process.env.REACT_APP_API_BASE_URL}/uploads/resume/${empDetails.resume}`
                                 : null
                             }
-                            target="_blank"
+                            target="_blank" rel="noreferrer"
                           >
                             <i className="bi bi-person-lines-fill"></i>
                           </a>

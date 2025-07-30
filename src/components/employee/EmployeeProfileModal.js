@@ -1,13 +1,12 @@
 import React from "react";
 import Modal from "react-modal";
 import * as Utils from "../../lib/Utils";
-import * as APP_FUNCTIONS from "../../lib/AppFunctions";
 import { useNavigate } from "react-router-dom";
 
 const EmployeeProfileModal = (props) => {
   const [modalIsOpen, setIsOpen] = React.useState(props.modalIsOpen);
-  const [hideAddInListBtn, setHideAddInListBtn] = React.useState(props.hideAddInListBtn || false);
-  const [hideHireBtn, setHideHireBtn] = React.useState(props.hideHireBtn || false);
+  const hideAddInListBtn = React.useState(props.hideAddInListBtn || false);
+  const hideHireBtn = React.useState(props.hideHireBtn || false);
   const allSkills = [
     ...(props.employee.primary_skills ? props.employee.primary_skills.split(",") : []),
     ...(props.employee.secondary_skills ? props.employee.secondary_skills.split(",") : [])
@@ -30,10 +29,11 @@ const EmployeeProfileModal = (props) => {
     <Modal
       isOpen={props.modelstatus}
       onRequestClose={closeModal}
-      ariaHideApp={false}
+      ariaHideApp={true}
       contentLabel="Profile Modal"
       className="profile-modal"
       overlayClassName="profile-modal-overlay"
+      shouldCloseOnOverlayClick={true} 
     >
       <div className="modal-left">
         <div className="profile-header-model">
@@ -82,7 +82,7 @@ const EmployeeProfileModal = (props) => {
       <div className="modal-right">
         <div className="buttons">
           {!hideHireBtn && <button className="hire-btn" onClick={handleHireClick}>Hire</button>}
-          {!hideAddInListBtn && <button className="add-btn">Add In List</button>}
+          {!hideAddInListBtn && <a href={(props.employee.resume) ? `${process.env.REACT_APP_API_BASE_URL}/uploads/resume/${props.employee.resume}` : null} rel="noreferrer" target="_blank" className="add-btn">Resume</a>}
         </div>
         <h3>
             {props.employee.designation} <span className="price">$ {props.employee.rate_per_hour}/hr</span>

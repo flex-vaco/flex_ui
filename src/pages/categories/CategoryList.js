@@ -7,7 +7,7 @@ import APP_CONSTANTS from "../../appConstants";
 
 function CategoryList() {
     const  [categoryList, setCategoryList] = useState([])
-    const [hasReadOnlyAccess, setHasReadOnlyAccess] = useState(AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.PRODUCER);
+    const hasReadOnlyAccess = useState(AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.PRODUCER);
     
     const navigate = useNavigate(); 
 

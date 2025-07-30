@@ -1,14 +1,10 @@
-import React,{ useState, useEffect} from 'react'
-import { Link, useNavigate } from "react-router-dom"
-import axios from 'axios'
-import Layout from "../../components/Layout"
-import * as Utils from "../../lib/Utils"
-import DataTable from 'react-data-table-component';
-import { Select, MenuItem, toggleButtonGroupClasses } from "@mui/material";
+import React,{ useState, useEffect} from 'react';
+import axios from 'axios';
+import Layout from "../../components/Layout";
+import * as Utils from "../../lib/Utils";
 import MUIDataTable from "mui-datatables";
 
 function AvailableHours() {
-    const navigate = useNavigate();
     const  [columns , setColumnsConfigs] = useState([])
     const  [data , setColumnsData] = useState([])
 
@@ -140,7 +136,6 @@ function AvailableHours() {
       onFilterChange: (changedColumn, filterList) => {
         console.log(changedColumn, filterList);
       },
-      selectableRows: 'multiple',
       filterType: 'dropdown',
       responsive: 'vertical',
       rowsPerPage: 10,

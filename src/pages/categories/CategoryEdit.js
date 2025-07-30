@@ -1,12 +1,12 @@
 import React, {useState, useEffect} from 'react'
-import { Link, useParams, useNavigate } from "react-router-dom"
+import { useParams, useNavigate } from "react-router-dom"
 import Swal from 'sweetalert2'
 import axios from 'axios'
 import Layout from "../../components/Layout";
 import * as AppFunc from "../../lib/AppFunctions";
 
 function CategoryEdit() {
-    const [category_id, setId] = useState(useParams().id)
+    const category_id = useState(useParams().id)
     const [category_name, setCategoryName] = useState('');
     const [technologies, setTechnologies] = useState('');
     const navigate = useNavigate();
@@ -16,11 +16,6 @@ function CategoryEdit() {
     const handleCancel = () => {
         navigate("/categoryList");
     }
-    const httpConfig = {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-    };
 
     const handleImageChange = (e) => {
         if (AppFunc.validateUploadFile(e.target.files[0], "image")) {

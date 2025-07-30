@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import axios from 'axios'
 import Menu from "./Menu";
 
@@ -65,7 +65,7 @@ const Menubar = () => {
       </div>
     </nav>
   </div>
-  
+
   );
 };
 

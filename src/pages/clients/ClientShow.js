@@ -4,7 +4,7 @@ import axios from 'axios';
 import Layout from "../../components/Layout"
  
 function ClientShow() {
-    const [client_id, setId] = useState(useParams().id)
+    const client_id = useState(useParams().id)
     const [clientDetails, setClientDetails] = useState({
         name: '',
         location: '',

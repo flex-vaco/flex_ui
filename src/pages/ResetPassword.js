@@ -6,9 +6,9 @@ import axios from 'axios'
 function ResetPassword() {
     const location = useLocation();
     const user = location?.state?.user;
-    const [user_id, setId] = useState(user.user_id)
+    const user_id = useState(user.user_id)
     const [password, setPassword] = useState('');
-    const [email, setEmail] = useState(user.email);
+    const email = useState(user.email);
     const [isSaving, setIsSaving] = useState(false);
     const [formErr, setFormErr] = useState("");
     const [chkPassword, setChkPassword] = useState('');
@@ -74,7 +74,7 @@ function ResetPassword() {
         <>
             <div className="container w-auto login_div">
                 <div className="container w-auto login_logo">
-                <img src='images/Logo.png' alt="My Image" />
+                <img src='images/Logo.png' alt="Logo" />
                 </div>
                 <div className="container w-auto">
                 <div className="justify-content-center d-flex">
