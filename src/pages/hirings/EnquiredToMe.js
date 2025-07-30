@@ -1,15 +1,11 @@
-import React,{ useState, useEffect} from 'react'
-import { Link, useNavigate } from "react-router-dom"
-import Swal from 'sweetalert2'
+import React,{ useState, useEffect} from 'react';
 import axios from 'axios'
 import Layout from "../../components/Layout"
-import * as Utils from "../../lib/Utils";
 import HiringModal from '../../components/HiringModal';
 import DataTable from 'react-data-table-component';
 
 function EnquiredByMe() {
     const [hiringList, setHiringList] = useState([])
-    const navigate = useNavigate();
     const [modalIsOpen, setIsOpen] = useState(false);
     const [hiringModalDetails, setHiringModalDetails] = useState({});
     const [hiringModalComments, setHiringModalComments] = useState({})
@@ -40,7 +36,7 @@ function EnquiredByMe() {
     ];
 
     const [selectedStatus, setSelectedStatus] = useState('');
-    const [searchText, setSearchText] = useState('');
+    const searchText = useState('');
 
     const filteredData = hiringList.filter(item => {
       const isStatusMatch = selectedStatus ? item.hiring_status === selectedStatus : true;

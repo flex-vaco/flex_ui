@@ -6,18 +6,12 @@ import Menu from "./Menu";
 const Navbar = () => {
   const navigate = useNavigate();
   const [searchSkill, setSearchSkill] = useState('');
-  const [showAvatarMenu, setShowAvatarMenu] = useState(false);
 
   const handleSearchClick = (event) => {
     event.preventDefault();
     navigate(`/filter`, {
       state: { categoryTech: [], technologies: searchSkill }
     });
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("jwt-access-token");
-    navigate("/");
   };
 
   if (AppFunc.userIsEmployee()) {
@@ -54,23 +48,14 @@ const Navbar = () => {
       </form>
 
       <div className="navbar-links">
-        {/* Employees dropdown */}
-        <div
-          className="dropdown-wrapper"
-        >
-          <button className="nav-link">
-            Employees <span className="arrow">&#9662;</span>
-          </button>
-        </div>
-
         {/* Projects dropdown */}
-        <div
+        {/* <div
           className="dropdown-wrapper"
         >
           <button className="nav-link">
             Projects <span className="arrow">&#9662;</span>
           </button>
-        </div>
+        </div> */}
         <Menu />
       </div>
     </nav>

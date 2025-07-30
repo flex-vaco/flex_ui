@@ -81,7 +81,7 @@ function UserList() {
 
     const handleSearchKeyChange = (event) => {
       event.stopPropagation();
-      if (event.target.value == "-select-"){
+      if (event.target.value === "-select-"){
         document.getElementById("search-value").value = "";
       } else {
         setSearchKey(event.target.value);

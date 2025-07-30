@@ -62,7 +62,7 @@ export const ResetPassword = () => {
 
     <div className="container w-auto login_div">
       <div className="container w-auto login_logo">
-        <img src='/images/Logo.png' alt="My Image" />
+        <img src='/images/Logo.png' alt="Logo" />
       </div>
 
       <div className="container w-auto">
@@ -115,7 +115,7 @@ export const ResetPassword = () => {
                             </div>
                         </form>
                         <div className="text-center poweredby_logo">
-                          Powered by <img src='/images/VacoBinary_Logo.png' alt="My Image" />
+                          Powered by <img src='/images/VacoBinary_Logo.png' alt="Logo" />
                         </div>
                     </div>
                     

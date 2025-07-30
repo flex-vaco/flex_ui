@@ -3,7 +3,6 @@ import axios from 'axios';
 import { userIsEmployee, userIsProducer, userIsManager } from "../lib/AppFunctions";
 
 function TimeEntryWidget(props) {
-
   const [taskName, setTaskName] = useState('');
   const [taskHours, setTaskHours] = useState(0);
   const [taskOvertime, setTaskOvertime] = useState(0);
@@ -14,7 +13,7 @@ function TimeEntryWidget(props) {
     const [weekEndBGColor] = useState(props.isWeekend ? "bg-light bg-gradient" : "");
     const [labelFont] = useState(props.isWeekend ? "text-muted" : "fw-bold");
 
-    const [tempTimesheetId, setTempTimesheetId] = useState(`temp_${props.empAlloc.project_id}_${props.tsDate}`)
+    const tempTimesheetId = useState(`temp_${props.empAlloc.project_id}_${props.tsDate}`)
     const fetchTimesheets = () => {
       axios
         .post(`/timesheets/by_allocation`, {

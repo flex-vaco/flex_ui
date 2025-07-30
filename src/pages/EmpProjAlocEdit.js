@@ -6,7 +6,7 @@ import Layout from "../components/Layout"
 import * as Utils from "../lib/Utils"
  
 function EmpProjAlocEdit() {
-    const [emp_proj_aloc_id, setId] = useState(useParams().id)
+    const emp_proj_aloc_id = useState(useParams().id)
     const [emp_id, setEmpId] = useState('');
     const [project_id, setProjectId] = useState('');
     const [start_date, setStartDate] = useState('');

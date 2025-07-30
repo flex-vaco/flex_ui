@@ -1,4 +1,4 @@
-import React, {useState, useEffect } from 'react'
+import React, {useState } from 'react'
 import { useNavigate, useLocation } from "react-router-dom"
 import Swal from 'sweetalert2'
 import axios from 'axios'
@@ -8,7 +8,7 @@ import * as APP_FUNCTIONS from "../lib/AppFunctions";
 
 function HireResource() {
     const loc = useLocation();
-    const [employee, setId] = useState(loc.state.employee);
+    const employee = useState(loc.state.employee);
     const [project_name, setProjectName] = useState('');
     const [work_location, setWorkLocation] = useState('Remote');
     const [start_date, setStartDate] = useState(null);

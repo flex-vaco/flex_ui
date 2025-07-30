@@ -20,6 +20,7 @@ function EmpShow() {
     setIsModalOpen(true);
   };
 
+
   const handleLogin = () => {
     Swal.showLoading();
     setTryingLogin(true);
@@ -85,7 +86,7 @@ function EmpShow() {
     <>
     <div className="login_div">
     <div className="container w-auto login_logo">
-          <img src='images/Logo.png' alt="My Image" />
+          <img src='images/Logo.png' alt="Logo" />
         </div>
       <div className="login_form_container">
         
@@ -136,6 +137,7 @@ function EmpShow() {
                         Continue
                       </button>
                     </div>
+                    <p onClick={handleForgotPassword} className="forgot-password">Forgot password?</p>
                     <div className="login-divider">
                       <div className="login-divider-line"></div>
                       <span className="login-divider-text">Don't Have Highspring Account</span>
@@ -149,7 +151,7 @@ function EmpShow() {
                   </div>    
                 </form>
                 <div className="text-center poweredby_logo">
-                  Powered by <img src='images/VacoBinary_Logo.png' alt="My Image" />
+                  Powered by <img src='images/VacoBinary_Logo.png' alt="Logo" />
                 </div>
               </div>
             </div>

@@ -5,9 +5,7 @@ import * as AppFunc from "../lib/AppFunctions";
 const Menu = () => { 
     const navigate = useNavigate();
     const activeUserRole = localStorage.getItem("user_role");
-    const [searchSkill, setSearchSkill] = useState('');
-    const dummyState = {categoryTech:[], technologies:''};
-    const [notificationsCount, setNotificationsCount] = useState(0);
+    const notificationsCount = useState(0);
 
     const handleLogout = () => {
       navigate("/")
@@ -109,7 +107,7 @@ return(
               </ul>
             </li>
             
-        </ul>
+        </ul> 
 )
 }
 export default Menu;

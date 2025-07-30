@@ -10,10 +10,10 @@ import * as APP_FUNCTIONS from "../../lib/AppFunctions";
 const Timesheet = () => {
     const [empId, setEmpId] = useState(APP_FUNCTIONS.userIsEmployee() ? JSON.parse(localStorage.getItem("user"))?.emp_id : null);
     const [empAllocatations, setEmpAllocations] = useState([]);
-    const [userIsApprover, setUserIsApprover] = useState(APP_FUNCTIONS.activeUserRole === APP_CONSTANTS.USER_ROLES.MANAGER);
-    const [userIsProducer, setUserIsProducer] = useState(APP_FUNCTIONS.activeUserRole === APP_CONSTANTS.USER_ROLES.PRODUCER);
+    const userIsApprover = useState(APP_FUNCTIONS.activeUserRole === APP_CONSTANTS.USER_ROLES.MANAGER);
+    const userIsProducer = useState(APP_FUNCTIONS.activeUserRole === APP_CONSTANTS.USER_ROLES.PRODUCER);
     const [isSaving, setIsSaving] = useState(false);
-    const [managerEmail, setManagerEmail] = useState(JSON.parse(localStorage.getItem("user"))?.email);
+    const managerEmail = useState(JSON.parse(localStorage.getItem("user"))?.email);
     const [empList, setEmpList] = useState([]);
     const [prjList, setPrjList] = useState([]);
     const [proprjList, setProProjectList] = useState([]);
@@ -21,7 +21,6 @@ const Timesheet = () => {
     const [proempList, setProEmpList] = useState([]);
     const [selectedProjectId, setSelectedProjectId] = useState('');
     const weekEnd = ["Sat", "Sun"];
-    const {monthStartDate, monthEndDate } = Utils.getStartEndDatesCurrentMonth();
     const {weekStartDate, weekEndDate} = Utils.getStartEndDatesCurrentWeek();
     const [dispStartDate, setDispStartDate] = useState(weekStartDate);
     const [dispEndDate, setDispEndDate] = useState(weekEndDate);
@@ -32,12 +31,12 @@ const Timesheet = () => {
     const handleDateChange = (e) => {
       e.preventDefault();
       const action = e.target.name;
-      if (action == "prevWeek"){
+      if (action === "prevWeek"){
         const {prevWeekStartDate, prevWeekEndDate} = Utils.getStartEndDatesPreviousWeek(new Date(displayDates[0]));
         setDisplayDates(Utils.getDatesBetween(prevWeekStartDate, prevWeekEndDate));
         setDispStartDate(prevWeekStartDate);
         setDispEndDate(prevWeekEndDate);
-      } else if (action == "nextWeek"){
+      } else if (action === "nextWeek"){
         const {nextWeekStartDate, nextWeekEndDate} = Utils.getStartEndDatesNextWeek(new Date(displayDates[0]));
         setDisplayDates(Utils.getDatesBetween(nextWeekStartDate, nextWeekEndDate));
         setDispStartDate(nextWeekStartDate);
@@ -123,7 +122,7 @@ const Timesheet = () => {
     if ("-select-" === e.target.value) {
       setEmpAllocations(origEmpAlloc);
     } else {
-      const selectedProject = origEmpAlloc.filter(ea=> ea.project_id == e.target.value);
+      const selectedProject = origEmpAlloc.filter(ea=> ea.project_id === e.target.value);
       setSelectedProjectId(selectedProject[0].project_id);
       setEmpAllocations(selectedProject);
       console.log("Sele Pro", selectedProject);

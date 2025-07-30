@@ -4,7 +4,7 @@ import axios from 'axios';
 import Layout from "../components/Layout"
  
 function ProjectShow() {
-    const [project_id, setId] = useState(useParams().id)
+    const project_id = useState(useParams().id)
     const [projectDetails, setProjectDetails] = useState({
         project_name: '',
         project_location: '',

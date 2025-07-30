@@ -2,7 +2,6 @@ import React,{ useState, useEffect} from 'react';
 import Modal from 'react-modal';
 import * as Utils from "../lib/Utils"
 import * as APP_FUNCTIONS from "../lib/AppFunctions";
-import { useNavigate } from "react-router-dom";
 import Swal from 'sweetalert2';
 import axios from 'axios';
 
@@ -11,7 +10,6 @@ const HiringModal = (props) => {
     const [hiringModalIsOpen, setIsModelOpen] = useState(false);
     const [comments, setComments] = useState([]); 
     const [newComment, setNewComment] = useState("");
-    const navigate = useNavigate();
     const [isSaving, setIsSaving] = useState(false);
 
     const closeModal = () => {

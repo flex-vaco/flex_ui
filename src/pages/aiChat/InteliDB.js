@@ -1,12 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import Swal from 'sweetalert2'
 import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
-import { MainContainer, ChatContainer, MessageList, Message, MessageInput, TypingIndicator } from '@chatscope/chat-ui-kit-react';
 import Layout from "../../components/Layout"
 import axios from 'axios'
-import { Height } from '@mui/icons-material';
-import { height } from '@mui/system';
-import { event } from 'jquery';
 
 function InteliDB() {
   const [message, setMessage] = useState('');
@@ -26,7 +22,7 @@ function InteliDB() {
 
   const handleQueryChange = (event) => {
       const userQueryId = event.target.value;
-      const queryItem = userQueryList.find((queryItem) => queryItem.user_query_id == userQueryId);
+      const queryItem = userQueryList.find((queryItem) => queryItem.user_query_id === userQueryId);
       if (queryItem) {
         setQuery(queryItem.query);
         setMessage(queryItem.question);

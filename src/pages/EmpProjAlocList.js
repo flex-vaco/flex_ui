@@ -14,7 +14,7 @@ function EmpProjAlocList() {
     const [inputType, setInputType] = useState("text");
     const [modalIsOpen, setIsOpen] = useState(false);
     const [empModalDetails, setEmpModalDetails] = useState({});
-    const [hasReadOnlyAccess, setHasReadOnlyAccess] = useState(AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.PRODUCER);
+    const hasReadOnlyAccess = useState(AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.PRODUCER);
     const navigate = useNavigate(); 
 
     const handleAddButtonClick = () => {
@@ -76,7 +76,7 @@ function EmpProjAlocList() {
 
     const handleSearch = (event) => {
       event.stopPropagation();
-     if (!searchKey || searchKey == "-select-") {
+     if (!searchKey || searchKey === "-select-") {
         Swal.fire({
           title: 'Select Search Key ',
           text: "Please select a key to search!",
@@ -102,7 +102,7 @@ function EmpProjAlocList() {
 
     const handleSearchKeyChange = (event) => {
       event.stopPropagation();
-      if (event.target.value == "-select-"){
+      if (event.target.value === "-select-"){
         document.getElementById("search-value").value = "";
       } else {
         setSearchKey(event.target.value);

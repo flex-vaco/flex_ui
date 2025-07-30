@@ -9,7 +9,7 @@ import APP_CONSTANTS from "../appConstants";
 
 function ProjectList() {
     const [projectList, setProjectList] = useState([]);
-    const [hasReadOnlyAccess, setHasReadOnlyAccess] = useState(AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.PRODUCER);
+    const hasReadOnlyAccess = useState(AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.PRODUCER);
 
     const navigate = useNavigate();
 
@@ -89,7 +89,7 @@ function ProjectList() {
 
   const handleSearchKeyChange = (event) => {
     event.stopPropagation();
-    if (event.target.value == "-select-"){
+    if (event.target.value === "-select-"){
       document.getElementById("search-value").value = "";
     } else {
       setSearchKey(event.target.value);

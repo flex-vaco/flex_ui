@@ -4,7 +4,7 @@ import axios from 'axios';
 import Layout from "../components/Layout"
  
 function EmpShow() {
-    const [emp_id, setId] = useState(useParams().id)
+    const emp_id = useState(useParams().id)
     const [empDetails, setEmpDetails] = useState({
         first_name: '',
         last_name: '',
@@ -79,13 +79,13 @@ function EmpShow() {
                         <p><b className="text-muted">Resume: </b>
                             <a href={(empDetails.resume) ? 
                               `${process.env.REACT_APP_API_BASE_URL}/uploads/resume/${empDetails.resume}` : null} 
-                              target="_blank">
+                              target="_blank" rel="noreferrer">
                               <i className="bi bi-person-lines-fill"></i>
                             </a>
                         </p>
                         </div>
                         <div className="col">
-                        <p> <img className="rounded-pill profile_pictureempdetails" 
+                        <p> <img className="rounded-pill profile_pictureempdetails" alt="profile picture"
                             src = {(empDetails.profile_picture) ?
                                 `${process.env.REACT_APP_API_BASE_URL}/uploads/profile_picture/${empDetails.profile_picture}` : 
                                 `${process.env.REACT_APP_API_BASE_URL}/uploads/profile_picture/profile_picture-default.png`} 

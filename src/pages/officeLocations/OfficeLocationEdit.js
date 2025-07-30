@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import { Link, useParams, useNavigate } from "react-router-dom"
+import { useParams, useNavigate } from "react-router-dom"
 import Swal from 'sweetalert2'
 import axios from 'axios'
 import Layout from "../../components/Layout"
  
 function OfficeLocationEdit() {
-    const [location_id, setId] = useState(useParams().id)
+    const location_id = useState(useParams().id);
     const [name, setLocationName] = useState('');
     const [isSaving, setIsSaving] = useState(false)
     const navigate = useNavigate();

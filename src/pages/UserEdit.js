@@ -8,7 +8,7 @@ import * as Utils from "../lib/Utils";
 import Multiselect from 'multiselect-react-dropdown';
 
 function UserEdit() {
-    const [user_id, setId] = useState(useParams().id)
+    const user_id = useState(useParams().id)
     const [first_name, setFirstName] = useState('');
     const [last_name, setLastName] = useState('');
     const [password, setPassword] = useState('');
@@ -332,7 +332,7 @@ function UserEdit() {
                                 <label htmlFor="role">Role</label>
                                 <select name="role" id="role" className="form-control" onChange={handleRoleChange} > 
                                     {roles.map((rl, key) => {
-                                        const sel = (rl.role == role) ? true : false;
+                                        const sel = (rl.role === role) ? true : false;
                                         return <option key={key} value={rl.role} selected={sel}>{rl.role.toUpperCase()}</option>;
                                     })}
                                 </select>
@@ -356,7 +356,7 @@ function UserEdit() {
                                 <select name="project" id="project" className="form-control" onChange={handleProjectChange} > 
                                     <option value="-select-" > -- Select a Project -- </option>
                                     {projects.map((prj) => {
-                                        const sel = (prj.project_id == project) ? true : false;
+                                        const sel = (prj.project_id === project) ? true : false;
                                         return <option key={prj.project_id} value={prj.project_id} selected={sel}>{prj.project_name}</option>;
                                     })}
                                 </select>
@@ -367,7 +367,7 @@ function UserEdit() {
                                 <select name="emp" id="emp" className="form-control" onChange={handlEmployeeChange} > 
                                     <option value="-select-" > -- Select an Employee -- </option>
                                     {employees.map((emp) => {
-                                        const sel = (emp.emp_id == employee) ? true : false;
+                                        const sel = (emp.emp_id === employee) ? true : false;
                                         return <option key={emp.emp_id} value={emp.emp_id} selected={sel}>{emp.first_name} {emp.last_name}</option>;
                                     })}
                                 </select>
