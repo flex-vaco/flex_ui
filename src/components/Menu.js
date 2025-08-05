@@ -1,11 +1,13 @@
-import React,  { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom"
 import * as AppFunc from "../lib/AppFunctions";
+import "./Menu.css";
 
 const Menu = () => { 
     const navigate = useNavigate();
     const activeUserRole = localStorage.getItem("user_role");
     const notificationsCount = useState(0);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const handleLogout = () => {
       navigate("/")
@@ -14,48 +16,34 @@ const Menu = () => {
       localStorage.removeItem("user_role");
     }
 
+    const toggleSidebar = () => {
+      setIsSidebarOpen(!isSidebarOpen);
+    }
+
+    const closeSidebar = () => {
+      setIsSidebarOpen(false);
+    }
+
+    const handleMenuClick = (path) => {
+      navigate(path);
+      closeSidebar();
+    }
+
 return(
-        <ul className="navbar-nav me-auto mb-2 mb-lg-0 float-right">
-          {AppFunc.hasMenuAccess(activeUserRole) ?
-            <li className="nav-item dropdown ms-3 me-3">
-              <a className="nav-link dropdown-toggle main_li" href="#" id="navbarDropdownemp" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Menu
-              </a>
-              <ul className="dropdown-menu" aria-labelledby="navbarDropdownemp">
-                {AppFunc.hasEmployeeAccess(activeUserRole) ? <li><a className="dropdown-item" href="/employees">Resource List</a></li>: ""}
-                {AppFunc.hasProjectAccess(activeUserRole) ? <li><a className="dropdown-item" href="/projects">Projects</a></li>: ""}
-                {AppFunc.hasClientAccess(activeUserRole) ? <li><a className="dropdown-item" href="/clients">Clients</a></li>: ""}
-                {AppFunc.hasAllocationAccess(activeUserRole) ? <li><a className="dropdown-item" href="/empProjList">Allocations</a></li>: ""}
-                {AppFunc.hasUtilizationAccess(activeUserRole) ? <li><a className="dropdown-item" href="/empUtiliList">Utilization</a></li> : ""}
-                {AppFunc.hasCategoriesAccess(activeUserRole) ? <li><a className="dropdown-item" href="/categoryList">Categories</a></li> : ""}
-                {AppFunc.hasUserAccess(activeUserRole) ? <li><a className="dropdown-item" href="/userList">Users</a></li> : ""}
-                {AppFunc.hasLocationAccess(activeUserRole) ? <li><a className="dropdown-item" href="/officeLocations">Office Locations</a></li> : ""}
-                {AppFunc.hasApproveTimesheetAccess(activeUserRole) ? <li className="nav-item dropdown"><a className="dropdown-item" href="#">Timesheets</a>
-                <ul className="dropdown-submenu">
-                            <li><a className="dropdown-item" href="/approveTimesheet">Approve Timesheets</a></li>
-                            <li><a className="dropdown-item" href="/timesheet">Timesheets</a></li>
-                        </ul>
-                  
-                </li> : ""}
-                {AppFunc.hasReportAccess(activeUserRole) ? <li className="nav-item dropdown"><a className="dropdown-item" href="#">Reports</a>
-                <ul className="dropdown-submenu">
-                            <li><a className="dropdown-item" href="/forecastHours">Forecast Hours</a></li>
-                            <li><a className="dropdown-item" href="/availableHours">Available Percentage</a></li>
-                        </ul>
-                  
-                </li> : ""}
-                {AppFunc.hasHiringAccess(activeUserRole) ? <li className="nav-item dropdown"><a className="dropdown-item" href="#">Hiring Enquires</a>
-                <ul className="dropdown-submenu">
-                            <li><a className="dropdown-item" href="/enquiredbyme">By Me</a></li>
-                            <li><a className="dropdown-item" href="/enquiredtome">To Me</a></li>
-                        </ul>
-                  
-                </li> : ""}
-                {AppFunc.hasAIChatAccess(activeUserRole) ? <li><a className="dropdown-item" href="/ichat">Explore Resumes</a></li> : ""}
-                {AppFunc.hasAIChatAccess(activeUserRole) ? <li><a className="dropdown-item" href="/idb">Explore Database</a></li> : ""}
-              </ul>
-            </li> : ""}
-            <li className="nav-item dropdown ms-2 me-2">
+    <>
+        {/* Navigation Icons - Menu and Notifications on same line */}
+        <div className="navbar-nav me-auto mb-2 mb-lg-0 float-right">
+          <div className="nav-icons-container">
+            {AppFunc.hasMenuAccess(activeUserRole) && (
+              <button 
+                className="nav-link main_li sidebar-toggle-btn" 
+                onClick={toggleSidebar}
+              >
+                <i className="bi bi-list fs-4"></i>
+              </button>
+            )}
+            
+            <div className="nav-item dropdown ms-2 me-2">
               <a className="nav-link" href="#" id="navbarDropdownNotifications" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 <i className="bi bi-bell-fill"></i>
                 {notificationsCount > 0 && (
@@ -89,25 +77,170 @@ return(
                   </li>
                 )}
               </ul>
-            </li>
-            <li className="nav-item dropdown ms-2 me-2">
-              <a className="nav-link dropdown-toggle" href="#" id="navbarDropdownuser" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <img src="/images/img_avatar1.png" alt="Avatar Logo" className="rounded-pill nav_profileimg"/>
-              </a>
-              <ul className="dropdown-menu" aria-labelledby="navbarDropdownuser">
-                <li><a className="dropdown-item" href="#">Role: {activeUserRole}</a></li>
-                <li> 
-                  <a className="dropdown-item"
-                    onClick={handleLogout}
-                    type="submit"
-                  >
-                    <i className="bi bi-box-arrow-right"> Logout</i>
-                  </a>
-                </li>
-              </ul>
-            </li>
+            </div>
+          </div>
+        </div>
+
+        {/* Overlay */}
+        {isSidebarOpen && (
+          <div 
+            className="sidebar-overlay" 
+            onClick={closeSidebar}
+          ></div>
+        )}
+
+        {/* Sidebar */}
+        <div className={`sidebar ${isSidebarOpen ? 'sidebar-open' : ''}`}>
+          {/* Sidebar Header with Role Details */}
+          <div className="sidebar-header">
+            <div className="sidebar-title-section">
+              <h5 className="sidebar-title">Menu</h5>
+              <div className="user-role-info">
+                <i className="bi bi-person-circle me-2"></i>
+                <span className="role-text">Role: {activeUserRole}</span>
+              </div>
+            </div>
+            <button 
+              className="sidebar-close-btn"
+              onClick={closeSidebar}
+            >
+              ×
+            </button>
+          </div>
+
+          {/* Sidebar Menu Items */}
+          <div className="sidebar-menu">
+            {AppFunc.hasEmployeeAccess(activeUserRole) && (
+              <div className="sidebar-item" onClick={() => handleMenuClick('/employees')}>
+                <i className="bi bi-people-fill me-2"></i>
+                Resource List
+              </div>
+            )}
             
-        </ul> 
+            {AppFunc.hasProjectAccess(activeUserRole) && (
+              <div className="sidebar-item" onClick={() => handleMenuClick('/projects')}>
+                <i className="bi bi-folder-fill me-2"></i>
+                Projects
+              </div>
+            )}
+            
+            {AppFunc.hasClientAccess(activeUserRole) && (
+              <div className="sidebar-item" onClick={() => handleMenuClick('/clients')}>
+                <i className="bi bi-building-fill me-2"></i>
+                Clients
+              </div>
+            )}
+            
+            {AppFunc.hasAllocationAccess(activeUserRole) && (
+              <div className="sidebar-item" onClick={() => handleMenuClick('/empProjList')}>
+                <i className="bi bi-diagram-3-fill me-2"></i>
+                Allocations
+              </div>
+            )}
+            
+            {AppFunc.hasUtilizationAccess(activeUserRole) && (
+              <div className="sidebar-item" onClick={() => handleMenuClick('/empUtiliList')}>
+                <i className="bi bi-graph-up me-2"></i>
+                Utilization
+              </div>
+            )}
+            
+            {AppFunc.hasCategoriesAccess(activeUserRole) && (
+              <div className="sidebar-item" onClick={() => handleMenuClick('/categoryList')}>
+                <i className="bi bi-tags-fill me-2"></i>
+                Categories
+              </div>
+            )}
+            
+            {AppFunc.hasUserAccess(activeUserRole) && (
+              <div className="sidebar-item" onClick={() => handleMenuClick('/userList')}>
+                <i className="bi bi-person-fill me-2"></i>
+                Users
+              </div>
+            )}
+            
+            {AppFunc.hasLocationAccess(activeUserRole) && (
+              <div className="sidebar-item" onClick={() => handleMenuClick('/officeLocations')}>
+                <i className="bi bi-geo-alt-fill me-2"></i>
+                Office Locations
+              </div>
+            )}
+            
+            {AppFunc.hasApproveTimesheetAccess(activeUserRole) && (
+              <div className="sidebar-section">
+                <div className="sidebar-section-title">
+                  <i className="bi bi-clock-fill me-2"></i>
+                  Timesheets
+                </div>
+                <div className="sidebar-submenu">
+                  <div className="sidebar-item sub-item" onClick={() => handleMenuClick('/approveTimesheet')}>
+                    Approve Timesheets
+                  </div>
+                  <div className="sidebar-item sub-item" onClick={() => handleMenuClick('/timesheet')}>
+                    Timesheets
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {AppFunc.hasReportAccess(activeUserRole) && (
+              <div className="sidebar-section">
+                <div className="sidebar-section-title">
+                  <i className="bi bi-file-earmark-text-fill me-2"></i>
+                  Reports
+                </div>
+                <div className="sidebar-submenu">
+                  <div className="sidebar-item sub-item" onClick={() => handleMenuClick('/forecastHours')}>
+                    Forecast Hours
+                  </div>
+                  <div className="sidebar-item sub-item" onClick={() => handleMenuClick('/availableHours')}>
+                    Available Percentage
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {AppFunc.hasHiringAccess(activeUserRole) && (
+              <div className="sidebar-section">
+                <div className="sidebar-section-title">
+                  <i className="bi bi-person-plus-fill me-2"></i>
+                  Hiring Enquires
+                </div>
+                <div className="sidebar-submenu">
+                  <div className="sidebar-item sub-item" onClick={() => handleMenuClick('/enquiredbyme')}>
+                    By Me
+                  </div>
+                  <div className="sidebar-item sub-item" onClick={() => handleMenuClick('/enquiredtome')}>
+                    To Me
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {AppFunc.hasAIChatAccess(activeUserRole) && (
+              <div className="sidebar-item" onClick={() => handleMenuClick('/ichat')}>
+                <i className="bi bi-chat-dots-fill me-2"></i>
+                Explore Resumes
+              </div>
+            )}
+            
+            {AppFunc.hasAIChatAccess(activeUserRole) && (
+              <div className="sidebar-item" onClick={() => handleMenuClick('/idb')}>
+                <i className="bi bi-database-fill me-2"></i>
+                Explore Database
+              </div>
+            )}
+          </div>
+
+          {/* Logout Section at Bottom */}
+          <div className="sidebar-logout-section">
+            <div className="sidebar-item logout-item" onClick={handleLogout}>
+              <i className="bi bi-box-arrow-right me-2"></i>
+              Logout
+            </div>
+          </div>
+        </div>
+    </>
 )
 }
 export default Menu;
