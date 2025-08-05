@@ -8,7 +8,7 @@ import * as APP_FUNCTIONS from "../lib/AppFunctions";
 
 function HireResource() {
     const loc = useLocation();
-    const employee = useState(loc.state.employee);
+    const employee = loc.state.employee;
     const [project_name, setProjectName] = useState('');
     const [work_location, setWorkLocation] = useState('Remote');
     const [start_date, setStartDate] = useState(null);

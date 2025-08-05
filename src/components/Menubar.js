@@ -50,7 +50,7 @@ const Menubar = () => {
                   <a className="nav-link main_li" href="#" id="navbarDropdownemp" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     {category.category_name}
                   </a>
-                  <ul className="dropdown-menu">
+                  <ul className="dropdown-menu" key={`dropdown-menu-${key}`}>
                     {category.technologies.split(',').map((technology,key) => { return (
                     <li className="ps-1"><a className="dropdown-item" key={key} onClick={(event)=>handleTechClick(event,technology)} href='#'>{technology}</a></li>
                     )})}

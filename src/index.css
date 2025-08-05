@@ -310,7 +310,7 @@ a.a_underline {
   cursor: pointer;
 }
 input#exp {
-  accent-color: #F27B3F;
+  accent-color: #2dbff9;
 }
 @media (min-width: 768px) {
   .nav_search.d-md-block {
@@ -334,7 +334,7 @@ input#exp {
     flex-basis: auto;
   }
   .container-fluid.homepage {
-    width: 70%;
+    width: 90%;
   }
   .homepage div#navbarSupportedContent {
     display: block !important;
@@ -411,7 +411,7 @@ input#exp {
 
 /* homepage css*/
 .main_container.pt-3.homepage_main {
-  background: linear-gradient(to bottom, #072942 8%, white 45%);
+  background: linear-gradient(to bottom, #072942 1%, white 33%);
   border-radius: 4rem;
   float: left;
   width: 100%;
@@ -427,6 +427,9 @@ button.btn.btn-outline-success.homepage_search_btn {
   border-radius: 10px;
   margin-left: -2rem;
   opacity: 1;
+  padding: 0rem 3rem;
+  font-size: 18px;
+  font-weight: bold;
 }
 
 input.form-control.homepage_search_input {
@@ -454,7 +457,8 @@ input.form-control.homepage_search_input {
 }
 
 .search_container form {
-  width: 30%;
+  width: 30rem;
+  height: 3rem;
 }
 
 .float-right {
@@ -1248,6 +1252,7 @@ h4.selected_category_name {
   display: flex;
   align-items: center;
   margin-bottom: 15px;
+  cursor: pointer;
 }
 
 .crm-services-list img {
@@ -1289,7 +1294,7 @@ h4.selected_category_name {
 }
 
 .logo-img {
-  height: 10vh;
+  height: 5vh;
   margin-right: 6px;
 }
 
@@ -1468,16 +1473,41 @@ h4.selected_category_name {
 /* Modal container: flex row */
 .profile-modal {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     width: 80% !important;
     background: #fff;
     border-radius: 6rem 0 !important;
-    padding: 5rem 0px !important;
+    padding: 2rem 0px !important;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     outline: none !important;
     margin-right: 0 !important;
     inset: 25% 18% auto !important;
     height: 70vh;
+}
+
+/* Header: full width, left aligned */
+.modal-header {
+  width: 100%;
+  padding: 20px 30px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  cursor: pointer;
+}
+
+/* Content container: flex row for left/right layout */
+.profile-modal-content {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  padding: 1rem 0px;
+}
+
+.modal-header .exitarrow {
+  padding-left: 4rem !important;
+  color: #00aaff !important;
 }
 
 /* Left side: fixed width */
@@ -1487,7 +1517,7 @@ h4.selected_category_name {
   flex-direction: column;
   padding-right: 20px;
   box-sizing: border-box;
-  padding-left: 8rem;
+  padding-left: 3rem;
 }
 
 /* Right side: take remaining space */
@@ -1532,15 +1562,16 @@ h4.selected_category_name {
   margin-bottom: 10px;
 }
 
+
 .hire-btn, .add-btn {
   border: 2px solid #00aaff;
   background: white;
-  color: #00aaff;
+  color: #000;
   border-radius: 20px;
-  padding: 6px 16px;
+  padding: 6px 43px;
   cursor: pointer;
-  font-weight: bold;
-  font-size: 13px;
+  /* font-weight: bold; */
+  font-size: 18px;
   transition: all 0.2s ease;
 }
 
@@ -1570,9 +1601,8 @@ h4.selected_category_name {
 }
 
 .price {
-  font-size: 14px;
-  font-weight: normal;
-  color: #555;
+  font-size: 16px;
+  font-weight: bold;
 }
 
 /* Description */
@@ -1620,7 +1650,7 @@ h4.selected_category_name {
   height: auto;
   border-radius: 50%;
   object-fit: cover;
-  margin-right: 3rem;
+  margin-right: 1rem;
   border: 1px solid;
 }
 
@@ -1665,4 +1695,13 @@ h4.selected_category_name {
 
 .navbar-links ul.navbar-nav.me-auto.mb-2.mb-lg-0.float-right {
   flex-direction: row;
+}
+
+.profile-modal .buttons {
+  margin-bottom: 2rem;
+}
+
+a {
+  color: #072942;
+  text-decoration: none;
 }

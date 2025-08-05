@@ -96,13 +96,14 @@ function Home() {
 
       <div className="container-fluid mt-5 float-left">
         <div className="col-xs-12 col-lg-12 mx-1">
-          {categoryList.map((category) => {
+          {categoryList.map((category, key) => {
             return (
               <div
                 className="col-6 col-lg-3 float-left my-1 ps-1 pe-1 cursor"
                 onClick={(e) => {
                   handleClickCategory(e, category);
                 }}
+                key={key}
               >
                 <div className="col-12 col-lg-10 mx-0 mb-2 height_min home_cards">
                   <div className="card text-center min_height">
