@@ -411,7 +411,7 @@ input#exp {
 
 /* homepage css*/
 .main_container.pt-3.homepage_main {
-  background: linear-gradient(to bottom, #072942 1%, white 33%);
+  background: linear-gradient(to bottom, #072942 0.1rem, white 18rem);
   border-radius: 4rem;
   float: left;
   width: 100%;
@@ -1702,6 +1702,6 @@ h4.selected_category_name {
 }
 
 a {
-  color: #072942;
+  color: #072942 !important;
   text-decoration: none;
 }

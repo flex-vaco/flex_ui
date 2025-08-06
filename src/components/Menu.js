@@ -6,6 +6,7 @@ import "./Menu.css";
 const Menu = () => { 
     const navigate = useNavigate();
     const activeUserRole = localStorage.getItem("user_role");
+    const activeUser = JSON.parse(localStorage.getItem("user"));
     const notificationsCount = useState(0);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -94,10 +95,10 @@ return(
           {/* Sidebar Header with Role Details */}
           <div className="sidebar-header">
             <div className="sidebar-title-section">
-              <h5 className="sidebar-title">Menu</h5>
+              <h5 className="sidebar-title">{activeUser.first_name} {activeUser.last_name}</h5>
               <div className="user-role-info">
                 <i className="bi bi-person-circle me-2"></i>
-                <span className="role-text">Role: {activeUserRole}</span>
+                <span className="role-text">Logged in as: {activeUserRole}</span>
               </div>
             </div>
             <button 

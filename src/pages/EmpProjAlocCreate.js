@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import Swal from 'sweetalert2'
 import axios from 'axios'
 import Layout from "../components/Layout"
- 
+import "./FormStyles.css"
  
 function EmpProjAlocCreate() {
     const [emp_id, setEmpId] = useState('');
@@ -18,11 +18,12 @@ function EmpProjAlocCreate() {
 
     const [isSaving, setIsSaving] = useState(false)
     const navigate = useNavigate();
+    const [empList, setEmpList] = useState([])
+    const [projectList, setProjectList] = useState([])
+
     const handleCancel = () => {
         navigate("/empProjList");
     }
-    const  [empList, setEmpList] = useState([])
-    const  [projectList, setProjectList] = useState([])
 
     useEffect(() => {
         fetchEmpList();
@@ -41,6 +42,7 @@ function EmpProjAlocCreate() {
           console.log(error);
         })
     }
+
     const handleEmpChange = (e) => {
         if(e.target.value === "-select-"){
             Swal.fire({
@@ -72,8 +74,26 @@ function EmpProjAlocCreate() {
           console.log(error);
         })
     }
+
     const handleSave = () => {
-        Swal.showLoading();
+        if (emp_id === '' || emp_id === '-select-') {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Please select a resource!',
+                showConfirmButton: true
+            })
+            return;
+        }
+
+        if (project_id === '' || project_id === '-select-') {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Please select a project!',
+                showConfirmButton: true
+            })
+            return;
+        }
+
         setIsSaving(true);
         const config = {
           headers: {
@@ -96,12 +116,11 @@ function EmpProjAlocCreate() {
           .then(function (response) {
             Swal.fire({
                 icon: 'success',
-                title: 'Successfully Saved!',
+                title: 'Allocation saved successfully!',
                 showConfirmButton: false,
                 timer: 1500
             })
             navigate("/empProjList");
-            Swal.hideLoading()
             setIsSaving(false);
             setEmpId('');
             setProjectId('');
@@ -111,6 +130,7 @@ function EmpProjAlocCreate() {
             setHoursPerDay('');
             setShiftStartTime('');
             setShiftEndTime('');
+            setRatePerHour('');
           })
           .catch(function (error) {
             Swal.fire({
@@ -125,111 +145,210 @@ function EmpProjAlocCreate() {
   
     return (
         <Layout>
-            <div className="container">
-                <div className="card">
-                    <div className="card-header">
-                        <h4 className="text-center">Allocate Resource to Project</h4>
+            <div className="form-page-container">
+                <div className="form-page-card">
+                    <div className="form-page-header">
+                        <h1 className="form-page-title">Allocate Resource to Project</h1>
                     </div>
-                    <div className="card-body">
-                        <form>
-                            <div className="form-group">
-                                <label htmlFor="employee">Resource Name</label>
-                                <select name="employee" id="employee" className="form-control" onChange={handleEmpChange}> 
-                                    <option value="-select-"> -- Select Resource -- </option>
-                                    {empList.map((emp) => <option value={emp.emp_id}>{emp.first_name}, {emp.last_name}</option>)}
-                                </select>
+                    <div className="form-page-body">
+                        <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
+                            <div className="form-section">
+                                <h3 className="form-section-title">Resource & Project Selection</h3>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="employee" className="form-label required-field">
+                                            Resource Name
+                                        </label>
+                                        <select 
+                                            name="employee" 
+                                            id="employee" 
+                                            className="form-select" 
+                                            onChange={handleEmpChange}
+                                            value={emp_id}
+                                            required
+                                        > 
+                                            <option value=""> -- Select Resource -- </option>
+                                            {empList.map((emp) => (
+                                                <option key={emp.emp_id} value={emp.emp_id}>
+                                                    {emp.first_name} {emp.last_name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="project" className="form-label required-field">
+                                            Project
+                                        </label>
+                                        <select 
+                                            name="project" 
+                                            id="project" 
+                                            className="form-select" 
+                                            onChange={handleProjectChange}
+                                            value={project_id}
+                                            required
+                                        > 
+                                            <option value=""> -- Select Project -- </option>
+                                            {projectList.map((prj) => (
+                                                <option key={prj.project_id} value={prj.project_id}>
+                                                    {prj.project_name}, {prj.project_location}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="form-group">
-                                <label htmlFor="project">Project</label>
-                                <select name="project" id="project" className="form-control" onChange={handleProjectChange}> 
-                                    <option value="-select-" > -- Select Project -- </option>
-                                    {projectList.map((prj) => <option value={prj.project_id}>{prj.project_name}, {prj.project_location}</option>)}
-                                </select>
+
+                            <div className="form-section">
+                                <h3 className="form-section-title">Allocation Period</h3>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="start_date" className="form-label required-field">
+                                            Allocation Start Date
+                                        </label>
+                                        <input 
+                                            onChange={(event)=>{setStartDate(event.target.value)}}
+                                            value={start_date}
+                                            type="date"
+                                            className="form-date"
+                                            id="start_date"
+                                            name="start_date"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="end_date" className="form-label">
+                                            Allocation End Date
+                                        </label>
+                                        <input 
+                                            onChange={(event)=>{setEndDate(event.target.value)}}
+                                            value={end_date}
+                                            type="date"
+                                            className="form-date"
+                                            id="end_date"
+                                            name="end_date"
+                                        />
+                                    </div>
+                                </div>
                             </div>
-                            <div className="form-group">
-                                <label htmlFor="start_date">Allocation Start Date</label>
-                                <input 
-                                    onChange={(event)=>{setStartDate(event.target.value)}}
-                                    value={start_date}
-                                    type="date"
-                                    className="form-control"
-                                    id="start_date"
-                                    name="start_date"/>
+
+                            <div className="form-section">
+                                <h3 className="form-section-title">Work Details</h3>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="work_location" className="form-label">
+                                            Work Location
+                                        </label>
+                                        <input 
+                                            onChange={(event)=>{setWorkLocation(event.target.value)}}
+                                            value={work_location}
+                                            type="text"
+                                            className="form-control"
+                                            id="work_location"
+                                            name="work_location"
+                                            placeholder="Enter work location"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="hours_per_day" className="form-label">
+                                            Hours per Day
+                                        </label>
+                                        <input 
+                                            onChange={(event)=>{setHoursPerDay(event.target.value)}}
+                                            value={hours_per_day}
+                                            type="number"
+                                            className="form-control"
+                                            id="hours_per_day"
+                                            name="hours_per_day"
+                                            placeholder="Enter hours per day"
+                                            min="1"
+                                            max="24"
+                                            step="0.5"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="rate_per_hour" className="form-label">
+                                            Rate Per Hour (USD)
+                                        </label>
+                                        <input 
+                                            onChange={(event)=>{setRatePerHour(event.target.value)}}
+                                            value={rate_per_hour}
+                                            type="number"
+                                            className="form-control"
+                                            id="rate_per_hour"
+                                            name="rate_per_hour"
+                                            placeholder="Enter rate per hour"
+                                            min="0"
+                                            step="0.01"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        {/* Empty div for layout balance */}
+                                    </div>
+                                </div>
                             </div>
-                            <div className="form-group">
-                                <label htmlFor="end_date">Allocation End Date</label>
-                                <input 
-                                    onChange={(event)=>{setEndDate(event.target.value)}}
-                                    value={end_date}
-                                    type="date"
-                                    className="form-control"
-                                    id="end_date"
-                                    name="end_date"/>
+
+                            <div className="form-section">
+                                <h3 className="form-section-title">Shift Schedule</h3>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="shift_start_time" className="form-label">
+                                            Shift Start Time
+                                        </label>
+                                        <input 
+                                            onChange={(event)=>{setShiftStartTime(event.target.value)}}
+                                            value={shift_start_time}
+                                            type="time"
+                                            className="form-control"
+                                            id="shift_start_time"
+                                            name="shift_start_time"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="shift_end_time" className="form-label">
+                                            Shift End Time
+                                        </label>
+                                        <input 
+                                            onChange={(event)=>{setShiftEndTime(event.target.value)}}
+                                            value={shift_end_time}
+                                            type="time"
+                                            className="form-control"
+                                            id="shift_end_time"
+                                            name="shift_end_time"
+                                        />
+                                    </div>
+                                </div>
                             </div>
-                            <div className="form-group">
-                                <label htmlFor="work_location">Work Location</label>
-                                <input 
-                                    onChange={(event)=>{setWorkLocation(event.target.value)}}
-                                    value={work_location}
-                                    type="text"
-                                    className="form-control"
-                                    id="work_location"
-                                    name="work_location"/>
+
+                            <div className="form-actions">
+                                <button 
+                                    type="button"
+                                    onClick={handleCancel} 
+                                    className="btn btn-outline"
+                                    disabled={isSaving}
+                                >
+                                    <i className="bi bi-x-circle"></i>
+                                    Cancel
+                                </button>
+                                <button 
+                                    type="submit"
+                                    className="btn btn-success"
+                                    disabled={isSaving}
+                                >
+                                    {isSaving ? (
+                                        <>
+                                            <span className="loading-spinner"></span>
+                                            Saving...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <i className="bi bi-check-circle"></i>
+                                            Save Allocation
+                                        </>
+                                    )}
+                                </button>
                             </div>
-                            <div className="form-group">
-                                <label htmlFor="hours_per_day">Hours per Day</label>
-                                <input 
-                                    onChange={(event)=>{setHoursPerDay(event.target.value)}}
-                                    value={hours_per_day}
-                                    type="number"
-                                    className="form-control"
-                                    id="hours_per_day"
-                                    name="hours_per_day"/>
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="hours_per_day">Rate Per Hour (USD)</label>
-                                <input 
-                                    onChange={(event)=>{setRatePerHour(event.target.value)}}
-                                    value={rate_per_hour}
-                                    type="number"
-                                    className="form-control"
-                                    id="rate_per_hour"
-                                    name="rate_per_hour"/>
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="shift_start_time">Shift Start Time</label>
-                                <input 
-                                    onChange={(event)=>{setShiftStartTime(event.target.value)}}
-                                    value={shift_start_time}
-                                    type="time"
-                                    className="form-control"
-                                    id="shift_start_time"
-                                    name="shift_start_time"/>
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="shift_end_time">Shift End Time</label>
-                                <input 
-                                    onChange={(event)=>{setShiftEndTime(event.target.value)}}
-                                    value={shift_end_time}
-                                    type="time"
-                                    className="form-control"
-                                    id="shift_end_time"
-                                    name="shift_end_time"/>
-                            </div>
-                            <button 
-                                disabled={isSaving}
-                                onClick={handleCancel} 
-                                type="submit"
-                                className="btn btn-outline-light mt-3 me-3">
-                                Cancel
-                            </button>
-                            <button 
-                                disabled={isSaving}
-                                onClick={handleSave} 
-                                type="submit"
-                                className="btn btn-outline-info mt-3 me-3">
-                                Save
-                            </button>
                         </form>
                     </div>
                 </div>

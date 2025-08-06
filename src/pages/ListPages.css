@@ -1,0 +1,598 @@
+/* Common List Pages Styles - Shared across all list pages */
+
+.list-page-container {
+  padding: 20px;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+.list-page-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: none;
+  overflow: hidden;
+}
+
+.list-page-header {
+  background: linear-gradient(135deg, #072942 0%, #0d4a6b 100%);
+  color: white;
+  padding: 20px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.list-page-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+  text-align: center;
+}
+
+.search-controls {
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.search-input-group {
+  display: flex;
+  align-items: center;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  overflow: hidden;
+  flex: 1;
+  min-width: 200px;
+}
+
+.search-icon {
+  padding: 10px 15px;
+  background-color: #f8f9fa;
+  color: #6c757d;
+  border-right: 1px solid #e9ecef;
+}
+
+.search-select {
+  border: none;
+  padding: 10px 15px;
+  background: transparent;
+  flex: 1;
+  outline: none;
+  font-size: 14px;
+}
+
+.search-input {
+  border: none;
+  padding: 10px 15px;
+  flex: 1;
+  outline: none;
+  font-size: 14px;
+}
+
+.search-refresh-btn {
+  background: #072942;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.search-refresh-btn:hover {
+  background: #0d4a6b;
+  transform: translateY(-1px);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.excel-btn {
+  background: #43E098;
+  color: white !important;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.excel-btn:hover {
+  background: #218838;
+  transform: translateY(-1px);
+}
+
+.action-buttons .add-btn {
+  background: #072942;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.action-buttons .add-btn:hover {
+  background: #0d4a6b;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(7, 41, 66, 0.3);
+}
+
+/* Table Styles */
+.list-table-container {
+  padding: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+  position: relative;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Custom scrollbar styling for better UX */
+.list-table-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.list-table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.list-table-container::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.list-table-container::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+.list-table {
+  margin: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  min-width: 1200px; /* Ensure minimum width for tables with many columns */
+}
+
+.list-table thead th {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  color: #072942;
+  font-weight: 600;
+  padding: 15px 12px;
+  border-bottom: 2px solid #dee2e6;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.list-table tbody tr {
+  transition: all 0.3s ease;
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.list-table tbody tr:hover {
+  background-color: #f8f9fa;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.list-table tbody td {
+  padding: 12px;
+  vertical-align: middle;
+  font-size: 14px;
+  color: #495057;
+}
+
+/* Action Buttons in Table */
+.action-buttons-cell {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.delete-btn {
+  background: #F95C15;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 12px;
+}
+
+.delete-btn:hover {
+  background: #c82333;
+  transform: scale(1.05);
+}
+
+.edit-btn {
+  background: #43E098;
+  color: white !important;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 12px;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.edit-btn:hover {
+  background: #218838;
+  transform: scale(1.05);
+  color: white;
+  text-decoration: none;
+}
+
+.view-btn {
+  background: #2DBFF9;
+  color: white !important;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 12px;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.view-btn:hover {
+  background: #138496;
+  transform: scale(1.05);
+  color: white;
+  text-decoration: none;
+}
+
+/* Link Styles */
+.page-link {
+  color: #072942;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.page-link:hover {
+  color: #0d4a6b;
+  text-decoration: underline;
+}
+
+.client-link {
+  color: #43E098;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.client-link:hover {
+  color: #218838;
+  text-decoration: underline;
+}
+
+.project-link {
+  color: #072942;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.project-link:hover {
+  color: #0d4a6b;
+  text-decoration: underline;
+}
+
+/* Status Badges */
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-active {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-completed {
+  background-color: #cce5ff;
+  color: #004085;
+}
+
+.status-pending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.status-cancelled {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.status-inactive {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* Role Badges */
+.role-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.role-admin {
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+
+.role-manager {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.role-employee {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.role-producer {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* Pagination Styles */
+.pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+}
+
+.pagination-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pagination-select {
+  padding: 6px 12px;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  background: white;
+  font-size: 14px;
+  outline: none;
+}
+
+.pagination-select:focus {
+  border-color: #072942;
+  box-shadow: 0 0 0 2px rgba(7, 41, 66, 0.1);
+}
+
+.pagination-buttons {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.pagination-btn {
+  padding: 8px 12px;
+  border: 1px solid #dee2e6;
+  background: white;
+  color: #072942;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  min-width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: #072942;
+  color: white;
+  border-color: #072942;
+  transform: translateY(-1px);
+}
+
+.pagination-btn:disabled {
+  background: #f8f9fa;
+  color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.pagination-btn.active {
+  background: #072942;
+  color: white;
+  border-color: #072942;
+}
+
+.pagination-btn.first,
+.pagination-btn.last {
+  font-weight: bold;
+}
+
+.pagination-btn.prev,
+.pagination-btn.next {
+  font-size: 12px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .list-page-container {
+    padding: 10px;
+  }
+  
+  .search-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .search-input-group {
+    min-width: auto;
+  }
+  
+  .action-buttons {
+    justify-content: center;
+    margin-top: 10px;
+  }
+  
+  .list-table-container {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  }
+  
+  .list-table {
+    min-width: 800px;
+    font-size: 12px; /* Smaller font size on mobile */
+  }
+
+  .pagination-container {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+
+  .pagination-info {
+    justify-content: center;
+  }
+
+  .pagination-controls {
+    justify-content: center;
+  }
+
+  .pagination-buttons {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+/* Loading State */
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  color: #072942;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #6c757d;
+}
+
+.empty-state i {
+  font-size: 48px;
+  margin-bottom: 16px;
+  color: #dee2e6;
+}
+
+/* Animation for table rows */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.list-table tbody tr {
+  animation: fadeInUp 0.3s ease forwards;
+}
+
+.list-table tbody tr:nth-child(1) { animation-delay: 0.1s; }
+.list-table tbody tr:nth-child(2) { animation-delay: 0.2s; }
+.list-table tbody tr:nth-child(3) { animation-delay: 0.3s; }
+.list-table tbody tr:nth-child(4) { animation-delay: 0.4s; }
+.list-table tbody tr:nth-child(5) { animation-delay: 0.5s; }
+
+/* Utility Classes */
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.font-weight-bold {
+  font-weight: 600;
+}
+
+.text-muted {
+  color: #6c757d;
+}
+
+.text-success {
+  color: #43E098;
+}
+
+.text-danger {
+  color: #dc3545;
+}
+
+.text-warning {
+  color: #ffc107;
+}
+
+.text-info {
+  color: #2DBFF9;
+} 

@@ -5,6 +5,7 @@ import axios from 'axios'
 import Layout from "../components/Layout"
 import APP_CONSTANTS from "../appConstants";
 import Multiselect from 'multiselect-react-dropdown';
+import "./FormStyles.css";
  
 function UserCreate() {
     const [first_name, setFirstName] = useState('');
@@ -163,6 +164,60 @@ function UserCreate() {
         setProject(e.target.value)
     }
     const handleSave = () => {
+        if (!role || role === "-select-") {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Please select a role!',
+                showConfirmButton: true
+            })
+            return;
+        }
+
+        if (!first_name.trim()) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Please enter first name!',
+                showConfirmButton: true
+            })
+            return;
+        }
+
+        if (!last_name.trim()) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Please enter last name!',
+                showConfirmButton: true
+            })
+            return;
+        }
+
+        if (!email.trim()) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Please enter email!',
+                showConfirmButton: true
+            })
+            return;
+        }
+
+        if (!password || password.length < 8) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Password must be at least 8 characters!',
+                showConfirmButton: true
+            })
+            return;
+        }
+
+        if (password !== chkPassword) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Passwords do not match!',
+                showConfirmButton: true
+            })
+            return;
+        }
+
         setIsSaving(true);
         const config = {
           headers: {
@@ -207,6 +262,12 @@ function UserCreate() {
             setFirstName('');
             setLastName('');
             setRole('');
+            setEmail('');
+            setPassword('');
+            setChkPassword('');
+            setEmpId(null);
+            setProject(null);
+            setSelectedClients([]);
           })
           .catch(function (error) {
             Swal.fire({
@@ -229,120 +290,208 @@ function UserCreate() {
   
     return (
         <Layout>
-            <div className="container">
-                <div className="card">
-                    <div className="card-header">
-                        <h4 className="text-center">Add User</h4>
+            <div className="form-page-container">
+                <div className="form-page-card">
+                    <div className="form-page-header">
+                        <h1 className="form-page-title">Add New User</h1>
                     </div>
-                    <div className="card-body">
-                        <form>
-                            <div className="form-group">
-                                <label htmlFor="role">Role Name</label>
-                                <select name="role" id="role" className="form-control" onChange={handleRoleChange} > 
-                                    <option value="-select-" > -- Select a Role -- </option>
-                                    {roles.map((rl, key) => {
-                                        return <option key={key} value={rl.role}>{rl.role.toUpperCase()}</option>;
-                                    })}
-                                </select>
+                    <div className="form-page-body">
+                        <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
+                            <div className="form-section">
+                                <h3 className="form-section-title">User Role & Assignment</h3>
+                                <div className="form-group full-width">
+                                    <label htmlFor="role" className="form-label required-field">
+                                        Role Name
+                                    </label>
+                                    <select 
+                                        name="role" 
+                                        id="role" 
+                                        className="form-select" 
+                                        onChange={handleRoleChange}
+                                        value={role}
+                                        required
+                                    > 
+                                        <option value=""> -- Select a Role -- </option>
+                                        {roles.map((rl, key) => {
+                                            return <option key={key} value={rl.role}>{rl.role.toUpperCase()}</option>;
+                                        })}
+                                    </select>
+                                </div>
+                                {showClientSel && (
+                                    <div className="form-group full-width">
+                                        <label htmlFor="client" className="form-label required-field">
+                                            Client
+                                        </label>
+                                        <Multiselect
+                                            options={clients} 
+                                            onSelect={handleClientAdd} 
+                                            onRemove={handleClientRemove} 
+                                            showCheckbox={true}
+                                            displayValue="name" 
+                                            closeIcon="close"
+                                            placeholder="Select clients..."
+                                        />
+                                    </div>
+                                )}
+                                {showProjectSel && (
+                                    <div className="form-group full-width">
+                                        <label htmlFor="project" className="form-label required-field">
+                                            Project
+                                        </label>
+                                        <select 
+                                            name="project" 
+                                            id="project" 
+                                            className="form-select" 
+                                            onChange={handleProjectChange}
+                                            value={project || ""}
+                                            required
+                                        > 
+                                            <option value=""> -- Select a Project -- </option>
+                                            {projects.map((prj) => {
+                                                return <option key={prj.project_id} value={prj.project_id}>{prj.project_name}</option>;
+                                            })}
+                                        </select>
+                                    </div>
+                                )}
+                                {showEmpSel && (
+                                    <div className="form-group full-width">
+                                        <label htmlFor="emp" className="form-label required-field">
+                                            Employee
+                                        </label>
+                                        <select 
+                                            name="emp" 
+                                            id="emp" 
+                                            className="form-select" 
+                                            onChange={handlEmployeeChange}
+                                            value={empId || ""}
+                                            required
+                                        > 
+                                            <option value=""> -- Select an Employee -- </option>
+                                            {employees.map((emp) => {
+                                                return <option key={emp.emp_id} value={emp.emp_id}>{emp.first_name} {emp.last_name}</option>;
+                                            })}
+                                        </select>
+                                    </div>
+                                )}
                             </div>
-                            {showClientSel ? 
-                            (<div className="form-group">
-                                <label htmlFor="client">Client</label>
-                                <Multiselect
-                                    options={clients} 
-                                    onSelect={handleClientAdd} 
-                                    onRemove={handleClientRemove} 
-                                    showCheckbox={true}
-                                    displayValue="name" 
-                                    closeIcon="close"
-                                />
-                            </div>) : ''}
-                            {showProjectSel ? 
-                            (<div className="form-group">
-                                <label htmlFor="project">Project</label>
-                                <select name="project" id="project" className="form-control" onChange={handleProjectChange} > 
-                                    <option value="-select-" > -- Select a Project -- </option>
-                                    {projects.map((prj) => {
-                                        return <option key={prj.project_id} value={prj.project_id}>{prj.project_name}</option>;
-                                    })}
-                                </select>
-                            </div>) : ''}
-                            {showEmpSel ? 
-                            (<div className="form-group">
-                                <label htmlFor="emp">Employee</label>
-                                <select name="emp" id="emp" className="form-control" onChange={handlEmployeeChange} > 
-                                    <option value="-select-" > -- Select an Employee -- </option>
-                                    {employees.map((emp) => {
-                                        return <option key={emp.emp_id} value={emp.emp_id}>{emp.first_name} {emp.last_name}</option>;
-                                    })}
-                                </select>
-                            </div>) : ''}
-                            <div className="form-group">
-                                <label htmlFor="first_name">First Name</label>
-                                <input 
-                                    onChange={(event)=>{setFirstName(event.target.value)}}
-                                    value={first_name}
-                                    type="text"
-                                    className="form-control"
-                                    id="first_name"
-                                    name="first_name"/>
+
+                            <div className="form-section">
+                                <h3 className="form-section-title">User Information</h3>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="first_name" className="form-label required-field">
+                                            First Name
+                                        </label>
+                                        <input 
+                                            onChange={(event)=>{setFirstName(event.target.value)}}
+                                            value={first_name}
+                                            type="text"
+                                            className="form-control"
+                                            id="first_name"
+                                            name="first_name"
+                                            placeholder="Enter first name"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="last_name" className="form-label required-field">
+                                            Last Name
+                                        </label>
+                                        <input 
+                                            onChange={(event)=>{setLastName(event.target.value)}}
+                                            value={last_name}
+                                            type="text"
+                                            className="form-control"
+                                            id="last_name"
+                                            name="last_name"
+                                            placeholder="Enter last name"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                <div className="form-group full-width">
+                                    <label htmlFor="email" className="form-label required-field">
+                                        Email ID
+                                    </label>
+                                    <input 
+                                        onChange={(event)=>{setEmail(event.target.value)}}
+                                        value={email}
+                                        type="email"
+                                        className="form-control"
+                                        id="email"
+                                        name="email"
+                                        placeholder="Enter email address"
+                                        readOnly={role === APP_CONSTANTS.USER_ROLES.EMPLOYEE}
+                                        required
+                                    />
+                                </div>
                             </div>
-                            <div className="form-group">
-                                <label htmlFor="last_name">Last Name</label>
-                                <input 
-                                    onChange={(event)=>{setLastName(event.target.value)}}
-                                    value={last_name}
-                                    type="text"
-                                    className="form-control"
-                                    id="last_name"
-                                    name="last_name"/>
+
+                            <div className="form-section">
+                                <h3 className="form-section-title">Security</h3>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="password" className="form-label required-field">
+                                            Password
+                                        </label>
+                                        <input 
+                                            onChange={(event)=>{setPassword(event.target.value)}}
+                                            value={password}
+                                            type="password"
+                                            className="form-control"
+                                            id="password"
+                                            name="password"
+                                            placeholder="Enter password (min 8 characters)"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="re_password" className="form-label required-field">
+                                            Confirm Password
+                                        </label>
+                                        {formErr && <p className="form-error">{formErr}</p>}
+                                        <input 
+                                            onChange={(event)=>{verifyPassword(event.target.value)}}
+                                            value={chkPassword}
+                                            type="password"
+                                            className="form-control"
+                                            id="re_password"
+                                            name="re_password"
+                                            placeholder="Confirm password"
+                                            required
+                                        />
+                                    </div>
+                                </div>
                             </div>
-                            <div className="form-group">
-                                <label htmlFor="email">Email ID</label>
-                                <input 
-                                    onChange={(event)=>{setEmail(event.target.value)}}
-                                    value={email}
-                                    type="text"
-                                    className="form-control"
-                                    id="email"
-                                    name="email"
-                                    readOnly={role === APP_CONSTANTS.USER_ROLES.EMPLOYEE}/>
+
+                            <div className="form-actions">
+                                <button 
+                                    type="button"
+                                    onClick={handleCancel} 
+                                    className="btn btn-outline"
+                                    disabled={isSaving}
+                                >
+                                    <i className="bi bi-x-circle"></i>
+                                    Cancel
+                                </button>
+                                <button 
+                                    type="submit"
+                                    className="btn btn-success"
+                                    disabled={isSaving}
+                                >
+                                    {isSaving ? (
+                                        <>
+                                            <span className="loading-spinner"></span>
+                                            Saving...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <i className="bi bi-check-circle"></i>
+                                            Save User
+                                        </>
+                                    )}
+                                </button>
                             </div>
-                            <div className="form-group">
-                                <label htmlFor="password">Password</label>
-                                <input 
-                                    onChange={(event)=>{setPassword(event.target.value)}}
-                                    value={password}
-                                    type="password"
-                                    className="form-control"
-                                    id="passwordy"
-                                    name="password"/>
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="re_password">Re Type Password</label>
-                                {(formErr)? <p className="text-danger"> {formErr}</p> : ""}
-                                <input 
-                                    onChange={(event)=>{verifyPassword(event.target.value)}}
-                                    value={chkPassword}
-                                    type="password"
-                                    className="form-control"
-                                    id="re_password"
-                                    name="re_password"/>
-                            </div>
-                            <button 
-                                disabled={isSaving}
-                                onClick={handleCancel} 
-                                type="submit"
-                                className="btn btn-outline-light mt-3 me-3">
-                                Cancel
-                            </button>
-                            <button 
-                                disabled={isSaving}
-                                onClick={handleSave} 
-                                type="submit"
-                                className="btn btn-outline-info mt-3 me-3">
-                                Save User
-                            </button>
                         </form>
                     </div>
                 </div>

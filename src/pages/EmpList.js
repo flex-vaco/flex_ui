@@ -5,6 +5,8 @@ import axios from 'axios'
 import Layout from "../components/Layout"
 import * as Utils from "../lib/Utils"
 import EmployeeProfileModal from '../components/employee/EmployeeProfileModal'
+import Pagination from "../components/Pagination";
+import "./ListPages.css";
 
 function EmpList() {
     const [empList, setEmpList] = useState([]);
@@ -15,6 +17,10 @@ function EmpList() {
     const [searchKeys, setSearchKeys] = useState([]);
     const [modalIsOpen, setIsOpen] = useState(false);
     const [empModalDetails, setEmpModalDetails] = useState({})
+
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
 
     const handleAddButtonClick = () => {
       navigate("/empCreate");
@@ -103,6 +109,7 @@ function EmpList() {
           return dbVal?.includes(searchValue);
         });
         setFilteredList(fList);
+        setCurrentPage(1); // Reset to first page when searching
       }
     };
 
@@ -113,14 +120,17 @@ function EmpList() {
       } else {
         setSearchKey(event.target.value);
       }
-      
       (event.target.value.includes("date")) ? setInputType("date") : setInputType("text");
     };
 
     const handleSearchRefreshClick = () => {
       window.location.reload(true);
     };
-  
+
+    const handleExcelExport = () => {
+      Utils.exportHTMLTableToExcel('empListTable', 'Resource List', ["Action"])
+    };
+
     const searchKeysToIgnore = [
       "emp_id",
       "project_id",
@@ -134,66 +144,95 @@ function EmpList() {
       "resume",
       "education",
       "manager_email"
-    ]
+    ];
+
+    // Pagination handlers
+    const handlePageChange = (page) => {
+      setCurrentPage(page);
+    };
+
+    const handleItemsPerPageChange = (newItemsPerPage) => {
+      setItemsPerPage(newItemsPerPage);
+      setCurrentPage(1); // Reset to first page when changing items per page
+    };
+
+    // Calculate pagination
+    const totalItems = filteredList.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const currentItems = filteredList.slice(startIndex, endIndex);
 
     return (
       <Layout>
-        <div className="container-fluid">
-          <div className="card w-auto">
-            <div className="card-header">
-              <div className="row">
-                <div className="col input-group">
-                  <span className="input-group-text">
-                    <i className="bi bi-search text-gray"></i>
+        <div className="list-page-container">
+          <div className="list-page-card">
+            {/* Header Section */}
+            <div className="list-page-header">
+              <h1 className="list-page-title">Resource List</h1>
+            </div>
+
+            {/* Search Controls */}
+            <div className="search-controls">
+              <div className="search-row">
+                <div className="search-input-group">
+                  <span className="search-icon">
+                    <i className="bi bi-search"></i>
                   </span>
-                  <select
-                    style={{ width: "35%" }}
-                    name="searchKey"
-                    id="search-key"
+                  <select 
+                    className="search-select" 
+                    name="searchKey" 
+                    id="search-key"  
                     onChange={handleSearchKeyChange}
-                  >
-                    <option value="-select-"> -- Search Key -- </option>
-                    {searchKeys.map((k) =>
-                      !searchKeysToIgnore.includes(k) ? (
-                        <option value={k}>{k.toLocaleUpperCase()}</option>
-                      ) : (
-                        ""
-                      )
+                  > 
+                    <option value="-select-">-- Search Key --</option>
+                    {searchKeys.map((k) => (!searchKeysToIgnore.includes(k)) ? 
+                      <option key={k} value={k}>{k.toLocaleUpperCase()}</option> : ""
                     )}
                   </select>
-                  <input
-                    style={{ width: "35%" }}
-                    className="ms-1"
-                    id="search-value"
-                    type={inputType}
-                    placeholder=" Type a value"
-                    onChange={handleSearch}
+                  <input 
+                    className="search-input" 
+                    id="search-value" 
+                    type={inputType} 
+                    placeholder="Type a value" 
+                    onChange={handleSearch} 
                   />
-                  <span
-                    onClick={handleSearchRefreshClick}
-                    hidden={modalIsOpen}
-                    className="btn btn-outline-primary btn-small"
-                  >
-                    <i className="bi bi-arrow-counterclockwise"></i>
-                  </span>
                 </div>
-                <div className="col text-center">
-                  <h4>Resource List</h4>
-                </div>
-                <div className="col">
+                
+                <button 
+                  className="search-refresh-btn"
+                  onClick={handleSearchRefreshClick}
+                >
+                  <i className="bi bi-arrow-counterclockwise"></i>
+                  Refresh
+                </button>
+
+                <div className="action-buttons">
                   <button
                     type="button"
-                    onClick={handleAddButtonClick}
-                    className="btn btn-outline-primary float-end"
+                    onClick={handleExcelExport}
+                    className="excel-btn"
                   >
-                    ADD <i className="bi bi-plus-square"></i>
+                    <i className="bi bi-filetype-xls"></i>
+                    EXCEL
+                  </button>
+                  
+                  <button 
+                    type="button"
+                    onClick={handleAddButtonClick}
+                    className="add-btn"
+                  >
+                    <i className="bi bi-plus-square"></i>
+                    ADD RESOURCE
                   </button>
                 </div>
               </div>
             </div>
-            <div className="card-body table-responsive">
-              <table className="table table-hover">
-                <thead className="bg-light">
+
+            {/* Table Section */}
+            <div className="list-table-container">
+              <table className="table list-table" id='empListTable'>
+                <thead>
                   <tr>
                     <th>Action</th>
                     <th>Name</th>
@@ -214,71 +253,100 @@ function EmpList() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredList.map((empDetails, key) => {
-                    return (
-                      <tr
-                        key={key}
-                        onClick={(e) => openModal(empDetails.emp_id)}
-                      >
-                        <td>
-                          <button
-                            onClick={() => handleDelete(empDetails.emp_id)}
-                            className="btn btn-outline-danger"
-                          >
-                            <i className="bi bi-trash"></i>
-                          </button>
-                          <Link
-                            className="btn btn-outline-success edit_icon"
-                            to={`/empEdit/${empDetails.emp_id}`}
-                          >
-                            <i className="bi bi-pencil" font-size="2rem;"></i>
-                          </Link>
-                        </td>
-                        <td>
-                          {empDetails.first_name}, {empDetails.last_name}
-                        </td>
-                        <td>{empDetails.email}</td>
-                        <td>{empDetails.designation}</td>
-                        <td>{empDetails.primary_skills}</td>
-                        <td>{empDetails.secondary_skills}</td>
-                        <td>{empDetails.status}</td>
-                        <td>{empDetails.total_work_experience_years}</td>
-                        <td>{empDetails.rate_per_hour}</td>
-                        <td>
-                          {Utils.formatDateYYYYMMDD(empDetails.vaco_join_date)}
-                        </td>
-                        <td>{empDetails.home_location_city}</td>
-                        <td>{empDetails.office_location_city}</td>
-                        <td>{empDetails.manager_name}</td>
-                        <td>{empDetails.manager_email}</td>
-                        <td>{empDetails.is_onsite ? "YES" : "NO"}</td>
-                        <td>
-                          <a
-                            href={
-                              empDetails.resume
-                                ? `${process.env.REACT_APP_API_BASE_URL}/uploads/resume/${empDetails.resume}`
-                                : null
-                            }
-                            target="_blank" rel="noreferrer"
-                          >
-                            <i className="bi bi-person-lines-fill"></i>
-                          </a>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                  {currentItems.length === 0 ? (
+                    <tr>
+                      <td colSpan="16" className="empty-state">
+                        <i className="bi bi-people"></i>
+                        <p>No resources found</p>
+                      </td>
+                    </tr>
+                  ) : (
+                    currentItems.map((empDetails, key) => {
+                      return (
+                        <tr key={key} onClick={(e) => openModal(empDetails.emp_id)}>
+                          <td>
+                            <div className="action-buttons-cell">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDelete(empDetails.emp_id);
+                                }}
+                                className="delete-btn"
+                                title="Delete Resource"
+                              >
+                                <i className="bi bi-trash"></i>
+                              </button>
+                              <Link
+                                className="edit-btn"
+                                to={`/empEdit/${empDetails.emp_id}`}
+                                title="Edit Resource"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <i className="bi bi-pencil"></i>
+                              </Link>
+                            </div>
+                          </td>
+                          <td>
+                            {empDetails.first_name}, {empDetails.last_name}
+                          </td>
+                          <td>{empDetails.email}</td>
+                          <td>{empDetails.designation}</td>
+                          <td>{empDetails.primary_skills}</td>
+                          <td>{empDetails.secondary_skills}</td>
+                          <td>
+                            <span className={`status-badge ${empDetails.status === 'Active' ? 'status-active' : 'status-inactive'}`}>
+                              {empDetails.status}
+                            </span>
+                          </td>
+                          <td>{empDetails.total_work_experience_years}</td>
+                          <td>{empDetails.rate_per_hour}</td>
+                          <td>{Utils.formatDateYYYYMMDD(empDetails.vaco_join_date)}</td>
+                          <td>{empDetails.home_location_city}</td>
+                          <td>{empDetails.office_location_city}</td>
+                          <td>{empDetails.manager_name}</td>
+                          <td>{empDetails.manager_email}</td>
+                          <td>{empDetails.is_onsite ? "YES" : "NO"}</td>
+                          <td>
+                            <a
+                              href={
+                                empDetails.resume
+                                  ? `${process.env.REACT_APP_API_BASE_URL}/uploads/resume/${empDetails.resume}`
+                                  : null
+                              }
+                              target="_blank" 
+                              rel="noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <i className="bi bi-person-lines-fill"></i>
+                            </a>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
-              <EmployeeProfileModal
-                modelstatus={modalIsOpen}
-                close={() => setIsOpen(false)}
-                employee={empModalDetails}
-                hideAddInListBtn={true}
-                hideHireBtn={true}
-              />
             </div>
+
+            {/* Pagination */}
+            {totalItems > 0 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalItems}
+                itemsPerPage={itemsPerPage}
+                onPageChange={handlePageChange}
+                onItemsPerPageChange={handleItemsPerPageChange}
+              />
+            )}
           </div>
         </div>
+
+        <EmployeeProfileModal 
+          isOpen={modalIsOpen} 
+          onClose={() => setIsOpen(false)} 
+          employee={empModalDetails}
+        />
       </Layout>
     );
 }

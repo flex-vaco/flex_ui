@@ -4,6 +4,7 @@ import Swal from 'sweetalert2'
 import axios from 'axios'
 import Layout from "../components/Layout"
 import * as AppFunc from "../lib/AppFunctions";
+import "./FormStyles.css";
  
 function EmpCreate() {
     const [first_name, setFirstName] = useState('');
@@ -45,7 +46,6 @@ function EmpCreate() {
     const revenueCompanySizeOptions = ['<$10M', '$10M-$100M', '$100M-$1B', '$1B+'];
     const industriesOptions = ['Healthcare', 'Finance', 'Retail', 'Technology', 'Manufacturing'];
     const softwareErpExperienceOptions = ['SAP', 'Oracle', 'Dynamics', 'NetSuite', 'QuickBooks'];
-
 
     useEffect(() => {
         const configs = {
@@ -118,7 +118,87 @@ function EmpCreate() {
     };
 
     const handleSave = () => {
-        if(!AppFunc.validateForm(document.querySelectorAll('.needs-validation'))) return;
+        if (!first_name.trim()) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Please enter first name!',
+                showConfirmButton: true
+            })
+            return;
+        }
+
+        if (!last_name.trim()) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Please enter last name!',
+                showConfirmButton: true
+            })
+            return;
+        }
+
+        if (!email.trim()) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Please enter email!',
+                showConfirmButton: true
+            })
+            return;
+        }
+
+        if (!designation.trim()) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Please enter designation!',
+                showConfirmButton: true
+            })
+            return;
+        }
+
+        if (!total_work_experience_years) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Please enter total work experience!',
+                showConfirmButton: true
+            })
+            return;
+        }
+
+        if (!rate_per_hour) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Please enter rate per hour!',
+                showConfirmButton: true
+            })
+            return;
+        }
+
+        if (!home_location_city.trim()) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Please enter home location city!',
+                showConfirmButton: true
+            })
+            return;
+        }
+
+        if (!selected_resume) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Please upload resume!',
+                showConfirmButton: true
+            })
+            return;
+        }
+
+        if (!profile_picture) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Please upload profile picture!',
+                showConfirmButton: true
+            })
+            return;
+        }
+
         setIsSaving(true);
         const config = {
           headers: {
@@ -155,8 +235,6 @@ function EmpCreate() {
         data.append('erp_software_experience', software_erp_experience.join(','));  
         data.append('max_work_hours_prefered', hours_preference);
 
-
-
         axios.post('/employees/add', data, config)
           .then((response)=>{
             Swal.fire({
@@ -184,8 +262,8 @@ function EmpCreate() {
             setManagerEmail('');
             setEmail('');
             setIsOnsite(false);
-            setSelectedResume('null');
-            setSelectedProfilePicture('null');
+            setSelectedResume(null);
+            setSelectedProfilePicture(null);
           })
           .catch((error)=>{
             const errMsg = error.response?.data?.split("Error:");
@@ -201,359 +279,512 @@ function EmpCreate() {
   
     return (
         <Layout>
-            <div className="container">
-                <div className="card">
-                    <div className="card-header">
-                        <h4 className="text-center">Add Resource Details</h4>
+            <div className="form-page-container">
+                <div className="form-page-card">
+                    <div className="form-page-header">
+                        <h1 className="form-page-title">Add New Resource</h1>
                     </div>
-                    <div className="card-body">
-                        <form className="row g-3 align-items-center">
-                            <div className="form-group col-md-6">
-                                <label htmlFor="first_name">First Name</label>
-                                <input 
-                                    onChange={(event)=>{setFirstName(event.target.value)}}
-                                    value={first_name}
-                                    type="text"
-                                    className="form-control needs-validation"
-                                    id="first_name"
-                                    name="first_name"
-                                    required/>
-                            </div>
-                            <div className="form-group col-md-6">
-                                <label htmlFor="last_name">Last Name</label>
-                                <input 
-                                    onChange={(event)=>{setLastName(event.target.value)}}
-                                    value={last_name}
-                                    type="text"
-                                    className="form-control"
-                                    id="last_name"
-                                    name="last_name"/>
-                            </div>
-                            <div className="form-group col-md-4">
-                                <label htmlFor="email">Email ID</label>
-                                <input 
-                                    onChange={(event)=>{setEmail(event.target.value)}}
-                                    value={email}
-                                    type="email"
-                                    className="form-control needs-validation"
-                                    id="email"
-                                    name="email"
-                                    required/>
-                            </div>
-                            <div className="form-group col-md-4">
-                                <label htmlFor="total_work_experience_years">Total Experience </label>
-                                <input 
-                                    onChange={(event)=>{setTotWorkExp(event.target.value)}}
-                                    value={total_work_experience_years}
-                                    type="number"
-                                    className="form-control needs-validation"
-                                    id="total_work_experience_years"
-                                    name="total_work_experience_years"
-                                    required/>
-                            </div>
-                            <div className="form-group col-md-4">
-                                <label htmlFor="rate_per_hour">Rate Per Hour (USD)</label>
-                                <input 
-                                    onChange={(event)=>{setRatePerHour(event.target.value)}}
-                                    value={rate_per_hour}
-                                    type="number"
-                                    className="form-control needs-validation"
-                                    id="rate_per_hour"
-                                    name="rate_per_hour"
-                                    required/>
-                            </div>
-                            <div className="form-group col-md-6">
-                                <label htmlFor="primary_skills">Primary Skills (use comma to seperate skills)</label>
-                                <textarea 
-                                    value={primary_skills}
-                                    onChange={(event)=>{setPrimarySkills(event.target.value)}}
-                                    className="form-control needs-validation"
-                                    id="primary_skills"
-                                    rows="3"
-                                    name="primary_skills"
-                                    required></textarea>
-                            </div>
-                            <div className="form-group col-md-6">
-                                <label htmlFor="secondary_skills">Secondary Skills (use comma to seperate skills)</label>
-                                <textarea 
-                                    value={secondary_skills}
-                                    onChange={(event)=>{setSecondarySkills(event.target.value)}}
-                                    className="form-control"
-                                    id="secondary_skills"
-                                    rows="3"
-                                    name="secondary_skills">
-                                    </textarea>
-                            </div>
-                            <div className="form-group col-md-6">
-                                <label htmlFor="education">Education</label>
-                                <textarea 
-                                    value={education}
-                                    onChange={(event)=>{setEducation(event.target.value)}}
-                                    className="form-control"
-                                    id="education"
-                                    rows="3"
-                                    name="education"></textarea>
-                            </div>
-                            <div className="form-group col-md-6">
-                                <label htmlFor="profile_information">Profile Information</label>
-                                <textarea 
-                                    value={profile_information}
-                                    onChange={(event)=>{setProfileInformation(event.target.value)}}
-                                    className="form-control"
-                                    id="profile_information"
-                                    rows="3"
-                                    name="profile_information"></textarea>
-                            </div>
-                            <div className="form-group col-md-3">
-                                <label htmlFor="designation">Designation</label>
-                                <input 
-                                    onChange={(event)=>{setDesignation(event.target.value)}}
-                                    value={designation}
-                                    type="text"
-                                    className="form-control needs-validation"
-                                    id="designation"
-                                    name="designation"
-                                    required/>
-                            </div>
-                            <div className="form-group col-md-2">
-                                <label htmlFor="resume">Employment Type</label><br/>
-
-                                <label htmlFor="employment_type" className="radio_emptype">
-                                <input
-                                    type="radio"
-                                    value="Full-time"
-                                    className="form-check-input"
-                                    checked={employment_type === 'Full-time'}
-                                    name="employment_type"
-                                    onChange={handleEmpTypeChange}
-                                />
-                                <small className="fw-bold">  Full Time</small>
-                                </label>
-
-                                <label htmlFor="employment_type" className="radio_emptype">
-                                <input
-                                    type="radio"
-                                    value="Part-time"
-                                    className="form-check-input"
-                                    checked={employment_type === 'Part-time'}
-                                    name="employment_type"
-                                    onChange={handleEmpTypeChange}
-                                />
-                                <small className="fw-bold">  Part Time</small>
-                                </label>
-                            </div>
-                            <div className="form-group col-md-3">
-                                <label htmlFor="vaco_join_date">Joining Date at Vaco</label>
-                                <input 
-                                    onChange={(event)=>{setVacoJoinDate(event.target.value)}}
-                                    value={vaco_join_date}
-                                    type="date"
-                                    className="form-control"
-                                    id="vaco_join_date"
-                                    name="vaco_join_date"
-                                    required/>
-                            </div>
-                            <div className="form-group col-md-2 align-items-center">
-                                <label htmlFor="is_onsite">Is working On-site?</label> <br/>
-                                <input 
-                                    type="checkbox"
-                                    checked={is_onsite}
-                                    className="form-check-input"
-                                    id="is_onsite"
-                                    name="is_onsite"
-                                    onChange={()=>{setIsOnsite(!is_onsite)}}
-                                    />
-                            </div>
-                            <div className="form-group col-md-2">
-                                <label htmlFor="status">Status</label>
-                                <select name="status" id="status" className="form-control" defaultValue={"Active"}
-                                 onChange={(event)=>{setStatus(event.target[event.target.selectedIndex].text)}}>
-                                    <option value="Active" >Active</option>
-                                    <option value="Inactive">Inactive</option>
-                                </select>
+                    <div className="form-page-body">
+                        <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
+                            <div className="form-section">
+                                <h3 className="form-section-title">Basic Information</h3>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="first_name" className="form-label required-field">
+                                            First Name
+                                        </label>
+                                        <input 
+                                            onChange={(event)=>{setFirstName(event.target.value)}}
+                                            value={first_name}
+                                            type="text"
+                                            className="form-control"
+                                            id="first_name"
+                                            name="first_name"
+                                            placeholder="Enter first name"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="last_name" className="form-label required-field">
+                                            Last Name
+                                        </label>
+                                        <input 
+                                            onChange={(event)=>{setLastName(event.target.value)}}
+                                            value={last_name}
+                                            type="text"
+                                            className="form-control"
+                                            id="last_name"
+                                            name="last_name"
+                                            placeholder="Enter last name"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="email" className="form-label required-field">
+                                            Email ID
+                                        </label>
+                                        <input 
+                                            onChange={(event)=>{setEmail(event.target.value)}}
+                                            value={email}
+                                            type="email"
+                                            className="form-control"
+                                            id="email"
+                                            name="email"
+                                            placeholder="Enter email address"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="designation" className="form-label required-field">
+                                            Designation
+                                        </label>
+                                        <input 
+                                            onChange={(event)=>{setDesignation(event.target.value)}}
+                                            value={designation}
+                                            type="text"
+                                            className="form-control"
+                                            id="designation"
+                                            name="designation"
+                                            placeholder="Enter designation"
+                                            required
+                                        />
+                                    </div>
+                                </div>
                             </div>
 
-                            <div className="form-group col-md-6">
-                                <label htmlFor="home_location_city">Home Location City</label>
-                                <input 
-                                    onChange={(event)=>{setHomeLocCity(event.target.value)}}
-                                    value={home_location_city}
-                                    type="text"
-                                    className="form-control needs-validation"
-                                    id="home_location_city"
-                                    name="home_location_city"
-                                    required/>
+                            <div className="form-section">
+                                <h3 className="form-section-title">Experience & Skills</h3>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="total_work_experience_years" className="form-label required-field">
+                                            Total Experience (Years)
+                                        </label>
+                                        <input 
+                                            onChange={(event)=>{setTotWorkExp(event.target.value)}}
+                                            value={total_work_experience_years}
+                                            type="number"
+                                            className="form-control"
+                                            id="total_work_experience_years"
+                                            name="total_work_experience_years"
+                                            placeholder="Enter years of experience"
+                                            min="0"
+                                            step="0.5"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="rate_per_hour" className="form-label required-field">
+                                            Rate Per Hour (USD)
+                                        </label>
+                                        <input 
+                                            onChange={(event)=>{setRatePerHour(event.target.value)}}
+                                            value={rate_per_hour}
+                                            type="number"
+                                            className="form-control"
+                                            id="rate_per_hour"
+                                            name="rate_per_hour"
+                                            placeholder="Enter hourly rate"
+                                            min="0"
+                                            step="0.01"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                <div className="form-group full-width">
+                                    <label htmlFor="core_skillset" className="form-label required-field">
+                                        Core Skillset (Top 3)
+                                    </label>
+                                    <select
+                                        id="core_skillset"
+                                        multiple
+                                        className="form-select"
+                                        value={core_skillset}
+                                        onChange={(e) => setCoreSkillset(Array.from(e.target.selectedOptions, option => option.value))}
+                                        required
+                                    >
+                                        {coreSkillsetOptions.map(opt => (
+                                            <option key={opt} value={opt}>{opt}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="form-group full-width">
+                                    <label htmlFor="secondary_skills" className="form-label">
+                                        Secondary Skills
+                                    </label>
+                                    <textarea 
+                                        value={secondary_skills}
+                                        onChange={(event)=>{setSecondarySkills(event.target.value)}}
+                                        className="form-textarea"
+                                        id="secondary_skills"
+                                        name="secondary_skills"
+                                        placeholder="Enter secondary skills (comma separated)"
+                                        rows="3"
+                                    ></textarea>
+                                </div>
                             </div>
-                            <div className="form-group col-md-6">
-                                <label htmlFor="office_location_city">Office Location City</label>
-                                <select name="office_location_city" id="office_location_city" required value={office_location_city} className="form-control" onChange={(event)=>{setOfficeLocCity(event.target.value)}}> 
-                                    <option value="-select-" > -- Select Location -- </option>
-                                    {locationList.map((location) => <option value={location.office_location_city}>{location.office_location_city}</option>)}    
-                                </select>
+
+                            <div className="form-section">
+                                <h3 className="form-section-title">Education & Profile</h3>
+                                <div className="form-group full-width">
+                                    <label htmlFor="education" className="form-label">
+                                        Education
+                                    </label>
+                                    <textarea 
+                                        value={education}
+                                        onChange={(event)=>{setEducation(event.target.value)}}
+                                        className="form-textarea"
+                                        id="education"
+                                        name="education"
+                                        placeholder="Enter education details"
+                                        rows="3"
+                                    ></textarea>
+                                </div>
+                                <div className="form-group full-width">
+                                    <label htmlFor="profile_information" className="form-label">
+                                        Profile Information
+                                    </label>
+                                    <textarea 
+                                        value={profile_information}
+                                        onChange={(event)=>{setProfileInformation(event.target.value)}}
+                                        className="form-textarea"
+                                        id="profile_information"
+                                        name="profile_information"
+                                        placeholder="Enter profile information"
+                                        rows="4"
+                                    ></textarea>
+                                </div>
                             </div>
-                            <div className="form-group col-md-4">
-  <label htmlFor="functional_focus">Functional Focus</label>
-  <select
-    id="functional_focus"
-    className="form-control needs-validation"
-    required
-    value={functional_focus}
-    onChange={(e) => setFunctionalFocus(e.target.value)}
-  >
-    <option value="-select-">-- Select Functional Focus --</option>
-    {functionalFocusOptions.map(opt => (
-      <option key={opt} value={opt}>{opt}</option>
-    ))}
-  </select>
-</div>
 
-<div className="form-group col-md-4">
-  <label htmlFor="vaco_division">Vaco Division</label>
-  <select
-    id="vaco_division"
-    className="form-control needs-validation"
-    required
-    value={vaco_division}
-    onChange={(e) => setVacoDivision(e.target.value)}
-  >
-    <option value="-select-">-- Select Division --</option>
-    {vacoDivisionOptions.map(opt => (
-      <option key={opt} value={opt}>{opt}</option>
-    ))}
-  </select>
-</div>
-
-<div className="form-group col-md-4">
-  <label htmlFor="core_skillset">Core Skillset (Top 3)</label>
-  <select
-    id="core_skillset"
-    multiple
-    required
-    className="form-control needs-validation"
-    value={core_skillset}
-    onChange={(e) => setCoreSkillset(Array.from(e.target.selectedOptions, option => option.value))}
-  >
-    {coreSkillsetOptions.map(opt => (
-      <option key={opt} value={opt}>{opt}</option>
-    ))}
-  </select>
-</div>
-
-<div className="form-group col-md-4">
-  <label htmlFor="revenue_company_size">Revenue / Company Size Experience</label>
-  <select
-    id="revenue_company_size"
-    multiple
-    className="form-control"
-    value={revenue_company_size}
-    onChange={(e) => setRevenueCompanySize(Array.from(e.target.selectedOptions, option => option.value))}
-  >
-    {revenueCompanySizeOptions.map(opt => (
-      <option key={opt} value={opt}>{opt}</option>
-    ))}
-  </select>
-</div>
-
-<div className="form-group col-md-4">
-  <label htmlFor="industries">Industries (Top 3)</label>
-  <select
-    id="industries"
-    multiple
-    className="form-control"
-    value={industries}
-    onChange={(e) => setIndustries(Array.from(e.target.selectedOptions, option => option.value))}
-  >
-    {industriesOptions.map(opt => (
-      <option key={opt} value={opt}>{opt}</option>
-    ))}
-  </select>
-</div>
-
-<div className="form-group col-md-4">
-  <label htmlFor="software_erp_experience">Software / ERP Experience</label>
-  <select
-    id="software_erp_experience"
-    multiple
-    className="form-control"
-    value={software_erp_experience}
-    onChange={(e) => setSoftwareErpExperience(Array.from(e.target.selectedOptions, option => option.value))}
-  >
-    {softwareErpExperienceOptions.map(opt => (
-      <option key={opt} value={opt}>{opt}</option>
-    ))}
-  </select>
-</div>
-
-<div className="form-group col-md-6">
-  <label htmlFor="hours_preference">Hours Preference</label>
-  <select
-    id="hours_preference"
-    className="form-control needs-validation"
-    required
-    value={hours_preference}
-    onChange={(e) => setHoursPreference(e.target.value)}
-  >
-    <option value="40.00">40 hours</option>
-    <option value="45.00">Open to Excess Hours (&gt; 40)</option>
-  </select>
-</div>
-
-                            <div className="form-group col-md-6">
-                                <label htmlFor="manager_name">Manager Name</label>
-                                <select name="manager_id" id="manager_id" value={manager_id} required className="form-control" onChange={handleManagerChange}> 
-                                    <option value="-select-" > -- Select Manager -- </option>
-                                    {managerList.map((manager) => <option value={manager.user_id}>{manager.first_name}, {manager.last_name}</option>)}
-                                </select>
+                            <div className="form-section">
+                                <h3 className="form-section-title">Employment Details</h3>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="employment_type" className="form-label required-field">
+                                            Employment Type
+                                        </label>
+                                        <div style={{ marginTop: '8px' }}>
+                                            <label className="radio_emptype" style={{ marginRight: '20px' }}>
+                                                <input
+                                                    type="radio"
+                                                    value="Full-time"
+                                                    className="form-check-input"
+                                                    checked={employment_type === 'Full-time'}
+                                                    name="employment_type"
+                                                    onChange={handleEmpTypeChange}
+                                                />
+                                                <span style={{ marginLeft: '8px' }}>Full Time</span>
+                                            </label>
+                                            <label className="radio_emptype">
+                                                <input
+                                                    type="radio"
+                                                    value="Part-time"
+                                                    className="form-check-input"
+                                                    checked={employment_type === 'Part-time'}
+                                                    name="employment_type"
+                                                    onChange={handleEmpTypeChange}
+                                                />
+                                                <span style={{ marginLeft: '8px' }}>Part Time</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="vaco_join_date" className="form-label">
+                                            Joining Date at Vaco
+                                        </label>
+                                        <input 
+                                            onChange={(event)=>{setVacoJoinDate(event.target.value)}}
+                                            value={vaco_join_date}
+                                            type="date"
+                                            className="form-date"
+                                            id="vaco_join_date"
+                                            name="vaco_join_date"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="status" className="form-label required-field">
+                                            Status
+                                        </label>
+                                        <select 
+                                            name="status" 
+                                            id="status" 
+                                            className="form-select" 
+                                            value={status}
+                                            onChange={(event)=>{setStatus(event.target.value)}}
+                                            required
+                                        >
+                                            <option value="Active">Active</option>
+                                            <option value="Inactive">Inactive</option>
+                                        </select>
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="is_onsite" className="form-label">
+                                            Working On-site?
+                                        </label>
+                                        <div style={{ marginTop: '8px' }}>
+                                            <input 
+                                                type="checkbox"
+                                                checked={is_onsite}
+                                                className="form-check-input"
+                                                id="is_onsite"
+                                                name="is_onsite"
+                                                onChange={()=>{setIsOnsite(!is_onsite)}}
+                                            />
+                                            <span style={{ marginLeft: '8px' }}>Yes, working on-site</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="form-group col-md-6">
-                                <label htmlFor="manager_email">Manager Email</label>
-                                <input 
-                                    onChange={(event)=>{setManagerEmail(event.target.value)}}
-                                    value={manager_email}
-                                    type="email"
-                                    className="form-control needs-validation"
-                                    id="manager_email"
-                                    name="manager_email"
-                                    required
-                                    readOnly
-                                    />
-                            </div>
-                            <div className="form-group col-md-6">
-                                <label htmlFor="resume">Resume</label>
-                                <input
-                                    type="file"
-                                    name="resume"
-                                    id="resume"
-                                    className="form-control needs-validation"
-                                    onChange={handleResumeChange}
-                                    required/>
-                            </div>
-                            <div className="form-group col-md-6">
-                                <label htmlFor="profile_picture"> Profile Picture</label>
-                                <input
-                                    type="file" 
-                                    className="form-control needs-validation"
-                                    name="profile_picture"
-                                    id="profile_picture"
-                                    onChange={handleProfileChange}
-                                    required/>
-                            </div>
-                            <div className="form-group col-md-6 align-items-center">
-                            <button 
-                                disabled={isSaving}
-                                onClick={handleCancel} 
-                                type="submit"
-                                className="btn btn-outline-light mt-3 me-3">
-                                Cancel
-                            </button>
 
-                            <button 
-                                disabled={isSaving}
-                                onClick={handleSave} 
-                                type="submit"
-                                className="btn btn-outline-info mt-3 me-3">
-                                Save Resource
-                            </button>
+                            <div className="form-section">
+                                <h3 className="form-section-title">Location Information</h3>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="home_location_city" className="form-label required-field">
+                                            Home Location City
+                                        </label>
+                                        <input 
+                                            onChange={(event)=>{setHomeLocCity(event.target.value)}}
+                                            value={home_location_city}
+                                            type="text"
+                                            className="form-control"
+                                            id="home_location_city"
+                                            name="home_location_city"
+                                            placeholder="Enter home location city"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="office_location_city" className="form-label">
+                                            Office Location City
+                                        </label>
+                                        <select 
+                                            name="office_location_city" 
+                                            id="office_location_city" 
+                                            className="form-select" 
+                                            value={office_location_city} 
+                                            onChange={(event)=>{setOfficeLocCity(event.target.value)}}
+                                        > 
+                                            <option value="-select-"> -- Select Location -- </option>
+                                            {locationList.map((location) => (
+                                                <option key={location.office_location_city} value={location.office_location_city}>
+                                                    {location.office_location_city}
+                                                </option>
+                                            ))}    
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="form-section">
+                                <h3 className="form-section-title">Professional Focus</h3>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="functional_focus" className="form-label">
+                                            Functional Focus
+                                        </label>
+                                        <select
+                                            id="functional_focus"
+                                            className="form-select"
+                                            value={functional_focus}
+                                            onChange={(e) => setFunctionalFocus(e.target.value)}
+                                        >
+                                            <option value="-select-">-- Select Functional Focus --</option>
+                                            {functionalFocusOptions.map(opt => (
+                                                <option key={opt} value={opt}>{opt}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="vaco_division" className="form-label">
+                                            Vaco Division
+                                        </label>
+                                        <select
+                                            id="vaco_division"
+                                            className="form-select"
+                                            value={vaco_division}
+                                            onChange={(e) => setVacoDivision(e.target.value)}
+                                        >
+                                            <option value="-select-">-- Select Division --</option>
+                                            {vacoDivisionOptions.map(opt => (
+                                                <option key={opt} value={opt}>{opt}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="hours_preference" className="form-label">
+                                            Hours Preference
+                                        </label>
+                                        <select
+                                            id="hours_preference"
+                                            className="form-select"
+                                            value={hours_preference}
+                                            onChange={(e) => setHoursPreference(e.target.value)}
+                                        >
+                                            <option value="40.00">40 hours</option>
+                                            <option value="45.00">Open to Excess Hours (&gt; 40)</option>
+                                        </select>
+                                    </div>
+                                    <div className="form-group">
+                                            <label htmlFor="revenue_company_size" className="form-label">
+                                                Revenue / Company Size Experience
+                                            </label>
+                                            <select
+                                                id="revenue_company_size"
+                                                multiple
+                                                className="form-select"
+                                                value={revenue_company_size}
+                                                onChange={(e) => setRevenueCompanySize(Array.from(e.target.selectedOptions, option => option.value))}
+                                            >
+                                                {revenueCompanySizeOptions.map(opt => (
+                                                    <option key={opt} value={opt}>{opt}</option>
+                                                ))}
+                                            </select>
+                                    </div>
+
+                                </div>
+                                    <div className="form-row">
+                                        <div className="form-group">
+                                            <label htmlFor="industries" className="form-label">
+                                                Industries (Top 3)
+                                            </label>
+                                            <select
+                                                id="industries"
+                                                multiple
+                                                className="form-select"
+                                                value={industries}
+                                                onChange={(e) => setIndustries(Array.from(e.target.selectedOptions, option => option.value))}
+                                            >
+                                                {industriesOptions.map(opt => (
+                                                    <option key={opt} value={opt}>{opt}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div className="form-group">
+                                            <label htmlFor="software_erp_experience" className="form-label">
+                                                Software / ERP Experience
+                                            </label>
+                                            <select
+                                                id="software_erp_experience"
+                                                multiple
+                                                className="form-select"
+                                                value={software_erp_experience}
+                                                onChange={(e) => setSoftwareErpExperience(Array.from(e.target.selectedOptions, option => option.value))}
+                                            >
+                                                {softwareErpExperienceOptions.map(opt => (
+                                                    <option key={opt} value={opt}>{opt}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+                            </div>
+
+                            <div className="form-section">
+                                <h3 className="form-section-title">Manager Assignment</h3>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="manager_id" className="form-label">
+                                            Manager Name
+                                        </label>
+                                        <select 
+                                            name="manager_id" 
+                                            id="manager_id" 
+                                            className="form-select" 
+                                            value={manager_id} 
+                                            onChange={handleManagerChange}
+                                        > 
+                                            <option value="-select-"> -- Select Manager -- </option>
+                                            {managerList.map((manager) => (
+                                                <option key={manager.user_id} value={manager.user_id}>
+                                                    {manager.first_name}, {manager.last_name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="manager_email" className="form-label">
+                                            Manager Email
+                                        </label>
+                                        <input 
+                                            onChange={(event)=>{setManagerEmail(event.target.value)}}
+                                            value={manager_email}
+                                            type="email"
+                                            className="form-control"
+                                            id="manager_email"
+                                            name="manager_email"
+                                            placeholder="Manager email (auto-filled)"
+                                            readOnly
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="form-section">
+                                <h3 className="form-section-title">Documents</h3>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="resume" className="form-label required-field">
+                                            Resume
+                                        </label>
+                                        <input
+                                            type="file"
+                                            name="resume"
+                                            id="resume"
+                                            className="form-control"
+                                            onChange={handleResumeChange}
+                                            accept=".pdf,.doc,.docx"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="profile_picture" className="form-label required-field">
+                                            Profile Picture
+                                        </label>
+                                        <input
+                                            type="file" 
+                                            className="form-control"
+                                            name="profile_picture"
+                                            id="profile_picture"
+                                            onChange={handleProfileChange}
+                                            accept="image/*"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="form-actions">
+                                <button 
+                                    type="button"
+                                    onClick={handleCancel} 
+                                    className="btn btn-outline"
+                                    disabled={isSaving}
+                                >
+                                    <i className="bi bi-x-circle"></i>
+                                    Cancel
+                                </button>
+                                <button 
+                                    type="submit"
+                                    className="btn btn-success"
+                                    disabled={isSaving}
+                                >
+                                    {isSaving ? (
+                                        <>
+                                            <span className="loading-spinner"></span>
+                                            Saving...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <i className="bi bi-check-circle"></i>
+                                            Save Resource
+                                        </>
+                                    )}
+                                </button>
                             </div>
                         </form>
                     </div>

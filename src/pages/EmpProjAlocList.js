@@ -7,6 +7,8 @@ import * as Utils from "../lib/Utils"
 import EmployeeProfileModal from '../components/employee/EmployeeProfileModal'
 import * as AppFunc from "../lib/AppFunctions";
 import APP_CONSTANTS from "../appConstants";
+import Pagination from "../components/Pagination";
+import "./ListPages.css";
 
 function EmpProjAlocList() {
     const  [empProjAlocList, setEmpProjAlocList] = useState([])
@@ -14,8 +16,12 @@ function EmpProjAlocList() {
     const [inputType, setInputType] = useState("text");
     const [modalIsOpen, setIsOpen] = useState(false);
     const [empModalDetails, setEmpModalDetails] = useState({});
-    const hasReadOnlyAccess = useState(AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.PRODUCER);
+    const hasReadOnlyAccess = AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.PRODUCER;
     const navigate = useNavigate(); 
+
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
 
     const handleAddButtonClick = () => {
       navigate("/empProjCreate");
@@ -97,6 +103,7 @@ function EmpProjAlocList() {
           return dbVal?.includes(searchValue);
         });
         setFilteredList(fList);
+        setCurrentPage(1); // Reset to first page when searching
       }
     };
 
@@ -107,13 +114,17 @@ function EmpProjAlocList() {
       } else {
         setSearchKey(event.target.value);
       }
-      
       (event.target.value.includes("date")) ? setInputType("date") : setInputType("text");
     };
 
     const handleSearchRefreshClick = () => {
       window.location.reload(true);
     };
+
+    const handleExcelExport = () => {
+      Utils.exportHTMLTableToExcel('allocationListTable', 'Allocation List', ["Action"])
+    };
+
     const searchKeysToIgnore = ["emp_id","project_id","emp_proj_aloc_id","empDetails", "projectDetails"];
 
     const openEmpDetailsModal = (empId) => {
@@ -125,45 +136,97 @@ function EmpProjAlocList() {
           console.log(error);
         })
       setIsOpen(true);
-    }
-    
+    };
+
+    // Pagination handlers
+    const handlePageChange = (page) => {
+      setCurrentPage(page);
+    };
+
+    const handleItemsPerPageChange = (newItemsPerPage) => {
+      setItemsPerPage(newItemsPerPage);
+      setCurrentPage(1); // Reset to first page when changing items per page
+    };
+
+    // Calculate pagination
+    const totalItems = filteredList.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const currentItems = filteredList.slice(startIndex, endIndex);
+
     return (
       <Layout>
-        <div className="container-fluid">
-          <div className="card w-auto">
-            <div className="card-header">
-              <div className="row">
-                <div className="col input-group">
-                  <span className="input-group-text"><i className="bi bi-search text-gray"></i></span>
-                    <select style={{width:"35%"}} name="searchKey" id="searchKey" onChange={handleSearchKeyChange}> 
-                      <option value="-select-"> -- Select Key -- </option>
-                      {searchKeys.map((k) => (!searchKeysToIgnore.includes(k)) ? <option value={k}>{k.toLocaleUpperCase()}</option> : "")}
-                    </select>
-                    <input style={{width:"35%"}} className="ms-2" id="search-value" type={inputType} placeholder=" Type a value" onChange={handleSearch} />
-                    <span 
-                    onClick={handleSearchRefreshClick}
-                    hidden={modalIsOpen}
-                    className="btn btn-outline-primary btn-small">
-                    <i className="bi bi-arrow-counterclockwise"></i>
+        <div className="list-page-container">
+          <div className="list-page-card">
+            {/* Header Section */}
+            <div className="list-page-header">
+              <h1 className="list-page-title">Allocation List</h1>
+            </div>
+
+            {/* Search Controls */}
+            <div className="search-controls">
+              <div className="search-row">
+                <div className="search-input-group">
+                  <span className="search-icon">
+                    <i className="bi bi-search"></i>
                   </span>
+                  <select 
+                    className="search-select" 
+                    name="searchKey" 
+                    id="searchKey" 
+                    onChange={handleSearchKeyChange}
+                  > 
+                    <option value="-select-">-- Select Key --</option>
+                    {searchKeys.map((k) => (!searchKeysToIgnore.includes(k)) ? 
+                      <option key={k} value={k}>{k.toLocaleUpperCase()}</option> : ""
+                    )}
+                  </select>
+                  <input 
+                    className="search-input" 
+                    id="search-value" 
+                    type={inputType} 
+                    placeholder="Type a value" 
+                    onChange={handleSearch} 
+                  />
                 </div>
-                <div className="col text-center">
-                  <h4>Allocation List</h4>
-                </div>
-                <div className="col">
+                
+                <button 
+                  className="search-refresh-btn"
+                  onClick={handleSearchRefreshClick}
+                  hidden={modalIsOpen}
+                >
+                  <i className="bi bi-arrow-counterclockwise"></i>
+                  Refresh
+                </button>
+
+                <div className="action-buttons">
+                  <button
+                    type="button"
+                    onClick={handleExcelExport}
+                    className="excel-btn"
+                  >
+                    <i className="bi bi-filetype-xls"></i>
+                    EXCEL
+                  </button>
+                  
                   <button 
                     type="button"
                     hidden={hasReadOnlyAccess}
                     onClick={handleAddButtonClick}
-                    className="btn btn-outline-primary float-end">
-                    ADD <i className="bi bi-plus-square"></i> 
+                    className="add-btn"
+                  >
+                    <i className="bi bi-plus-square"></i>
+                    ADD ALLOCATION
                   </button>
                 </div>
               </div>
             </div>
-            <div className="card-body table-responsive">
-              <table className="table table-hover">
-                <thead className="bg-light">
+
+            {/* Table Section */}
+            <div className="list-table-container">
+              <table className="table list-table" id='allocationListTable'>
+                <thead>
                   <tr>
                     <th hidden={hasReadOnlyAccess}>Action</th>
                     <th>Project Name</th>
@@ -178,58 +241,85 @@ function EmpProjAlocList() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredList.map((empProjAlloc, key) => {
-                    return (
-                      <tr key={key}>
-                        <td hidden={hasReadOnlyAccess}>
-                          <button
-                            onClick={() => handleDelete(empProjAlloc.emp_proj_aloc_id)}
-                            className="btn btn-outline-danger mx-1"
-                          >
-                            <i className="bi bi-trash"></i>
-                          </button>
-                          <Link
-                            className="btn btn-outline-success mx-1 edit_icon"
-                            to={`/empProjEdit/${empProjAlloc.emp_proj_aloc_id}`}
-                          >
-                            <i className="bi bi-pencil"></i>
-                          </Link>
-                        </td>
-                        <td>
-                          <Link
-                            to={`/projectShow/${empProjAlloc.projectDetails.project_id}`}
-                          >
-                            {empProjAlloc.projectDetails.project_name}
-                          </Link>
-                        </td>
-                        <td>
-                          <a href='#' id={key} key={key}  onClick={(e) => openEmpDetailsModal(empProjAlloc.empDetails.emp_id)}>
-                            {empProjAlloc.empDetails.first_name}, 
-                            {empProjAlloc.empDetails.last_name}
-                          </a>
-                        </td>
-                        <td>{Utils.formatDateYYYYMMDD(empProjAlloc.start_date)}</td>
-                        <td>{Utils.formatDateYYYYMMDD(empProjAlloc.end_date)}</td>
-                        <td>{empProjAlloc.work_location}</td>
-                        <td>{empProjAlloc.hours_per_day}</td>
-                        <td>{empProjAlloc.rate_per_hour}</td>
-                        <td>{empProjAlloc.shift_start_time}</td>
-                        <td>{empProjAlloc.shift_end_time}</td>
-                      </tr>
-                    );
-                  })}
+                  {currentItems.length === 0 ? (
+                    <tr>
+                      <td colSpan="10" className="empty-state">
+                        <i className="bi bi-diagram-3"></i>
+                        <p>No allocations found</p>
+                      </td>
+                    </tr>
+                  ) : (
+                    currentItems.map((empProjAlloc, key) => {
+                      return (
+                        <tr key={key}>
+                          <td hidden={hasReadOnlyAccess}>
+                            <div className="action-buttons-cell">
+                              <button
+                                onClick={() => handleDelete(empProjAlloc.emp_proj_aloc_id)}
+                                className="delete-btn"
+                                title="Delete Allocation"
+                              >
+                                <i className="bi bi-trash"></i>
+                              </button>
+                              <Link
+                                className="edit-btn"
+                                to={`/empProjEdit/${empProjAlloc.emp_proj_aloc_id}`}
+                                title="Edit Allocation"
+                              >
+                                <i className="bi bi-pencil"></i>
+                              </Link>
+                            </div>
+                          </td>
+                          <td>
+                            <Link
+                              className="project-link"
+                              to={`/projectShow/${empProjAlloc.projectDetails.project_id}`}
+                            >
+                              {empProjAlloc.projectDetails.project_name}
+                            </Link>
+                          </td>
+                          <td>
+                            <a href='#' id={key} key={key} onClick={(e) => openEmpDetailsModal(empProjAlloc.empDetails.emp_id)}>
+                              {empProjAlloc.empDetails.first_name}, 
+                              {empProjAlloc.empDetails.last_name}
+                            </a>
+                          </td>
+                          <td>{Utils.formatDateYYYYMMDD(empProjAlloc.start_date)}</td>
+                          <td>{Utils.formatDateYYYYMMDD(empProjAlloc.end_date)}</td>
+                          <td>{empProjAlloc.work_location}</td>
+                          <td>{empProjAlloc.hours_per_day}</td>
+                          <td>{empProjAlloc.rate_per_hour}</td>
+                          <td>{empProjAlloc.shift_start_time}</td>
+                          <td>{empProjAlloc.shift_end_time}</td>
+                        </tr>
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
-              <EmployeeProfileModal
-                modelstatus={modalIsOpen}
-                close={() => setIsOpen(false)}
-                employee={empModalDetails}
-                hideAddInListBtn={true}
-                hideHireBtn={true}
-              />
             </div>
+
+            {/* Pagination */}
+            {totalItems > 0 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalItems}
+                itemsPerPage={itemsPerPage}
+                onPageChange={handlePageChange}
+                onItemsPerPageChange={handleItemsPerPageChange}
+              />
+            )}
           </div>
         </div>
+
+        <EmployeeProfileModal
+          modelstatus={modalIsOpen}
+          close={() => setIsOpen(false)}
+          employee={empModalDetails}
+          hideAddInListBtn={true}
+          hideHireBtn={true}
+        />
       </Layout>
     );
 }

@@ -4,7 +4,7 @@ import Swal from 'sweetalert2'
 import axios from 'axios'
 import Layout from "../../components/Layout"
 import * as Utils from "../../lib/Utils"
- 
+import "../FormStyles.css"
  
 function EmpProjUtiliCreate() {
     const [emp_id, setEmpId] = useState('');
@@ -18,8 +18,8 @@ function EmpProjUtiliCreate() {
     const [isSaving, setIsSaving] = useState(false)
     const navigate = useNavigate();
 
-    const  [empList, setEmpList] = useState([])
-    const  [projectList, setProjectList] = useState([])
+    const [empList, setEmpList] = useState([])
+    const [projectList, setProjectList] = useState([])
     const [minValue, setMinValue] = useState();
     const [maxValue, setMaxValue] = useState();
 
@@ -27,7 +27,7 @@ function EmpProjUtiliCreate() {
         fetchProjList();
     }, [])
   
-    const fetchEmpProjAloc = (emp_id ,project_id) => {
+    const fetchEmpProjAloc = (emp_id, project_id) => {
         axios.post(`/empPrjAloc/project_employees_alloc`, {
                 emp_id : emp_id,
                 project_id: project_id
@@ -53,6 +53,7 @@ function EmpProjUtiliCreate() {
           console.log(error);
         })
     }
+
     const handleEmpChange = (e) => {
         if(e.target.value === "-select-"){
             Swal.fire({
@@ -87,11 +88,39 @@ function EmpProjUtiliCreate() {
           console.log(error);
         })
     }
+
     const handleCancel = () => {
         navigate("/empUtiliList");
     }
+
     const handleSave = () => {
-        Swal.showLoading();
+        if (project_id === '' || project_id === '-select-') {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Please select a project!',
+                showConfirmButton: true
+            })
+            return;
+        }
+
+        if (emp_id === '' || emp_id === '-select-') {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Please select a resource!',
+                showConfirmButton: true
+            })
+            return;
+        }
+
+        if (!week_starting) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Please select a week starting date!',
+                showConfirmButton: true
+            })
+            return;
+        }
+
         setIsSaving(true);
         const config = {
           headers: {
@@ -112,19 +141,18 @@ function EmpProjUtiliCreate() {
           .then(function (response) {
             Swal.fire({
                 icon: 'success',
-                title: 'Successfully Saved!',
+                title: 'Utilization saved successfully!',
                 showConfirmButton: false,
                 timer: 1500
             })
-            Swal.hideLoading()
             setIsSaving(false);
             setEmpId('');
             setProjectId('');
             setWeekStart('');
-            setProjPerWeek('');
-            setAllcPerWeek('');
-            setForecastPerWeek('');
-            setPtoPerWeek('');
+            setProjPerWeek(0);
+            setAllcPerWeek(0);
+            setForecastPerWeek(0);
+            setPtoPerWeek(0);
           })
           .catch(function (error) {
             Swal.fire({
@@ -139,94 +167,188 @@ function EmpProjUtiliCreate() {
   
     return (
         <Layout>
-            <div className="container">
-                <div className="card">
-                    <div className="card-header">
-                        <h4 className="text-center">Utilization Resource to Project</h4>
+            <div className="form-page-container">
+                <div className="form-page-card">
+                    <div className="form-page-header">
+                        <h1 className="form-page-title">Add Resource Utilization</h1>
                     </div>
-                    <div className="card-body">
-                        <form>
-                            <div className="form-group">
-                                <label htmlFor="project">Project</label>
-                                <select name="project" id="project" className="form-control" onChange={handleProjectChange}> 
-                                    <option value="-select-" > -- Select Project -- </option>
-                                    {projectList.map((prj) => <option value={prj.project_id}>{prj.project_name}, {prj.project_location}</option>)}
-                                </select>
+                    <div className="form-page-body">
+                        <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
+                            <div className="form-section">
+                                <h3 className="form-section-title">Resource & Project Selection</h3>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="project" className="form-label required-field">
+                                            Project
+                                        </label>
+                                        <select 
+                                            name="project" 
+                                            id="project" 
+                                            className="form-select" 
+                                            onChange={handleProjectChange}
+                                            value={project_id}
+                                            required
+                                        > 
+                                            <option value=""> -- Select Project -- </option>
+                                            {projectList.map((prj) => (
+                                                <option key={prj.project_id} value={prj.project_id}>
+                                                    {prj.project_name}, {prj.project_location}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="employee" className="form-label required-field">
+                                            Resource Name
+                                        </label>
+                                        <select 
+                                            name="employee" 
+                                            id="employee" 
+                                            className="form-select" 
+                                            onChange={handleEmpChange}
+                                            value={emp_id}
+                                            required
+                                        > 
+                                            <option value=""> -- Select Resource -- </option>
+                                            {empList.map((emp) => (
+                                                <option key={emp.emp_id} value={emp.emp_id}>
+                                                    {emp.first_name} {emp.last_name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="form-group">
-                                <label htmlFor="employee">Resource Name</label>
-                                <select name="employee" id="employee" className="form-control" onChange={handleEmpChange}> 
-                                    <option value="-select-"> -- Select Resource -- </option>
-                                    {empList.map((emp) => <option value={emp.emp_id}>{emp.first_name}, {emp.last_name}</option>)}
-                                </select>
+
+                            <div className="form-section">
+                                <h3 className="form-section-title">Week Information</h3>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="week_starting" className="form-label required-field">
+                                            Week Starting
+                                        </label>
+                                        <input 
+                                            onChange={(event)=>{setWeekStart(event.target.value)}}
+                                            value={week_starting}
+                                            type="date"
+                                            className="form-date"
+                                            id="week_starting"
+                                            name="week_starting" 
+                                            min={minValue} 
+                                            max={maxValue}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        {/* Empty div for layout balance */}
+                                    </div>
+                                </div>
                             </div>
-                            <div className="form-group">
-                                <label htmlFor="week_starting">Week Starting</label>
-                                <input 
-                                    onChange={(event)=>{setWeekStart(event.target.value)}}
-                                    value={week_starting}
-                                    type="date"
-                                    className="form-control"
-                                    id="week_starting"
-                                    name="week_starting" 
-                                    min={minValue} 
-                                    max={maxValue} 
-                                    />
+
+                            <div className="form-section">
+                                <h3 className="form-section-title">Hours Breakdown</h3>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="proj_hours_per_week" className="form-label">
+                                            Project Hours per Week
+                                        </label>
+                                        <input 
+                                            onChange={(event)=>{setProjPerWeek(event.target.value)}}
+                                            value={proj_hours_per_week}
+                                            type="number"
+                                            className="form-control"
+                                            id="proj_hours_per_week"
+                                            name="proj_hours_per_week"
+                                            placeholder="Enter project hours"
+                                            min="0"
+                                            max="168"
+                                            step="0.5"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="allc_work_hours_per_week" className="form-label">
+                                            Allocation Hours per Week
+                                        </label>
+                                        <input 
+                                            onChange={(event)=>{setAllcPerWeek(event.target.value)}}
+                                            value={allc_work_hours_per_week}
+                                            type="number"
+                                            className="form-control"
+                                            id="allc_work_hours_per_week"
+                                            name="allc_work_hours_per_week"
+                                            placeholder="Enter allocation hours"
+                                            min="0"
+                                            max="168"
+                                            step="0.5"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="forecast_hours_per_week" className="form-label">
+                                            Forecast Hours per Week
+                                        </label>
+                                        <input 
+                                            onChange={(event)=>{setForecastPerWeek(event.target.value)}}
+                                            value={forecast_hours_per_week}
+                                            type="number"
+                                            className="form-control"
+                                            id="forecast_hours_per_week"
+                                            name="forecast_hours_per_week"
+                                            placeholder="Enter forecast hours"
+                                            min="0"
+                                            max="168"
+                                            step="0.5"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="pto_hours_per_week" className="form-label">
+                                            PTO Hours per Week
+                                        </label>
+                                        <input 
+                                            onChange={(event)=>{setPtoPerWeek(event.target.value)}}
+                                            value={pto_hours_per_week}
+                                            type="number"
+                                            className="form-control"
+                                            id="pto_hours_per_week"
+                                            name="pto_hours_per_week"
+                                            placeholder="Enter PTO hours"
+                                            min="0"
+                                            max="168"
+                                            step="0.5"
+                                        />
+                                    </div>
+                                </div>
                             </div>
-                            <div className="form-group">
-                                <label htmlFor="proj_hours_per_week">Project Hours per Week</label>
-                                <input 
-                                    onChange={(event)=>{setProjPerWeek(event.target.value)}}
-                                    value={proj_hours_per_week}
-                                    type="number"
-                                    className="form-control"
-                                    id="proj_hours_per_week"
-                                    name="proj_hours_per_week"/>
+
+                            <div className="form-actions">
+                                <button 
+                                    type="button"
+                                    onClick={handleCancel} 
+                                    className="btn btn-outline"
+                                    disabled={isSaving}
+                                >
+                                    <i className="bi bi-x-circle"></i>
+                                    Cancel
+                                </button>
+                                <button 
+                                    type="submit"
+                                    className="btn btn-success"
+                                    disabled={isSaving}
+                                >
+                                    {isSaving ? (
+                                        <>
+                                            <span className="loading-spinner"></span>
+                                            Saving...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <i className="bi bi-check-circle"></i>
+                                            Save Utilization
+                                        </>
+                                    )}
+                                </button>
                             </div>
-                            <div className="form-group">
-                                <label htmlFor="allc_work_hours_per_week">Allocation Hours per Week</label>
-                                <input 
-                                    onChange={(event)=>{setAllcPerWeek(event.target.value)}}
-                                    value={allc_work_hours_per_week}
-                                    type="number"
-                                    className="form-control"
-                                    id="allc_work_hours_per_week"
-                                    name="allc_work_hours_per_week"/>
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="forecast_hours_per_week">Forecast Hours per Week</label>
-                                <input 
-                                    onChange={(event)=>{setForecastPerWeek(event.target.value)}}
-                                    value={forecast_hours_per_week}
-                                    type="number"
-                                    className="form-control"
-                                    id="forecast_hours_per_week"
-                                    name="forecast_hours_per_week"/>
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="pto_hours_per_week">PTO Hours per Week</label>
-                                <input 
-                                    onChange={(event)=>{setPtoPerWeek(event.target.value)}}
-                                    value={pto_hours_per_week}
-                                    type="number"
-                                    className="form-control"
-                                    id="pto_hours_per_week"
-                                    name="pto_hours_per_week"/>
-                            </div>
-                            <button 
-                                disabled={isSaving}
-                                onClick={handleCancel} 
-                                type="submit"
-                                className="btn btn-outline-light mt-3 me-3">
-                                Cancel
-                            </button>
-                            <button 
-                                disabled={isSaving}
-                                onClick={handleSave} 
-                                type="submit"
-                                className="btn btn-outline-info mt-3">
-                                Save
-                            </button>
                         </form>
                     </div>
                 </div>

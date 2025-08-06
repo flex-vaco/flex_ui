@@ -6,10 +6,12 @@ import Layout from "../components/Layout"
 import * as Utils from "../lib/Utils"
 import * as AppFunc from "../lib/AppFunctions";
 import APP_CONSTANTS from "../appConstants";
+import Pagination from "../components/Pagination";
+import "./ListPages.css";
 
 function ProjectList() {
     const [projectList, setProjectList] = useState([]);
-    const hasReadOnlyAccess = useState(AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.PRODUCER);
+    const hasReadOnlyAccess = AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.PRODUCER;
 
     const navigate = useNavigate();
 
@@ -72,6 +74,10 @@ function ProjectList() {
   const  [inputType, setInputType] = useState("text");
   const  [searchKeys, setSearchKeys] = useState([])
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
   const handleSearch = (event) => {
     event.stopPropagation();
     const searchValue = event.target.value.toString().toLowerCase();
@@ -85,6 +91,7 @@ function ProjectList() {
       return dbVal.includes(searchValue);
     });
     setFilteredList(fList);
+    setCurrentPage(1); // Reset to first page when searching
   };
 
   const handleSearchKeyChange = (event) => {
@@ -97,7 +104,6 @@ function ProjectList() {
     (event.target.value.includes("date")) ? setInputType("date") : setInputType("text");
   };
 
-
   const handleSearchRefreshClick = () => {
     window.location.reload(true);
   };
@@ -108,51 +114,103 @@ function ProjectList() {
 
   const searchKeysToIgnore = ["project_id", "client_id","clientDetails"];
 
+  const getStatusBadgeClass = (status) => {
+    const statusLower = status?.toLowerCase();
+    if (statusLower === 'active' || statusLower === 'ongoing') return 'status-active';
+    if (statusLower === 'completed' || statusLower === 'finished') return 'status-completed';
+    if (statusLower === 'pending' || statusLower === 'on hold') return 'status-pending';
+    if (statusLower === 'cancelled' || statusLower === 'terminated') return 'status-cancelled';
+    return 'status-pending';
+  };
+
+  // Pagination handlers
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handleItemsPerPageChange = (newItemsPerPage) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1); // Reset to first page when changing items per page
+  };
+
+  // Calculate pagination
+  const totalItems = filteredList.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentItems = filteredList.slice(startIndex, endIndex);
+
     return (
       <Layout>
-        <div className="container-fluid">
-          <div className="card w-auto">
-          <div className="text-align-left mt-2 mb-2 ms-3">
-              <button
-                type="button"
-                onClick={handleExcelExport}
-                className="btn btn-sm btn-outline-info float-start"
-              >
-                EXCEL <i className="bi bi-filetype-xls"></i>
-              </button>
+        <div className="list-page-container">
+          <div className="list-page-card">
+            {/* Header Section */}
+            <div className="list-page-header">
+              <h1 className="list-page-title">Project List</h1>
             </div>
-            <div className="card-header">
-              <div className="row">
-              <div className="col input-group">
-                  <span className="input-group-text"><i className="bi bi-search text-gray"></i></span>
-                    <select style={{width:"35%"}} name="searchKey" id="search-key"  onChange={handleSearchKeyChange}> 
-                      <option value="-select-"> -- Search Key -- </option>
-                      {searchKeys.map((k) => (!searchKeysToIgnore.includes(k)) ? <option value={k}>{k.toLocaleUpperCase()}</option> : "")}
-                    </select>
-                    <input style={{width:"35%"}} className="ms-1" id="search-value" type={inputType} placeholder=" Type a value" onChange={handleSearch} />
-                      <span 
-                      onClick={handleSearchRefreshClick}
-                      className="btn btn-outline-primary btn-small">
-                      <i className="bi bi-arrow-counterclockwise"></i>
-                    </span>
+
+            {/* Search Controls */}
+            <div className="search-controls">
+              <div className="search-row">
+                <div className="search-input-group">
+                  <span className="search-icon">
+                    <i className="bi bi-search"></i>
+                  </span>
+                  <select 
+                    className="search-select" 
+                    name="searchKey" 
+                    id="search-key"  
+                    onChange={handleSearchKeyChange}
+                  > 
+                    <option value="-select-">-- Search Key --</option>
+                    {searchKeys.map((k) => (!searchKeysToIgnore.includes(k)) ? 
+                      <option key={k} value={k}>{k.toLocaleUpperCase()}</option> : ""
+                    )}
+                  </select>
+                  <input 
+                    className="search-input" 
+                    id="search-value" 
+                    type={inputType} 
+                    placeholder="Type a value" 
+                    onChange={handleSearch} 
+                  />
                 </div>
-                <div className="col text-center">
-                  <h4>Project List</h4>
-                </div>
-                <div className="col">
+                
+                <button 
+                  className="search-refresh-btn"
+                  onClick={handleSearchRefreshClick}
+                >
+                  <i className="bi bi-arrow-counterclockwise"></i>
+                  Refresh
+                </button>
+
+                <div className="action-buttons">
+                  <button
+                    type="button"
+                    onClick={handleExcelExport}
+                    className="excel-btn"
+                  >
+                    <i className="bi bi-filetype-xls"></i>
+                    EXCEL
+                  </button>
+                  
                   <button 
                     type="button"
                     hidden={hasReadOnlyAccess}
                     onClick={handleAddButtonClick}
-                    className="btn btn-outline-primary float-end">
-                    ADD <i className="bi bi-plus-square"></i> 
+                    className="add-btn"
+                  >
+                    <i className="bi bi-plus-square"></i>
+                    ADD PROJECT
                   </button>
                 </div>
               </div>
             </div>
-            <div className="card-body table-responsive">
-              <table className="table table-hover" id='projectListTable'>
-                <thead className="bg-light">
+
+            {/* Table Section */}
+            <div className="list-table-container">
+              <table className="table list-table" id='projectListTable'>
+                <thead>
                   <tr>
                     <th hidden={hasReadOnlyAccess}>Action</th>
                     <th>Client Name</th>
@@ -170,56 +228,86 @@ function ProjectList() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredList.map((projectDetails, key) => {
-                    return (
-                      <tr key={key}>
-                        <td hidden={hasReadOnlyAccess}>
-                          <button
-                            onClick={() => handleDelete(projectDetails.project_id)}
-                            className="btn btn-outline-danger mx-1"
-                          >
-                            <i className="bi bi-trash"></i>
-                          </button>
-                          <Link
-                            className="btn btn-outline-success mx-1 edit_icon"
-                            to={`/projectEdit/${projectDetails.project_id}`}
-                          >
-                            <i className="bi bi-pencil"></i>
-                          </Link>
-                        </td>
-                        <td>
-                          <Link
-                            to={`/clientShow/${projectDetails.clientDetails.client_id}`}
-                          >
-                            {projectDetails.clientDetails.name}
-                          </Link>
-                        </td>
-                        <td>
-                          <Link
-                            to={`/projectShow/${projectDetails.project_id}`}
-                          >
-                            {projectDetails.project_name}
-                          </Link>
-                        </td>
-                        
-                        <td>{projectDetails.project_location}</td>
+                  {currentItems.length === 0 ? (
+                    <tr>
+                      <td colSpan="13" className="empty-state">
+                        <i className="bi bi-folder-x"></i>
+                        <p>No projects found</p>
+                      </td>
+                    </tr>
+                  ) : (
+                    currentItems.map((projectDetails, key) => {
+                      return (
+                        <tr key={key}>
+                          <td hidden={hasReadOnlyAccess}>
+                            <div className="action-buttons-cell">
+                              <button
+                                onClick={() => handleDelete(projectDetails.project_id)}
+                                className="delete-btn"
+                                title="Delete Project"
+                              >
+                                <i className="bi bi-trash"></i>
+                              </button>
+                              <Link
+                                className="edit-btn"
+                                to={`/projectEdit/${projectDetails.project_id}`}
+                                title="Edit Project"
+                              >
+                                <i className="bi bi-pencil"></i>
+                              </Link>
+                            </div>
+                          </td>
+                          <td>
+                            <Link
+                              className="client-link"
+                              to={`/clientShow/${projectDetails.clientDetails.client_id}`}
+                            >
+                              {projectDetails.clientDetails.name}
+                            </Link>
+                          </td>
+                          <td>
+                            <Link
+                              className="project-link"
+                              to={`/projectShow/${projectDetails.project_id}`}
+                            >
+                              {projectDetails.project_name}
+                            </Link>
+                          </td>
+                          
+                          <td>{projectDetails.project_location}</td>
 
-                        <td>{projectDetails.contact_person}</td>
-                        <td>{projectDetails.contact_email}</td>
-                        <td>{projectDetails.contact_phone}</td>
-                        <td>{Utils.formatDateYYYYMMDD(projectDetails.start_date)}</td>
-                        <td>{Utils.formatDateYYYYMMDD(projectDetails.expected_end_date)}</td>
-                        <td>{Utils.formatDateYYYYMMDD(projectDetails.actual_end_date)}</td>
-                        <td>{projectDetails.status}</td>
-                        <td>{projectDetails.technologies_required}</td>
-                        <td>{projectDetails.head_count}</td>
-
-                      </tr>
-                    );
-                  })}
+                          <td>{projectDetails.contact_person}</td>
+                          <td>{projectDetails.contact_email}</td>
+                          <td>{projectDetails.contact_phone}</td>
+                          <td>{Utils.formatDateYYYYMMDD(projectDetails.start_date)}</td>
+                          <td>{Utils.formatDateYYYYMMDD(projectDetails.expected_end_date)}</td>
+                          <td>{Utils.formatDateYYYYMMDD(projectDetails.actual_end_date)}</td>
+                          <td>
+                            <span className={`status-badge ${getStatusBadgeClass(projectDetails.status)}`}>
+                              {projectDetails.status}
+                            </span>
+                          </td>
+                          <td>{projectDetails.technologies_required}</td>
+                          <td>{projectDetails.head_count}</td>
+                        </tr>
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
             </div>
+
+            {/* Pagination */}
+            {totalItems > 0 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalItems}
+                itemsPerPage={itemsPerPage}
+                onPageChange={handlePageChange}
+                onItemsPerPageChange={handleItemsPerPageChange}
+              />
+            )}
           </div>
         </div>
       </Layout>
