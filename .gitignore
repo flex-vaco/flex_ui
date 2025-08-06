@@ -1,4 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+#environment files
+.env
+package*
 
 # dependencies
 /node_modules
@@ -13,6 +16,7 @@
 
 # log files
 *.log
+*.logs
 
 # misc
 .DS_Store
