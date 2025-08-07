@@ -173,9 +173,20 @@ function InteliDB() {
                 return <Message key={i} model={message} />
               })}
             </MessageList> */}
-             <input style={{width:'95%'}} id="search-value"  placeholder="Ask any information" value={message} onChange={(event) => setMessage(event.target.value)}></input>
+                <input
+                  style={{ width: '95%' }}
+                  id="search-value"
+                  placeholder="Ask any information"
+                  value={message}
+                  onChange={(event) => setMessage(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      handleSend(message);
+                    }
+                  }}
+                />
                 <span
-                 style={{width:'5%'}}
+                  style={{ width: '5%', minWidth: '5%' }}
                   onClick={handleSend}
                   className="btn btn-outline-primary btn-small">
                   <i className="bi bi-send"></i>
