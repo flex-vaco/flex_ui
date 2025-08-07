@@ -9,7 +9,6 @@ import "./FormStyles.css";
 function EmpCreate() {
     const [first_name, setFirstName] = useState('');
     const [last_name, setLastName] = useState('');
-    const [primary_skills, setPrimarySkills] = useState('');
     const [secondary_skills, setSecondarySkills] = useState('');
     const [education, setEducation] = useState('');
     const [profile_information, setProfileInformation] = useState('');
@@ -247,7 +246,6 @@ function EmpCreate() {
             setIsSaving(false);
             setFirstName('');
             setLastName('');
-            setPrimarySkills('');
             setSecondarySkills('');
             setEducation('');
             setProfileInformation('');
@@ -264,6 +262,13 @@ function EmpCreate() {
             setIsOnsite(false);
             setSelectedResume(null);
             setSelectedProfilePicture(null);
+            setFunctionalFocus('-select-');
+            setVacoDivision('-select-');
+            setCoreSkillset([]);
+            setRevenueCompanySize([]);
+            setIndustries([]);
+            setSoftwareErpExperience([]);
+            setHoursPreference('40.00');
           })
           .catch((error)=>{
             const errMsg = error.response?.data?.split("Error:");

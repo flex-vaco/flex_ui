@@ -12,7 +12,6 @@ function EmpEdit() {
     const navigate = useNavigate();
     const [first_name, setFirstName] = useState('');
     const [last_name, setLastName] = useState('');
-    const [primary_skills, setPrimarySkills] = useState('');
     const [secondary_skills, setSecondarySkills] = useState('');
     const [education, setEducation] = useState('');
     const [profile_information, setProfileInformation] = useState('');
@@ -114,7 +113,6 @@ function EmpEdit() {
             let empDetails = response.data.employees[0];
             setFirstName(empDetails.first_name);
             setLastName(empDetails.last_name);
-            setPrimarySkills(empDetails.primary_skills);
             setSecondarySkills(empDetails.secondary_skills);
             setEducation(empDetails.education);
             setProfileInformation(empDetails.profile_information);
@@ -228,7 +226,6 @@ function EmpEdit() {
         data.append('status', status);
         data.append('email', email);
         data.append('designation', designation);
-        data.append('primary_skills', primary_skills);
         data.append('secondary_skills', secondary_skills);
         data.append('education', education);
         data.append('profile_information', profile_information);
