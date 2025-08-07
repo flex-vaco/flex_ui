@@ -32,7 +32,7 @@ function InteliChat() {
   const customChatGptAPICall = async (message, chatMessages) => {
     setIsTyping(true);
   
-    const baseURL = `/api/talk_to_ai`;
+    const baseURL = `/talk_to_ai`;
     const params = new URLSearchParams({
       userQuery: message
     });
