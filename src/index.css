@@ -1705,3 +1705,7 @@ a {
   color: #072942 !important;
   text-decoration: none;
 }
+
+button.btn.btn-outline-primary.float-end {
+    padding: 0.5rem 1rem !important;
+}
