@@ -138,7 +138,7 @@ function EmpShow() {
                       </button>
                     </div>
                     <p onClick={handleForgotPassword} className="forgot-password">Forgot password?</p>
-                    <div className="login-divider">
+                    {/* <div className="login-divider">
                       <div className="login-divider-line"></div>
                       <span className="login-divider-text">Don't Have Highspring Account</span>
                       <div className="login-divider-line"></div>
@@ -147,7 +147,7 @@ function EmpShow() {
                       <button className="btn btn-primary text-center mt-2 p-2 signup_button" type="submit">
                         Sign Up
                       </button>
-                    </div>
+                    </div> */}
                   </div>    
                 </form>
                 <div className="text-center poweredby_logo">

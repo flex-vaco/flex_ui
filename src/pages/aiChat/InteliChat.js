@@ -32,9 +32,9 @@ function InteliChat() {
   const customChatGptAPICall = async (message, chatMessages) => {
     setIsTyping(true);
   
-    const baseURL = `http://13.57.185.244:5603/resume_query`;
+    const baseURL = `/api/talk_to_ai`;
     const params = new URLSearchParams({
-      query: message
+      userQuery: message
     });
   
     const url = `${baseURL}?${params.toString()}`;

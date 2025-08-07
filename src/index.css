@@ -157,10 +157,10 @@ ul.dropdown-menu.show {
 }
 
 .login_footer a {
-  color: #fff;
+  color: #fff !important;
 }
 .login_footer a:hover {
-  color: #fff;
+  color: #fff !important;
 }
 
 .login_logo {
@@ -1704,4 +1704,8 @@ h4.selected_category_name {
 a {
   color: #072942 !important;
   text-decoration: none;
+}
+
+button.btn.btn-outline-primary.float-end {
+    padding: 0.5rem 1rem !important;
 }
