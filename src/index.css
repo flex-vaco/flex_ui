@@ -157,10 +157,10 @@ ul.dropdown-menu.show {
 }
 
 .login_footer a {
-  color: #fff;
+  color: #fff !important;
 }
 .login_footer a:hover {
-  color: #fff;
+  color: #fff !important;
 }
 
 .login_logo {
