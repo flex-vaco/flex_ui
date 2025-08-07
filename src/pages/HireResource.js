@@ -5,18 +5,19 @@ import axios from 'axios'
 import Layout from "../components/Layout"
 import EmployeeProfileCard from '../components/employee/EmploeeProfileCard'
 import * as APP_FUNCTIONS from "../lib/AppFunctions";
+import "./FormStyles.css"
 
 function HireResource() {
     const loc = useLocation();
-    const employee = useState(loc.state.employee);
+    const employee = loc.state.employee;
     const [project_name, setProjectName] = useState('');
     const [work_location, setWorkLocation] = useState('Remote');
-    const [start_date, setStartDate] = useState(null);
-    const [end_date, setEndDate] = useState(null);
+    const [start_date, setStartDate] = useState('');
+    const [end_date, setEndDate] = useState('');
     const [shift_start_time, setShiftStartTime] = useState('');
     const [shift_end_time, setShiftEndTime] = useState('');
     const [comments, setComments] = useState('');
-    const [hours_per_week, setHoursPerWeek] = useState(null);
+    const [hours_per_week, setHoursPerWeek] = useState('');
     const [isSaving, setIsSaving] = useState(false)
     const navigate = useNavigate();
 
@@ -25,17 +26,25 @@ function HireResource() {
     const openModal = () => {
         setIsOpen(false);
     }
+
+    const handleCancel = () => {
+        navigate("/home");
+    }
+
     const handleWorkLocChange = (event) => {
         setWorkLocation(event.target.value);
     }
+
     const handleSave = () => {
         if(!APP_FUNCTIONS.validateForm(document.querySelectorAll('.needs-validation'))) return;
-        Swal.showLoading();
+        
         setIsSaving(true);
         const config = {
           headers: {
+            "Content-Length": 0,
             "Content-Type": "application/json",
-          }
+          },
+          responseType: "text",
         };
         const data = {
           project_name: project_name,
@@ -54,23 +63,29 @@ function HireResource() {
           .then((response) => {
             Swal.fire({
                 icon: 'success',
-                title: 'Request Succesfull!',
+                title: 'Request Successful!',
                 text: 'Resource Manager will get back to you!',
-                showConfirmButton: true
-            }).then(res=>{
-                if(res.isConfirmed){
-                    Swal.hideLoading();
-                    navigate("/home");
-                    setIsSaving(false);
-                }
+                showConfirmButton: false,
+                timer: 1500
             })
+            navigate("/home");
+            setIsSaving(false);
+            // Reset form
+            setProjectName('');
+            setWorkLocation('Remote');
+            setStartDate('');
+            setEndDate('');
+            setShiftStartTime('');
+            setShiftEndTime('');
+            setComments('');
+            setHoursPerWeek('');
           })
           .catch(function (error) {
             Swal.fire({
                 icon: 'error',
-                title: 'An Error Occured!',
+                title: 'An Error Occurred!',
                 showConfirmButton: false,
-                timer: 2000
+                timer: 1500
             })
             setIsSaving(false)
           });
@@ -78,148 +93,197 @@ function HireResource() {
   
     return (
         <Layout>
-            <div className="container">
-                <div className="card row">
-                    <div className="card-header">
-                        <h4 className="text-center">{`Send a booking query for ${employee.first_name} ${employee.last_name}`}</h4>
+            <div className="form-page-container">
+                <div className="form-page-card">
+                    <div className="form-page-header">
+                        <h1 className="form-page-title">
+                            Send Booking Query for {employee.first_name} {employee.last_name}
+                        </h1>
                     </div>
-                    <div className="card-body">
-                        <div className="col">
-                        <EmployeeProfileCard availability={40} handleProfileClick={openModal} employee={employee} />
-                        </div>
-                        <div className="col">
-                        <form className="row g-3 align-items-center">
-                            <div className="form-group row mt-3 mb-2">
-                                <label htmlFor="project_name" className="col-sm-2 col-form-label fs-6">Project Name</label>
-                                <div className="col-sm-10">
-                                <input 
-                                    onChange={(event)=>{setProjectName(event.target.value)}}
-                                    value={project_name}
-                                    type="text"
-                                    className="form-control"
-                                    id="project_name"
-                                    name="project_name"/>
+                    <div className="form-page-body">
+                        <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
+
+                            <div className="form-section">
+                                <h3 className="form-section-title">Project Information</h3>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="project_name" className="form-label">
+                                            Project Name
+                                        </label>
+                                        <input 
+                                            onChange={(event)=>{setProjectName(event.target.value)}}
+                                            value={project_name}
+                                            type="text"
+                                            className="form-control"
+                                            id="project_name"
+                                            name="project_name"
+                                            placeholder="Enter project name"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="hours_per_week" className="form-label required-field">
+                                            Hours per Week
+                                        </label>
+                                        <input 
+                                            onChange={(event)=>{setHoursPerWeek(event.target.value)}}
+                                            value={hours_per_week}
+                                            type="number"
+                                            className="form-control needs-validation"
+                                            id="hours_per_week"
+                                            name="hours_per_week"
+                                            placeholder="Enter hours per week"
+                                            min="1"
+                                            max="40"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label className="form-label">Work Location</label>
+                                        <div className="radio-group">
+                                            <label className="radio-option">
+                                                <input
+                                                    type="radio"
+                                                    value="Remote"
+                                                    checked={work_location === 'Remote'}
+                                                    name="work_location"
+                                                    onChange={handleWorkLocChange}
+                                                />
+                                                <span>Remote</span>
+                                            </label>
+                                            <label className="radio-option">
+                                                <input
+                                                    type="radio"
+                                                    value="Office"
+                                                    checked={work_location === 'Office'}
+                                                    name="work_location"
+                                                    onChange={handleWorkLocChange}
+                                                />
+                                                <span>Office</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div className="form-group">
+                                    </div>
                                 </div>
                             </div>
-                            <div className="form-group row mt-3 mb-2">
-                                <label htmlFor="start_date" className="col-sm-2 col-form-label fs-6">Start Date *</label>
-                                <div className="col-sm-10">
-                                <input 
-                                    onChange={(event)=>{setStartDate(event.target.value)}}
-                                    value={start_date}
-                                    type="date"
-                                    className="form-control needs-validation"
-                                    id="start_date"
-                                    name="start_date"
-                                    required/>
+
+                            <div className="form-section">
+                                <h3 className="form-section-title">Project Timeline</h3>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="start_date" className="form-label required-field">
+                                            Start Date
+                                        </label>
+                                        <input 
+                                            onChange={(event)=>{setStartDate(event.target.value)}}
+                                            value={start_date}
+                                            type="date"
+                                            className="form-date needs-validation"
+                                            id="start_date"
+                                            name="start_date"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="end_date" className="form-label required-field">
+                                            End Date
+                                        </label>
+                                        <input 
+                                            onChange={(event)=>{setEndDate(event.target.value)}}
+                                            value={end_date}
+                                            type="date"
+                                            className="form-date needs-validation"
+                                            id="end_date"
+                                            name="end_date"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="shift_start_time" className="form-label">
+                                            Shift Start Time
+                                        </label>
+                                        <input 
+                                            onChange={(event)=>{setShiftStartTime(event.target.value)}}
+                                            value={shift_start_time}
+                                            type="time"
+                                            className="form-control"
+                                            id="shift_start_time"
+                                            name="shift_start_time"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="shift_end_time" className="form-label">
+                                            Shift End Time
+                                        </label>
+                                        <input 
+                                            onChange={(event)=>{setShiftEndTime(event.target.value)}}
+                                            value={shift_end_time}
+                                            type="time"
+                                            className="form-control"
+                                            id="shift_end_time"
+                                            name="shift_end_time"
+                                        />
+                                    </div>
                                 </div>
                             </div>
-                            <div className="form-group row mt-3 mb-2">
-                                <label htmlFor="end_date" className="col-sm-2 col-form-label fs-6">End Date *</label>
-                                <div className="col-sm-10">
-                                <input 
-                                    onChange={(event)=>{setEndDate(event.target.value)}}
-                                    value={end_date}
-                                    type="date"
-                                    className="form-control needs-validation"
-                                    id="end_date"
-                                    name="end_date"
-                                    required/>
+
+                            <div className="form-section">
+                                <h3 className="form-section-title">Additional Information</h3>
+                                <div className="form-group full-width">
+                                    <label htmlFor="comments" className="form-label">
+                                        Comments
+                                    </label>
+                                    <textarea 
+                                        value={comments}
+                                        onChange={(event)=>{setComments(event.target.value)}}
+                                        className="form-textarea"
+                                        id="comments"
+                                        name="comments"
+                                        placeholder="Enter any additional comments or requirements"
+                                        rows="4"
+                                    ></textarea>
                                 </div>
                             </div>
-                            <div className="form-group row mt-3 mb-2">
-                                <label htmlFor="hours_per_week" className="col-sm-2 col-form-label fs-6">Hours per Week*</label>
-                                <div className="col-sm-10">
-                                <input 
-                                    onChange={(event)=>{setHoursPerWeek(event.target.value)}}
-                                    value={hours_per_week}
-                                    type="number"
-                                    className="form-control needs-validation"
-                                    id="hours_per_week"
-                                    name="hours_per_week"
-                                    required/>
-                                </div>
+
+                            <div className="form-actions">
+                                <button 
+                                    type="button"
+                                    onClick={handleCancel} 
+                                    className="btn btn-outline"
+                                    disabled={isSaving}
+                                >
+                                    <i className="bi bi-x-circle"></i>
+                                    Cancel
+                                </button>
+                                <button 
+                                    type="submit"
+                                    className="btn btn-success"
+                                    disabled={isSaving}
+                                >
+                                    {isSaving ? (
+                                        <>
+                                            <span className="loading-spinner"></span>
+                                            Submitting...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <i className="bi bi-check-circle"></i>
+                                            Submit Request
+                                        </>
+                                    )}
+                                </button>
                             </div>
-                            <div className="form-group row mt-3 mb-2">
-                                <label htmlFor="work_location" className="col-sm-2 col-form-label fs-6">Location</label><br/>
-                                <div className="col-sm-10">
-                                <input
-                                    type="radio"
-                                    value="Remote"
-                                    className="form-check-input"
-                                    checked={work_location === 'Remote'}
-                                    name="work_location"
-                                    onChange={handleWorkLocChange}
-                                />
-                                <label className="radio_emptype fs-6">
-                                    Remote
-                                </label>
-                                <input
-                                    type="radio"
-                                    value="Office"
-                                    className="form-check-input"
-                                    checked={work_location === 'Office'}
-                                    name="work_location"
-                                    onChange={handleWorkLocChange}
-                                />
-                                <label className="radio_emptype fs-6">
-                                    Office
-                                </label>
-                                </div>
-                            </div>
-                            <div className="form-group row mt-3 mb-2">
-                                <label htmlFor="shift_start_time" className="col-sm-2 col-form-label fs-6">Shift Start Time</label>
-                                <div className="col-sm-10">
-                                <input 
-                                    onChange={(event)=>{setShiftStartTime(event.target.value)}}
-                                    value={shift_start_time}
-                                    type="time"
-                                    className="form-control"
-                                    id="shift_start_time"
-                                    name="shift_start_time"/>
-                                </div>
-                            </div>
-                            <div className="form-group row mt-3 mb-2">
-                                <label htmlFor="shift_end_time" className="col-sm-2 col-form-label fs-6">Shift End Time</label>
-                                <div className="col-sm-10">
-                                <input 
-                                    onChange={(event)=>{setShiftEndTime(event.target.value)}}
-                                    value={shift_end_time}
-                                    type="time"
-                                    className="form-control"
-                                    id="shift_end_time"
-                                    name="shift_end_time"/>
-                                </div>
-                            </div>
-                            <div className="form-group row mt-3 mb-2">
-                                <label htmlFor="comments" className="col-sm-2 col-form-label fs-6">Comments</label>
-                                <div className="col-sm-10">
-                                <textarea 
-                                    value={comments}
-                                    onChange={(event)=>{setComments(event.target.value)}}
-                                    className="form-control"
-                                    id="comments"
-                                    rows="3"
-                                    name="comments"></textarea>
-                                </div>
-                            </div>
-                            <div className="d-flex form-group justify-content-center">
-                            <button 
-                                disabled={isSaving}
-                                onClick={handleSave} 
-                                type="submit"
-                                className="btn btn-outline-primary mt-3 me-3 float-middle">
-                                Submit
-                            </button>
-                            </div>
-                            <p className="d-flex form-group justify-content-center fs-6 fst-italic fw-lighter">
-                                Submitting will raise a request for someone from the Vaco Binary team to get in touch with you.
-                            </p>
                         </form>
-                        </div>
+                        
+                        <p className="form-note">
+                            Submitting will raise a request for someone from the team to get in touch with you.
+                        </p>
                     </div>
                 </div>
-
             </div>
         </Layout>
     );

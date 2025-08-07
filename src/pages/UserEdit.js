@@ -1,20 +1,23 @@
 import React, { useState, useEffect } from 'react'
-import { useParams } from "react-router-dom"
+import { useParams, useNavigate } from "react-router-dom"
 import Swal from 'sweetalert2'
 import axios from 'axios'
 import Layout from "../components/Layout"
 import APP_CONSTANTS from "../appConstants";
 import * as Utils from "../lib/Utils";
 import Multiselect from 'multiselect-react-dropdown';
+import "./FormStyles.css";
 
 function UserEdit() {
-    const user_id = useState(useParams().id)
+    const { id } = useParams();
+    const navigate = useNavigate();
     const [first_name, setFirstName] = useState('');
     const [last_name, setLastName] = useState('');
     const [password, setPassword] = useState('');
     const [role, setRole] = useState('');
     const [email, setEmail] = useState('');
     const [isSaving, setIsSaving] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [roles, setRoles] = useState([]);
 
     const [clients, setClients] = useState([]);
@@ -32,6 +35,9 @@ function UserEdit() {
     const [showProjectSel, setShowProjectSel] = useState(false);
     const [errMsg, setErrMsg] = useState('');
 
+    const handleCancel = () => {
+        navigate("/userList");
+    }
 
     const handleRoleChange = (e) => {
         const roleVal =  e.target.value;
@@ -114,9 +120,8 @@ function UserEdit() {
         fetchEmployees();
     }, []);
 
-
     useEffect(() => {
-        axios.get(`/users/${user_id}`)
+        axios.get(`/users/${id}`)
         .then(function (response) {
             let userDetatils = response.data.user;
             setFirstName(userDetatils.first_name);
@@ -131,6 +136,7 @@ function UserEdit() {
             setShowProjectSel(userDetatils.project_id ? true : false);
             setEmployee(userDetatils.emp_id);
             setShowEmpSel(userDetatils.role === APP_CONSTANTS.USER_ROLES.EMPLOYEE);
+            setIsLoading(false);
         })
         .catch(function (error) {
             Swal.fire({
@@ -140,9 +146,10 @@ function UserEdit() {
                 showConfirmButton: false,
                 timer: 1500
             })
+            setIsLoading(false);
         })
           
-    }, [useParams().id])
+    }, [id])
 
  const validateRoleDependencies = () =>{
     let roleHasValidDependencies = false;
@@ -187,6 +194,33 @@ function UserEdit() {
     }, [role])
 
     const handleSave = async () => {
+        if (!first_name.trim()) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Please enter first name!',
+                showConfirmButton: true
+            })
+            return;
+        }
+
+        if (!last_name.trim()) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Please enter last name!',
+                showConfirmButton: true
+            })
+            return;
+        }
+
+        if (!email.trim()) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Please enter email!',
+                showConfirmButton: true
+            })
+            return;
+        }
+
         if(validateRoleDependencies()) {
             setIsSaving(true);
 
@@ -216,7 +250,7 @@ function UserEdit() {
                 }
             }
 
-            axios.post(`/users/update/${user_id}`, updatedData)
+            axios.post(`/users/update/${id}`, updatedData)
             .then(function (response) {
                 Swal.fire({
                     icon: 'success',
@@ -225,6 +259,7 @@ function UserEdit() {
                     timer: 1500
                 })
                 setIsSaving(false);
+                navigate("/userList");
             })
             .catch(function (error) {
                 Swal.fire({
@@ -251,7 +286,7 @@ function UserEdit() {
         const tempPswd = Utils.generateRandomString(8);
 
         setIsSaving(true);
-        axios.post(`/users/resetPassword/${user_id}`, {
+        axios.post(`/users/resetPassword/${id}`, {
             email: email,
             password: tempPswd,
             needsPasswordReset: true
@@ -289,110 +324,216 @@ function UserEdit() {
     const handleReset = ()=>{
         window.location.reload(true);
     }
+
+    if (isLoading) {
+        return (
+            <Layout>
+                <div className="form-page-container">
+                    <div className="form-page-card">
+                        <div className="form-page-header">
+                            <h1 className="form-page-title">Edit User Details</h1>
+                        </div>
+                        <div className="form-page-body">
+                            <div style={{ textAlign: 'center', padding: '40px' }}>
+                                <span className="loading-spinner"></span>
+                                <p style={{ marginTop: '20px', color: '#6c757d' }}>Loading user details...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </Layout>
+        );
+    }
+
     return (
         <Layout>
-            <div className="container">
-                <div className="card">
-                    <div className="card-header">
-                        <h4 className="text-center">Edit User Details</h4>
+            <div className="form-page-container">
+                <div className="form-page-card">
+                    <div className="form-page-header">
+                        <h1 className="form-page-title">Edit User Details</h1>
                     </div>
-                    <div className="card-body">
-                    <form>
-                            <div className="form-group">
-                                <label htmlFor="first_name">First Name</label>
-                                <input 
-                                    onChange={(event)=>{setFirstName(event.target.value)}}
-                                    value={first_name}
-                                    type="text"
-                                    className="form-control"
-                                    id="first_name"
-                                    name="first_name"/>
+                    <div className="form-page-body">
+                        <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
+                            <div className="form-section">
+                                <h3 className="form-section-title">User Information</h3>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="first_name" className="form-label required-field">
+                                            First Name
+                                        </label>
+                                        <input 
+                                            onChange={(event)=>{setFirstName(event.target.value)}}
+                                            value={first_name}
+                                            type="text"
+                                            className="form-control"
+                                            id="first_name"
+                                            name="first_name"
+                                            placeholder="Enter first name"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="last_name" className="form-label required-field">
+                                            Last Name
+                                        </label>
+                                        <input 
+                                            onChange={(event)=>{setLastName(event.target.value)}}
+                                            value={last_name}
+                                            type="text"
+                                            className="form-control"
+                                            id="last_name"
+                                            name="last_name"
+                                            placeholder="Enter last name"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                <div className="form-group full-width">
+                                    <label htmlFor="email" className="form-label required-field">
+                                        Email ID
+                                    </label>
+                                    <input 
+                                        onChange={(event)=>{setEmail(event.target.value)}}
+                                        value={email}
+                                        type="email"
+                                        className="form-control"
+                                        id="email"
+                                        name="email"
+                                        placeholder="Enter email address"
+                                        required
+                                    />
+                                </div>
                             </div>
-                            <div className="form-group">
-                                <label htmlFor="last_name">Last Name</label>
-                                <input 
-                                    onChange={(event)=>{setLastName(event.target.value)}}
-                                    value={last_name}
-                                    type="text"
-                                    className="form-control"
-                                    id="last_name"
-                                    name="last_name"/>
+
+                            <div className="form-section">
+                                <h3 className="form-section-title">User Role & Assignment</h3>
+                                <div className="form-group full-width">
+                                    <label htmlFor="role" className="form-label required-field">
+                                        Role
+                                    </label>
+                                    <select 
+                                        name="role" 
+                                        id="role" 
+                                        className="form-select" 
+                                        onChange={handleRoleChange}
+                                        value={role}
+                                        required
+                                    > 
+                                        {roles.map((rl, key) => {
+                                            return <option key={key} value={rl.role}>{rl.role.toUpperCase()}</option>;
+                                        })}
+                                    </select>
+                                </div>
+                                {showClientSel && (
+                                    <div className="form-group full-width">
+                                        <label htmlFor="client" className="form-label required-field">
+                                            Client
+                                        </label>
+                                        <Multiselect
+                                            options={clients} 
+                                            selectedValues={clients.filter(cl=> producerClientIds?.includes(cl.client_id))} 
+                                            onSelect={handleClientAdd}
+                                            onRemove={handleClientRemove}
+                                            showCheckbox={true}
+                                            displayValue="name"
+                                            closeIcon="close"
+                                            placeholder="Select clients..."
+                                        />
+                                    </div>
+                                )}
+                                {showProjectSel && (
+                                    <div className="form-group full-width">
+                                        <label htmlFor="project" className="form-label required-field">
+                                            Project
+                                        </label>
+                                        <select 
+                                            name="project" 
+                                            id="project" 
+                                            className="form-select" 
+                                            onChange={handleProjectChange}
+                                            value={project || ""}
+                                            required
+                                        > 
+                                            <option value=""> -- Select a Project -- </option>
+                                            {projects.map((prj) => {
+                                                return <option key={prj.project_id} value={prj.project_id}>{prj.project_name}</option>;
+                                            })}
+                                        </select>
+                                    </div>
+                                )}
+                                {showEmpSel && (
+                                    <div className="form-group full-width">
+                                        <label htmlFor="emp" className="form-label required-field">
+                                            Employee
+                                        </label>
+                                        <select 
+                                            name="emp" 
+                                            id="emp" 
+                                            className="form-select" 
+                                            onChange={handlEmployeeChange}
+                                            value={employee || ""}
+                                            required
+                                        > 
+                                            <option value=""> -- Select an Employee -- </option>
+                                            {employees.map((emp) => {
+                                                return <option key={emp.emp_id} value={emp.emp_id}>{emp.first_name} {emp.last_name}</option>;
+                                            })}
+                                        </select>
+                                    </div>
+                                )}
                             </div>
-                            <div className="form-group">
-                                <label htmlFor="email">Email ID</label>
-                                <input 
-                                    onChange={(event)=>{setEmail(event.target.value)}}
-                                    value={email}
-                                    type="text"
-                                    className="form-control"
-                                    id="email"
-                                    name="email"/>
+
+                            <div className="form-actions">
+                                <div className="form-actions-left">
+                                    <button 
+                                        type="button"
+                                        onClick={handleReset} 
+                                        className="btn btn-outline"
+                                        disabled={isSaving}
+                                    >
+                                        <i className="bi bi-arrow-clockwise"></i>
+                                        Reset
+                                    </button>
+                                    <button 
+                                        type="button"
+                                        onClick={handlePasswordReset} 
+                                        className="btn btn-outline-danger"
+                                        disabled={isSaving}
+                                    >
+                                        <i className="bi bi-key"></i>
+                                        Reset Password
+                                    </button>
+                                </div>
+                                <div className="form-actions-right">
+                                    <button 
+                                        type="button"
+                                        onClick={handleCancel} 
+                                        className="btn btn-outline"
+                                        disabled={isSaving}
+                                    >
+                                        <i className="bi bi-x-circle"></i>
+                                        Cancel
+                                    </button>
+                                    <button 
+                                        type="submit"
+                                        className="btn btn-success"
+                                        disabled={isSaving}
+                                    >
+                                        {isSaving ? (
+                                            <>
+                                                <span className="loading-spinner"></span>
+                                                Updating...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <i className="bi bi-check-circle"></i>
+                                                Update User
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
                             </div>
-                            <div className="form-group">
-                                <label htmlFor="role">Role</label>
-                                <select name="role" id="role" className="form-control" onChange={handleRoleChange} > 
-                                    {roles.map((rl, key) => {
-                                        const sel = (rl.role === role) ? true : false;
-                                        return <option key={key} value={rl.role} selected={sel}>{rl.role.toUpperCase()}</option>;
-                                    })}
-                                </select>
-                            </div>
-                            {showClientSel ? 
-                            (<div className="form-group">
-                                <label htmlFor="client">Client </label>
-                                <Multiselect
-                                    options={clients} 
-                                    selectedValues={clients.filter(cl=> producerClientIds?.includes(cl.client_id))} 
-                                    onSelect={handleClientAdd}
-                                    onRemove={handleClientRemove}
-                                    showCheckbox={true}
-                                    displayValue="name"
-                                    closeIcon="close"
-                                />
-                            </div>) : ''}
-                            {showProjectSel ? 
-                            (<div className="form-group">
-                                <label htmlFor="project">Project</label>
-                                <select name="project" id="project" className="form-control" onChange={handleProjectChange} > 
-                                    <option value="-select-" > -- Select a Project -- </option>
-                                    {projects.map((prj) => {
-                                        const sel = (prj.project_id === project) ? true : false;
-                                        return <option key={prj.project_id} value={prj.project_id} selected={sel}>{prj.project_name}</option>;
-                                    })}
-                                </select>
-                            </div>) : ''}
-                            {showEmpSel ? 
-                            (<div className="form-group">
-                                <label htmlFor="emp">Employee</label>
-                                <select name="emp" id="emp" className="form-control" onChange={handlEmployeeChange} > 
-                                    <option value="-select-" > -- Select an Employee -- </option>
-                                    {employees.map((emp) => {
-                                        const sel = (emp.emp_id === employee) ? true : false;
-                                        return <option key={emp.emp_id} value={emp.emp_id} selected={sel}>{emp.first_name} {emp.last_name}</option>;
-                                    })}
-                                </select>
-                            </div>) : ''}
                         </form>
-                        <button 
-                                onClick={handleReset} 
-                                type="submit"
-                                className="btn btn-outline-light me-3 mt-3">
-                                RESET
-                        </button>
-                        <button 
-                                disabled={isSaving}
-                                onClick={handleSave} 
-                                type="submit"
-                                className="btn btn-outline-info mt-3">
-                                UPDATE
-                        </button>
-                        <button 
-                                disabled={isSaving}
-                                onClick={handlePasswordReset} 
-                                type="submit"
-                                className="btn btn-outline-danger mt-3 float-end">
-                                RESET PASSWORD
-                        </button>
                     </div>
                 </div>
             </div>

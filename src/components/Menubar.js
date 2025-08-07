@@ -44,22 +44,37 @@ const Menubar = () => {
             <Menu />
           </div>
           <ul className="navbar-nav  cat_menubar me-auto mb-2 mb-lg-0">
-             {categoryList.map((category,key) => { 
-                return (
-                <li className="nav-item menu-item dropdown ps-2" key={key} id="test1">
-                  <a className="nav-link main_li" href="#" id="navbarDropdownemp" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            {categoryList.map((category, categoryIndex) => {
+              return (
+                <li className="nav-item menu-item dropdown ps-2" key={categoryIndex}>
+                  <a 
+                    className="nav-link main_li" 
+                    href="#" 
+                    id="navbarDropdownemp" 
+                    role="button" 
+                    data-bs-toggle="dropdown" 
+                    aria-expanded="false"
+                  >
                     {category.category_name}
                   </a>
-                  <ul className="dropdown-menu">
-                    {category.technologies.split(',').map((technology,key) => { return (
-                    <li className="ps-1"><a className="dropdown-item" key={key} onClick={(event)=>handleTechClick(event,technology)} href='#'>{technology}</a></li>
-                    )})}
+                  <ul className="dropdown-menu" key={`dropdown-menu-${categoryIndex}`}>
+                    {category.technologies.split(',').map((technology, techIndex) => {
+                      return (
+                        <li className="ps-1" key={`tech-${categoryIndex}-${techIndex}`}>
+                          <a 
+                            className="dropdown-item" 
+                            onClick={(event) => handleTechClick(event, technology)} 
+                            href='#'
+                          >
+                            {technology}
+                          </a>
+                        </li>
+                      );
+                    })}
                   </ul>
-                </li>)
-              })
-            }
-          
-           
+                </li>
+              );
+            })}
           </ul>
         </div>
       </div>

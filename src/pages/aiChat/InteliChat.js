@@ -12,46 +12,56 @@ function InteliChat() {
   const [messages, setMessages] = useState([
     {
       message: "Hello, I'm Resume Explorer! Ask me anything!",
+      sender: "ai"
     }
   ]);
-  const [isTyping, setIsTyping] = useState(false);
+  const [isTyping, setIsTyping] = useState(false); 
 
   const handleSend = useCallback((message) => {
-    const chatMessages = [...messages, {
-      message
-    }]
+    const chatMessages = [...messages, 
+      {
+        message,
+        sender: "user"
+      }
+    ]
     setMessages(chatMessages)
     setIsTyping(true)
     customChatGptAPICall(message, chatMessages)
   },[messages.length]);
 
-  const customChatGptAPICall = async (message, chatMessages)=>{
-    axios.defaults.withCredentials = true;
-
-
-    const URL = `http://15.206.232.42:5601/query`;//`http://15.206.232.42:5605/resume_qa`;
-    const config = {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    };
-
-    const data = new FormData();
-    data.append("category", "resumes");
-    data.append("text", message)
-    //data.append("additional_instructions", "Make your answers clear and concise.")
-    
-    axios.post(URL, data, config)
-      .then((res) => {
-        setIsTyping(false)
-        setMessages([...chatMessages, {
-          message: res.data.answer || "Sorry, something went wrong. Please try again!"
-        }])
-      })
-      .catch((error) => {
-        console.log(error);
-      })
-  }
+  const customChatGptAPICall = async (message, chatMessages) => {
+    setIsTyping(true);
+  
+    const baseURL = `http://13.57.185.244:5603/resume_query`;
+    const params = new URLSearchParams({
+      query: message
+    });
+  
+    const url = `${baseURL}?${params.toString()}`;
+  
+    try {
+      const res = await axios.get(url, {
+        withCredentials: true
+      });
+  
+      const aiText = res.data.ai_response || "Sorry, something went wrong. Please try again!";
+  
+      setIsTyping(false);
+  
+      setMessages([
+        ...chatMessages,
+        { message: aiText, sender: "ai" }
+      ]);
+    } catch (error) {
+      setIsTyping(false);
+      console.error("GET request failed:", error);
+      setMessages([
+        ...chatMessages,
+        { message: "Something went wrong. Please try again later!", sender: "ai" }
+      ]);
+    }
+  };
+  
 
   return (
     <Layout>
@@ -63,9 +73,17 @@ function InteliChat() {
               scrollBehavior="smooth" 
               typingIndicator={isTyping ? <TypingIndicator content="Resume Explorer is typing" /> : null}
             >
-              {messages.map((message, i) => {
-                return <Message key={i} model={message} />
-              })}
+              {messages.map((msg, i) => (
+                  <Message
+                    key={i}
+                    model={{
+                      message: msg.message,
+                      sentTime: "just now",
+                      sender: msg.sender === 'user' ? "You" : "Resume Explorer",
+                      direction: msg.sender === 'user' ? "outgoing" : "incoming"
+                    }}
+                  />
+                ))}
             </MessageList>
             <MessageInput placeholder="Type message here" onSend={handleSend} />        
           </ChatContainer>

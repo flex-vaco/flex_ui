@@ -166,7 +166,7 @@ function EmpFilteredList() {
                             </div>
                             <div className="col-12 skill_height">
                     {techSkills.map((techSkill,key) => {
-                        return(<div className="form-check pe-1" >
+                        return(<div className="form-check pe-1" key={`formCheck-${key}`} >
                                     <input className="form-check-input" type="checkbox" key={key}    onChange={handleTechSkillChange} value={techSkill} id={`flexCheckDefault-${key}`}/>
                                     <label className="form-check-label" htmlFor={`flexCheckDefault-${key}`}>
                                          {techSkill}

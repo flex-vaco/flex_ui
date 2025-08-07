@@ -4,11 +4,17 @@ import Swal from 'sweetalert2'
 import axios from 'axios'
 import Layout from "../components/Layout"
 import * as Utils from "../lib/Utils"
+import Pagination from "../components/Pagination";
+import "./ListPages.css";
 
 function UserList() {
     const  [userList, setUserList] = useState([])
     const  [searchKeys, setSearchKeys] = useState([])
     const  [inputType, setInputType] = useState("text");
+
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
 
     useEffect(() => {
         fetchUserList()
@@ -77,6 +83,7 @@ function UserList() {
         return dbVal.includes(searchValue);
       });
       setFilteredList(fList);
+      setCurrentPage(1); // Reset to first page when searching
     };
 
     const handleSearchKeyChange = (event) => {
@@ -90,48 +97,103 @@ function UserList() {
       (event.target.value.includes("date")) ? setInputType("date") : setInputType("text");
     };
 
-
     const handleSearchRefreshClick = () => {
       window.location.reload(true);
     };
 
+    const handleExcelExport = () => {
+      Utils.exportHTMLTableToExcel('userListTable', 'User List', ["Action"])
+    };
+
     const searchKeysToIgnore = ["password","user_id"];
+
+    // Pagination handlers
+    const handlePageChange = (page) => {
+      setCurrentPage(page);
+    };
+
+    const handleItemsPerPageChange = (newItemsPerPage) => {
+      setItemsPerPage(newItemsPerPage);
+      setCurrentPage(1); // Reset to first page when changing items per page
+    };
+
+    // Calculate pagination
+    const totalItems = filteredList.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const currentItems = filteredList.slice(startIndex, endIndex);
     
     return (
       <Layout>
-        <div className="container-fluid">
-          <div className="card w-auto">
-            <div className="card-header">
-            <div className="row">
-                <div className="col input-group">
-                  <span className="input-group-text"><i className="bi bi-search text-gray"></i></span>
-                    <select style={{width:"35%"}} name="searchKey" id="search-key"  onChange={handleSearchKeyChange}> 
-                      <option value="-select-"> -- Search Key -- </option>
-                      {searchKeys.map((k) => (!searchKeysToIgnore.includes(k)) ? <option value={k}>{k.toLocaleUpperCase()}</option> : "")}
-                    </select>
-                    <input style={{width:"35%"}} className="ms-1" id="search-value" type={inputType} placeholder=" Type a value" onChange={handleSearch} />
-                      <span 
-                      onClick={handleSearchRefreshClick}
-                      className="btn btn-outline-primary btn-small">
-                      <i className="bi bi-arrow-counterclockwise"></i>
-                    </span>
+        <div className="list-page-container">
+          <div className="list-page-card">
+            {/* Header Section */}
+            <div className="list-page-header">
+              <h1 className="list-page-title">User List</h1>
+            </div>
+
+            {/* Search Controls */}
+            <div className="search-controls">
+              <div className="search-row">
+                <div className="search-input-group">
+                  <span className="search-icon">
+                    <i className="bi bi-search"></i>
+                  </span>
+                  <select 
+                    className="search-select" 
+                    name="searchKey" 
+                    id="search-key"  
+                    onChange={handleSearchKeyChange}
+                  > 
+                    <option value="-select-">-- Search Key --</option>
+                    {searchKeys.map((k) => (!searchKeysToIgnore.includes(k)) ? 
+                      <option key={k} value={k}>{k.toLocaleUpperCase()}</option> : ""
+                    )}
+                  </select>
+                  <input 
+                    className="search-input" 
+                    id="search-value" 
+                    type={inputType} 
+                    placeholder="Type a value" 
+                    onChange={handleSearch} 
+                  />
                 </div>
-                <div className="col text-center">
-                  <h4>User List</h4>
-                </div>
-                <div className="col">
+                
+                <button 
+                  className="search-refresh-btn"
+                  onClick={handleSearchRefreshClick}
+                >
+                  <i className="bi bi-arrow-counterclockwise"></i>
+                  Refresh
+                </button>
+
+                <div className="action-buttons">
+                  <button
+                    type="button"
+                    onClick={handleExcelExport}
+                    className="excel-btn"
+                  >
+                    <i className="bi bi-filetype-xls"></i>
+                    EXCEL
+                  </button>
+                  
                   <button 
                     type="button"
                     onClick={handleAddButtonClick}
-                    className="btn btn-outline-primary float-end">
-                    ADD <i className="bi bi-plus-square"></i> 
+                    className="add-btn"
+                  >
+                    <i className="bi bi-plus-square"></i>
+                    ADD USER
                   </button>
                 </div>
+              </div>
             </div>
-            </div>
-            <div className="card-body table-responsive">
-              <table className="table table-hover">
-                <thead className="bg-light">
+
+            {/* Table Section */}
+            <div className="list-table-container">
+              <table className="table list-table" id='userListTable'>
+                <thead>
                   <tr>
                     <th>Action</th>
                     <th>Name</th>
@@ -140,34 +202,59 @@ function UserList() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredList.map((usersList, key) => {
-                    return (
-                      <tr key={key}>
-                        <td>
-                          <button
-                            onClick={() => handleDelete(usersList.user_id)}
-                            className="btn btn-outline-danger" 
-                          >
-                            <i className="bi bi-trash"></i>
-                          </button>
-                          <Link
-                            className="btn btn-outline-success edit_icon"
-                            to={`/userEdit/${usersList.user_id}`}
-                          >
-                            <i className="bi bi-pencil" font-size="2rem;"></i>
-                          </Link>
-                        </td>
-                        <td>
+                  {currentItems.length === 0 ? (
+                    <tr>
+                      <td colSpan="4" className="empty-state">
+                        <i className="bi bi-people"></i>
+                        <p>No users found</p>
+                      </td>
+                    </tr>
+                  ) : (
+                    currentItems.map((usersList, key) => {
+                      return (
+                        <tr key={key}>
+                          <td>
+                            <div className="action-buttons-cell">
+                              <button
+                                onClick={() => handleDelete(usersList.user_id)}
+                                className="delete-btn"
+                                title="Delete User"
+                              >
+                                <i className="bi bi-trash"></i>
+                              </button>
+                              <Link
+                                className="edit-btn"
+                                to={`/userEdit/${usersList.user_id}`}
+                                title="Edit User"
+                              >
+                                <i className="bi bi-pencil"></i>
+                              </Link>
+                            </div>
+                          </td>
+                          <td>
                             {usersList.first_name}, {usersList.last_name}
-                        </td>
-                        <td>{usersList.email}</td>
-                        <td>{usersList.role.toUpperCase()}</td>  
-                      </tr>
-                    );
-                  })}
+                          </td>
+                          <td>{usersList.email}</td>
+                          <td>{usersList.role.toUpperCase()}</td>
+                        </tr>
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
             </div>
+
+            {/* Pagination */}
+            {totalItems > 0 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalItems}
+                itemsPerPage={itemsPerPage}
+                onPageChange={handlePageChange}
+                onItemsPerPageChange={handleItemsPerPageChange}
+              />
+            )}
           </div>
         </div>
       </Layout>
