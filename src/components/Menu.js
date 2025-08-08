@@ -51,6 +51,7 @@ return(
               </a>
               
               <ul className="dropdown-menu" aria-labelledby="navbarDropdownuser">
+                <li><a className="dropdown-item" href="#">{activeUser.first_name} {activeUser.last_name}</a></li>
                 <li><a className="dropdown-item" href="#">Role: {activeUserRole}</a></li>
                 <li> 
                   <a className="dropdown-item"
@@ -77,13 +78,6 @@ return(
         <div className={`sidebar ${isSidebarOpen ? 'sidebar-open' : ''}`}>
           {/* Sidebar Header with Role Details */}
           <div className="sidebar-header">
-            <div className="sidebar-title-section">
-              <h5 className="sidebar-title">{activeUser.first_name} {activeUser.last_name}</h5>
-              <div className="user-role-info">
-                <i className="bi bi-person-circle me-2"></i>
-                <span className="role-text">Logged in as: {activeUserRole}</span>
-              </div>
-            </div>
             <button 
               className="sidebar-close-btn"
               onClick={closeSidebar}

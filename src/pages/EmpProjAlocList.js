@@ -36,7 +36,9 @@ function EmpProjAlocList() {
         .then(function (response) {
           setEmpProjAlocList(response.data.empProjAlloc);
           setFilteredList(response.data.empProjAlloc);
-          setSearchKeys(Object.keys(response?.data?.empProjAlloc[0]))
+          const defaultKeys = Object.keys(response?.data?.empProjAlloc[0]);
+          const extraKeys = ["project_name"]; // add any other custom keys like employee_name, etc.
+          setSearchKeys([...defaultKeys, ...extraKeys]);
         })
         .catch(function (error) {
           console.log(error);
@@ -82,7 +84,8 @@ function EmpProjAlocList() {
 
     const handleSearch = (event) => {
       event.stopPropagation();
-     if (!searchKey || searchKey === "-select-") {
+    
+      if (!searchKey || searchKey === "-select-") {
         Swal.fire({
           title: 'Select Search Key ',
           text: "Please select a key to search!",
@@ -94,18 +97,24 @@ function EmpProjAlocList() {
       } else {
         const searchValue = event.target.value?.toString().toLowerCase();
         let dbVal = "";
+    
         const fList = empProjAlocList.filter((item) => {
-          if (searchKey.includes("date")) {
-            dbVal = Utils.formatDateYYYYMMDD(item[`${searchKey}`]).toString();
+          if (searchKey === "project_name") {
+            dbVal = item?.projectDetails?.project_name?.toLowerCase() || "";
+          } else if (searchKey.includes("date")) {
+            dbVal = Utils.formatDateYYYYMMDD(item[`${searchKey}`])?.toString();
           } else {
             dbVal = item[`${searchKey}`]?.toString().toLowerCase();
           }
+    
           return dbVal?.includes(searchValue);
         });
+    
         setFilteredList(fList);
         setCurrentPage(1); // Reset to first page when searching
       }
     };
+    
 
     const handleSearchKeyChange = (event) => {
       event.stopPropagation();
