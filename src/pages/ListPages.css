@@ -186,7 +186,7 @@
   border-bottom: 2px solid #dee2e6;
   font-size: 14px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  text-align: center; 
 }
 
 .list-table tbody tr {
@@ -313,12 +313,11 @@
 
 /* Status Badges */
 .status-badge {
-  padding: 4px 12px;
+  padding: 4px 4px;
   border-radius: 20px;
   font-size: 12px;
   font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .status-active {
@@ -596,3 +595,138 @@
 .text-info {
   color: #2DBFF9;
 } 
+
+.list-table-container {
+  overflow-x: auto;
+}
+
+@media (max-width: 1200px) {
+  .list-table-container {
+    overflow-x: auto;
+  }
+  
+  #empListTable {
+    min-width: 1000px;
+  }
+}
+
+@media (max-width: 768px) {
+  .list-table-container {
+    overflow-x: auto;
+  }
+  
+  #empListTable {
+    min-width: 800px;
+    font-size: 11px;
+  }
+  
+  #empListTable th,
+  #empListTable td {
+    padding: 4px 2px;
+  }
+  
+  #empListTable .action-buttons-cell .delete-btn,
+  #empListTable .action-buttons-cell .edit-btn {
+    padding: 1px 3px;
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 480px) {
+  #empListTable {
+    min-width: 600px;
+    font-size: 10px;
+  }
+  
+  #empListTable th,
+  #empListTable td {
+    padding: 3px 1px;
+  }
+}
+
+#empListTable {
+  width: 100%;
+  table-layout: fixed;
+  font-size: 12px;
+}
+
+#empListTable th,
+#empListTable td {
+  padding: 6px 4px;
+  word-wrap: break-word;
+  word-break: break-word;
+  white-space: normal;
+  vertical-align: top;
+}
+
+#empListTable th:nth-child(1),
+#empListTable td:nth-child(1) { width: 6%; text-align: center; }
+
+#empListTable th:nth-child(2),
+#empListTable td:nth-child(2) { width: 8%; }
+
+#empListTable th:nth-child(3),
+#empListTable td:nth-child(3) { width: 10%; }
+
+#empListTable th:nth-child(4),
+#empListTable td:nth-child(4) { width: 7%; }
+
+#empListTable th:nth-child(5),
+#empListTable td:nth-child(5) { width: 8%; }
+
+#empListTable th:nth-child(6),
+#empListTable td:nth-child(6) { width: 8%; }
+
+#empListTable th:nth-child(7),
+#empListTable td:nth-child(7) { width: 5%; text-align: center; }
+
+#empListTable th:nth-child(8),
+#empListTable td:nth-child(8) { width: 4%;text-align: center; }
+
+#empListTable th:nth-child(9),
+#empListTable td:nth-child(9) { width: 4%; text-align: center;}
+
+#empListTable th:nth-child(10),
+#empListTable td:nth-child(10) { width: 6%; text-align: center;}
+
+#empListTable th:nth-child(11),
+#empListTable td:nth-child(11) { width: 6%; }
+
+#empListTable th:nth-child(12),
+#empListTable td:nth-child(12) { width: 6%; }
+
+#empListTable th:nth-child(13),
+#empListTable td:nth-child(13) { width: 6%; }
+
+#empListTable th:nth-child(14),
+#empListTable td:nth-child(14) { width: 8%; }
+
+#empListTable th:nth-child(15),
+#empListTable td:nth-child(15) { width: 4%; text-align: center; }
+
+#empListTable th:nth-child(16),
+#empListTable td:nth-child(16) { width: 5%;text-align: center; }
+
+#empListTable .email-column {
+  word-wrap: break-word;
+  word-break: break-all;
+  white-space: normal;
+  hyphens: auto;
+}
+
+#empListTable .action-buttons-cell {
+  display: flex;
+  gap: 2px;
+  justify-content: center; /* Center the buttons horizontally */
+  align-items: center; 
+}
+
+#empListTable .action-buttons-cell .delete-btn,
+#empListTable .action-buttons-cell .edit-btn {
+  padding: 2px 4px;
+  font-size: 10px;
+}
+
+#empListTable td {
+  vertical-align: middle;
+}

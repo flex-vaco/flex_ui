@@ -236,18 +236,18 @@ function EmpList() {
                   <tr>
                     <th>Action</th>
                     <th>Name</th>
-                    <th>Email</th>
+                    <th className="email-column">Email</th>
                     <th>Designation</th>
                     <th>Primary Skills</th>
                     <th>Secondary Skills</th>
                     <th>Status</th>
                     <th>Exp.(yrs.)</th>
                     <th>Rate/hr</th>
-                    <th>Vaco Join Date</th>
+                    <th>Join Date</th>
                     <th>Home Location</th>
                     <th>Office Location</th>
                     <th>Manager</th>
-                    <th>Manager Email</th>
+                    <th className="email-column">Manager Email</th>
                     <th>On Site</th>
                     <th>Resume</th>
                   </tr>
@@ -289,7 +289,7 @@ function EmpList() {
                           <td>
                             {empDetails.first_name}, {empDetails.last_name}
                           </td>
-                          <td>{empDetails.email}</td>
+                          <td className="email-column">{empDetails.email}</td>
                           <td>{empDetails.designation}</td>
                           <td>{empDetails.primary_skills}</td>
                           <td>{empDetails.secondary_skills}</td>
@@ -304,7 +304,7 @@ function EmpList() {
                           <td>{empDetails.home_location_city}</td>
                           <td>{empDetails.office_location_city}</td>
                           <td>{empDetails.manager_name}</td>
-                          <td>{empDetails.manager_email}</td>
+                          <td className="email-column">{empDetails.manager_email}</td>
                           <td>{empDetails.is_onsite ? "YES" : "NO"}</td>
                           <td>
                             <a
