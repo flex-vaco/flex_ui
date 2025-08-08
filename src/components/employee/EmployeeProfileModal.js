@@ -37,7 +37,7 @@ const EmployeeProfileModal = (props) => {
       overlayClassName="profile-modal-overlay"
       shouldCloseOnOverlayClick={true} 
     >
-      <div className="modal-header"><button onClick={props.close} className="btn btn-primary btn-xs exitarrow"><i className="bi bi-box-arrow-left"></i></button></div>
+      <div className="modal-header"><button onClick={props.close} className="btn btn-primary btn-xs exitarrow"><i className="bi bi-x-circle"></i></button></div>
       <div className="profile-modal-content">
         <div className="modal-left">
           <div className="profile-header-model">

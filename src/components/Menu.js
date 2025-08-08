@@ -45,38 +45,21 @@ return(
             )}
             
             <div className="nav-item dropdown ms-2 me-2">
-              <a className="nav-link" href="#" id="navbarDropdownNotifications" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i className="bi bi-bell-fill"></i>
-                {notificationsCount > 0 && (
-                  <span className="badge bg-danger">{notificationsCount}</span>
-                )}
+              <a className="nav-link" href="#" id="navbarDropdownuser" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i className="bi bi-person-circle"></i>
+                
               </a>
-              <ul className="dropdown-menu" aria-labelledby="navbarDropdownNotifications">
-                {notificationsCount > 0 ? (
-                  <>
-                    <li>
-                      <a className="dropdown-item" href="#">
-                        New Notification 1
-                      </a>
-                    </li>
-                    <li>
-                      <a className="dropdown-item" href="#">
-                        New Notification 2
-                      </a>
-                    </li>
-                    <li>
-                      <a className="dropdown-item" href="#">
-                        See All Notifications
-                      </a>
-                    </li>
-                  </>
-                ) : (
-                  <li>
-                    <a className="dropdown-item" href="#">
-                      No Notifications
-                    </a>
-                  </li>
-                )}
+              
+              <ul className="dropdown-menu" aria-labelledby="navbarDropdownuser">
+                <li><a className="dropdown-item" href="#">Role: {activeUserRole}</a></li>
+                <li> 
+                  <a className="dropdown-item"
+                    onClick={handleLogout}
+                    type="submit"
+                  >
+                    <i className="bi bi-box-arrow-right"> Logout</i>
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
@@ -234,12 +217,7 @@ return(
           </div>
 
           {/* Logout Section at Bottom */}
-          <div className="sidebar-logout-section">
-            <div className="sidebar-item logout-item" onClick={handleLogout}>
-              <i className="bi bi-box-arrow-right me-2"></i>
-              Logout
-            </div>
-          </div>
+          
         </div>
     </>
 )

@@ -7,9 +7,9 @@ import * as APP_FUNCTIONS from "../../lib/AppFunctions";
 import EmployeeProfileModal from '../../components/employee/EmployeeProfileModal'
 
 function ApproveTimesheetList() {
-    const managerEmail = useState(JSON.parse(localStorage.getItem("user"))?.email);
-    const userIsApprover = useState(APP_FUNCTIONS.activeUserRole === APP_CONSTANTS.USER_ROLES.MANAGER); 
-    const userIsProducer = useState(APP_FUNCTIONS.activeUserRole === APP_CONSTANTS.USER_ROLES.PRODUCER); 
+    const [managerEmail, setManagerEmail] = useState(JSON.parse(localStorage.getItem("user"))?.email);
+    const [userIsApprover, setUserIsApptover] = useState(APP_FUNCTIONS.activeUserRole === APP_CONSTANTS.USER_ROLES.MANAGER); 
+    const [userIsProducer, setUserIsProducer] = useState(APP_FUNCTIONS.activeUserRole === APP_CONSTANTS.USER_ROLES.PRODUCER); 
     const [empList, setEmpList] = useState([]);
     const [pageTitle, setPageTitle] = useState();
     const [empModalDetails, setEmpModalDetails] = useState({})
@@ -18,7 +18,7 @@ function ApproveTimesheetList() {
     const fetchManagerEmployees = (managerEmail) => {
         axios
           .get(`timesheets/approvependingemployees`, {
-            params: { manager_email: managerEmail },
+            params: { manager_email: managerEmail }, //"rpanyala@vaco.com" }//
           })
           .then(function (response) {
             setEmpList(response.data?.employees);

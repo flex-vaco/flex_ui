@@ -21,7 +21,7 @@ function EmployeeProfileCard(props) {
                     </div>
                     <div className="profile-body">
                         <div className="d-flex justify-content-between align-items-start mb-3">
-                            <div>
+                            <div className="profile-name-container">
                                 <h3 className="profile-name">{props.employee.first_name} {props.employee.last_name}</h3>
                                 <p className="profile-title">{props.employee.designation}</p>
                             </div>

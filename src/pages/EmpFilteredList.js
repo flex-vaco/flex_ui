@@ -9,6 +9,7 @@ import $ from 'jquery';
 
 function EmpFilteredList() {
     const [isInitialLoad, setIsInitialLoad] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
     const {technologies} = useLocation().state;
     const [selectedSecondarySkill, setSelectedSecondarySkill] = useState([]);
     const [empList, setEmpList] = useState([])
@@ -131,7 +132,7 @@ function EmpFilteredList() {
     }
 
     const fetchEmpList = () => {
-
+        setIsLoading(true);
         axios.get(`employees/filter`, {
             params: {
                 skill: technologies ? technologies?.split(',') : null,
@@ -149,6 +150,9 @@ function EmpFilteredList() {
             })
             .catch(function (error) {
                 console.log(error);
+            })
+            .finally(() => {
+                setIsLoading(false);
             })
     }
 
@@ -281,12 +285,27 @@ function EmpFilteredList() {
             <h4 className="banner_header">Find Your Required Talent</h4>
         </p>
         <div className="col-xs-12 col-lg-12 mx-1">
-            {(empFilteredList?.length > 0) ? empFilteredList.map((empDetails, key)=>{
-                return (
-                    <EmployeeProfileCard availability={selectedAvailability} handleProfileClick={openModal} employee={empDetails} key={key}></EmployeeProfileCard>
+            {isLoading ? (
+                <div className="d-flex justify-content-center align-items-center" style={{ height: '200px' }}>
+                    <div className="spinner-border text-primary" role="status" style={{ width: '5rem', height: '5rem', borderWidth: '0.4em' }}>
+                        <span className="sr-only"></span>
+                    </div>
+                </div>
+            ) : (
+                (empFilteredList?.length > 0) ? empFilteredList.map((empDetails, key) => (
+                    <EmployeeProfileCard 
+                        availability={selectedAvailability}
+                        handleProfileClick={openModal}
+                        employee={empDetails}
+                        key={key}
+                    />
+                )) : (
+                    <div className="d-flex justify-content-center">
+                        <h2><br/><br/><br/>Resources Not Found!</h2>
+                    </div>
                 )
-                }) : <div className="d-flex justify-content-center"><h2><br/><br/><br/> Resources Not Found! </h2> </div>
-            }                                            
+            )}
+                                        
         </div>
         <EmployeeProfileModal modelstatus={modalIsOpen} close={() => setIsOpen(false)} employee={empModalDetails}/>                            
     </div>

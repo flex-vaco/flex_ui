@@ -22,7 +22,7 @@ function InteliDB() {
 
   const handleQueryChange = (event) => {
       const userQueryId = event.target.value;
-      const queryItem = userQueryList.find((queryItem) => queryItem.user_query_id === userQueryId);
+      const queryItem = userQueryList.find((queryItem) => queryItem.user_query_id === Number(userQueryId));
       if (queryItem) {
         setQuery(queryItem.query);
         setMessage(queryItem.question);
@@ -173,18 +173,19 @@ function InteliDB() {
                 return <Message key={i} model={message} />
               })}
             </MessageList> */}
-                <input
-                  style={{ width: '95%' }}
-                  id="search-value"
-                  placeholder="Ask any information"
-                  value={message}
-                  onChange={(event) => setMessage(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter') {
-                      handleSend(message);
-                    }
-                  }}
-                />
+                
+                <textarea 
+                    style={{ width: '95%' }}
+                    rows = {3}
+                    id="search-value"
+                    placeholder="Ask any information"
+                    value={message}
+                    onChange={(event) => setMessage(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter') {
+                        handleSend();
+                      }
+                    }}></textarea>
                 <span
                   style={{ width: '5%', minWidth: '5%' }}
                   onClick={handleSend}
@@ -212,7 +213,7 @@ function InteliDB() {
             <div className="col-3" >
                     <select style={{width:'90%', textAlign:'left',height:'50%'}} name="userQuery" id="userQuery" onChange={handleQueryChange}> 
                       <option value='0'> -- Select Query -- </option>
-                      {userQueryList.map((item) => <option value={item.user_query_id}>{item.query_description}</option>)}
+                      {userQueryList.map((item, key) => <option key={key} value={item.user_query_id}>{item.query_description}</option>)}
                     </select>
             </div>
             <div className="col-1">
