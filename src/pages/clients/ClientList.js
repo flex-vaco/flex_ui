@@ -6,8 +6,9 @@ import Layout from "../../components/Layout"
 import * as Utils from "../../lib/Utils"
 import Pagination from "../../components/Pagination";
 import "../ListPages.css";
-
+import Loader from "../../components/Loader";
 function ClientList() {
+    const [isLoading, setIsLoading] = useState(false);
     const [clientList, setClientList] = useState([])
     const navigate = useNavigate();
 
@@ -24,12 +25,16 @@ function ClientList() {
     }, [])
   
     const fetchClientList = () => {
+        setIsLoading(true);
         axios.get('/clients')
         .then(function (response) {
           setClientList(response.data.clients);
         })
         .catch(function (error) {
           console.log(error);
+        })
+        .finally(() => {
+            setIsLoading(false);
         })
     }
 
@@ -134,78 +139,86 @@ function ClientList() {
 
             {/* Table Section */}
             <div className="list-table-container">
-              <table className="table list-table" id='clientListTable'>
-                <thead>
-                  <tr>
-                    <th>Action</th>
-                    <th>Client Name</th>
-                    <th>Client Location</th>
-                    <th>Contact Person</th>
-                    <th>Contact Email</th>
-                    <th>Contact Phone</th>
-                    <th>Client Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentItems.length === 0 ? (
+              {isLoading ? (
+                <Loader 
+                  size="large" 
+                  variant="spinner" 
+                  containerHeight="200px"
+                />
+              ) : (
+                <table className="table list-table" id='clientListTable'>
+                  <thead>
                     <tr>
-                      <td colSpan="7" className="empty-state">
-                        <i className="bi bi-building"></i>
-                        <p>No clients found</p>
-                      </td>
+                      <th>Action</th>
+                      <th>Client Name</th>
+                      <th>Client Location</th>
+                      <th>Contact Person</th>
+                      <th>Contact Email</th>
+                      <th>Contact Phone</th>
+                      <th>Client Status</th>
                     </tr>
-                  ) : (
-                    currentItems.map((clientDetails, key) => {
-                      return (
-                        <tr key={key}>
-                          <td>
-                            <div className="action-buttons-cell">
-                              <button
-                                onClick={() => handleDelete(clientDetails.client_id)}
-                                className="delete-btn"
-                                title="Delete Client"
-                              >
-                                <i className="bi bi-trash"></i>
-                              </button>
+                  </thead>
+                  <tbody>
+                    {currentItems.length === 0 ? (
+                      <tr>
+                        <td colSpan="7" className="empty-state">
+                          <i className="bi bi-building"></i>
+                          <p>No clients found</p>
+                        </td>
+                      </tr>
+                    ) : (
+                      currentItems.map((clientDetails, key) => {
+                        return (
+                          <tr key={key}>
+                            <td>
+                              <div className="action-buttons-cell">
+                                <button
+                                  onClick={() => handleDelete(clientDetails.client_id)}
+                                  className="delete-btn"
+                                  title="Delete Client"
+                                >
+                                  <i className="bi bi-trash"></i>
+                                </button>
+                                <Link
+                                  className="edit-btn"
+                                  to={`/clientEdit/${clientDetails.client_id}`}
+                                  title="Edit Client"
+                                >
+                                  <i className="bi bi-pencil"></i>
+                                </Link>
+                                <Link
+                                  className="view-btn"
+                                  to={`/clientShow/${clientDetails.client_id}`}
+                                  title="View Client"
+                                >
+                                  <i className="bi bi-eye"></i>
+                                </Link>
+                              </div>
+                            </td>
+                            <td>
                               <Link
-                                className="edit-btn"
-                                to={`/clientEdit/${clientDetails.client_id}`}
-                                title="Edit Client"
-                              >
-                                <i className="bi bi-pencil"></i>
-                              </Link>
-                              <Link
-                                className="view-btn"
+                                className="client-link"
                                 to={`/clientShow/${clientDetails.client_id}`}
-                                title="View Client"
                               >
-                                <i className="bi bi-eye"></i>
+                                {clientDetails.name}
                               </Link>
-                            </div>
-                          </td>
-                          <td>
-                            <Link
-                              className="client-link"
-                              to={`/clientShow/${clientDetails.client_id}`}
-                            >
-                              {clientDetails.name}
-                            </Link>
-                          </td>
-                          <td>{clientDetails.location}</td>
-                          <td>{clientDetails.client_contact_person}</td>
-                          <td>{clientDetails.client_contact_email}</td>
-                          <td>{clientDetails.client_contact_phone}</td>
-                          <td>
-                            <span className={`status-badge ${getStatusBadgeClass(clientDetails.status)}`}>
-                              {clientDetails.status}
-                            </span>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
+                            </td>
+                            <td>{clientDetails.location}</td>
+                            <td>{clientDetails.client_contact_person}</td>
+                            <td>{clientDetails.client_contact_email}</td>
+                            <td>{clientDetails.client_contact_phone}</td>
+                            <td>
+                              <span className={`status-badge ${getStatusBadgeClass(clientDetails.status)}`}>
+                                {clientDetails.status}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              )}
             </div>
 
             {/* Pagination */}

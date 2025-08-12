@@ -8,8 +8,10 @@ import * as AppFunc from "../lib/AppFunctions";
 import APP_CONSTANTS from "../appConstants";
 import Pagination from "../components/Pagination";
 import "./ListPages.css";
+import Loader from "../components/Loader";
 
 function ProjectList() {
+    const [isLoading, setIsLoading] = useState(false);
     const [projectList, setProjectList] = useState([]);
     const hasReadOnlyAccess = AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.PRODUCER;
 
@@ -24,15 +26,18 @@ function ProjectList() {
     }, [])
   
     const fetchProjectList = () => {
+        setIsLoading(true);
         axios.get('/projects')
         .then(function (response) {
           setProjectList(response.data.projects);
           setFilteredList(response.data.projects);
           setSearchKeys(Object.keys(response?.data?.projects[0]))
-
         })
         .catch(function (error) {
           console.log(error);
+        })
+        .finally(() => {
+            setIsLoading(false);
         })
     }
 
@@ -209,92 +214,100 @@ function ProjectList() {
 
             {/* Table Section */}
             <div className="list-table-container">
-              <table className="table list-table" id='projectListTable'>
-                <thead>
-                  <tr>
-                    <th hidden={hasReadOnlyAccess}>Action</th>
-                    <th>Client Name</th>
-                    <th>Project Name</th>
-                    <th>Project Location</th>
-                    <th>Contact Person</th>
-                    <th>Contact Email</th>
-                    <th>Contact Phone</th>
-                    <th>Start Date</th>
-                    <th>Expected End Date</th>
-                    <th>Actual End Date</th>
-                    <th>Project Status</th>
-                    <th>Technologies Involved</th>
-                    <th>Head Count</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentItems.length === 0 ? (
+              {isLoading ? (
+                  <Loader 
+                    size="large" 
+                    variant="spinner" 
+                    containerHeight="200px"
+                  />
+              ) : (
+                <table className="table list-table" id='projectListTable'>
+                  <thead>
                     <tr>
-                      <td colSpan="13" className="empty-state">
-                        <i className="bi bi-folder-x"></i>
-                        <p>No projects found</p>
-                      </td>
+                      <th hidden={hasReadOnlyAccess}>Action</th>
+                      <th>Client Name</th>
+                      <th>Project Name</th>
+                      <th>Project Location</th>
+                      <th>Contact Person</th>
+                      <th>Contact Email</th>
+                      <th>Contact Phone</th>
+                      <th>Start Date</th>
+                      <th>Expected End Date</th>
+                      <th>Actual End Date</th>
+                      <th>Project Status</th>
+                      <th>Technologies Involved</th>
+                      <th>Head Count</th>
                     </tr>
-                  ) : (
-                    currentItems.map((projectDetails, key) => {
-                      return (
-                        <tr key={key}>
-                          <td hidden={hasReadOnlyAccess}>
-                            <div className="action-buttons-cell">
-                              <button
-                                onClick={() => handleDelete(projectDetails.project_id)}
-                                className="delete-btn"
-                                title="Delete Project"
-                              >
-                                <i className="bi bi-trash"></i>
-                              </button>
+                  </thead>
+                  <tbody>
+                    {currentItems.length === 0 ? (
+                      <tr>
+                        <td colSpan="13" className="empty-state">
+                          <i className="bi bi-folder-x"></i>
+                          <p>No projects found</p>
+                        </td>
+                      </tr>
+                    ) : (
+                      currentItems.map((projectDetails, key) => {
+                        return (
+                          <tr key={key}>
+                            <td hidden={hasReadOnlyAccess}>
+                              <div className="action-buttons-cell">
+                                <button
+                                  onClick={() => handleDelete(projectDetails.project_id)}
+                                  className="delete-btn"
+                                  title="Delete Project"
+                                >
+                                  <i className="bi bi-trash"></i>
+                                </button>
+                                <Link
+                                  className="edit-btn"
+                                  to={`/projectEdit/${projectDetails.project_id}`}
+                                  title="Edit Project"
+                                >
+                                  <i className="bi bi-pencil"></i>
+                                </Link>
+                              </div>
+                            </td>
+                            <td>
                               <Link
-                                className="edit-btn"
-                                to={`/projectEdit/${projectDetails.project_id}`}
-                                title="Edit Project"
+                                className="client-link"
+                                to={`/clientShow/${projectDetails.clientDetails.client_id}`}
                               >
-                                <i className="bi bi-pencil"></i>
+                                {projectDetails.clientDetails.name}
                               </Link>
-                            </div>
-                          </td>
-                          <td>
-                            <Link
-                              className="client-link"
-                              to={`/clientShow/${projectDetails.clientDetails.client_id}`}
-                            >
-                              {projectDetails.clientDetails.name}
-                            </Link>
-                          </td>
-                          <td>
-                            <Link
-                              className="project-link"
-                              to={`/projectShow/${projectDetails.project_id}`}
-                            >
-                              {projectDetails.project_name}
-                            </Link>
-                          </td>
-                          
-                          <td>{projectDetails.project_location}</td>
+                            </td>
+                            <td>
+                              <Link
+                                className="project-link"
+                                to={`/projectShow/${projectDetails.project_id}`}
+                              >
+                                {projectDetails.project_name}
+                              </Link>
+                            </td>
+                            
+                            <td>{projectDetails.project_location}</td>
 
-                          <td>{projectDetails.contact_person}</td>
-                          <td>{projectDetails.contact_email}</td>
-                          <td>{projectDetails.contact_phone}</td>
-                          <td>{Utils.formatDateYYYYMMDD(projectDetails.start_date)}</td>
-                          <td>{Utils.formatDateYYYYMMDD(projectDetails.expected_end_date)}</td>
-                          <td>{Utils.formatDateYYYYMMDD(projectDetails.actual_end_date)}</td>
-                          <td>
-                            <span className={`status-badge ${getStatusBadgeClass(projectDetails.status)}`}>
-                              {projectDetails.status}
-                            </span>
-                          </td>
-                          <td>{projectDetails.technologies_required}</td>
-                          <td>{projectDetails.head_count}</td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
+                            <td>{projectDetails.contact_person}</td>
+                            <td>{projectDetails.contact_email}</td>
+                            <td>{projectDetails.contact_phone}</td>
+                            <td>{Utils.formatDateYYYYMMDD(projectDetails.start_date)}</td>
+                            <td>{Utils.formatDateYYYYMMDD(projectDetails.expected_end_date)}</td>
+                            <td>{Utils.formatDateYYYYMMDD(projectDetails.actual_end_date)}</td>
+                            <td>
+                              <span className={`status-badge ${getStatusBadgeClass(projectDetails.status)}`}>
+                                {projectDetails.status}
+                              </span>
+                            </td>
+                            <td>{projectDetails.technologies_required}</td>
+                            <td>{projectDetails.head_count}</td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              )}
             </div>
 
             {/* Pagination */}

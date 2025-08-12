@@ -9,8 +9,10 @@ import * as AppFunc from "../lib/AppFunctions";
 import APP_CONSTANTS from "../appConstants";
 import Pagination from "../components/Pagination";
 import "./ListPages.css";
+import Loader from "../components/Loader";
 
 function EmpProjAlocList() {
+    const [isLoading, setIsLoading] = useState(false);
     const  [empProjAlocList, setEmpProjAlocList] = useState([])
     const  [searchKeys, setSearchKeys] = useState([]);
     const [inputType, setInputType] = useState("text");
@@ -32,18 +34,22 @@ function EmpProjAlocList() {
     }, [])
     const url = "empPrjAloc";
     const fetchEmpProjAlocList = () => {
-        axios.get(`/${url}`)
-        .then(function (response) {
-          setEmpProjAlocList(response.data.empProjAlloc);
-          setFilteredList(response.data.empProjAlloc);
-          const defaultKeys = Object.keys(response?.data?.empProjAlloc[0]);
-          const extraKeys = ["project_name"]; // add any other custom keys like employee_name, etc.
-          setSearchKeys([...defaultKeys, ...extraKeys]);
-        })
-        .catch(function (error) {
-          console.log(error);
-        })
-    }
+      setIsLoading(true);
+      axios.get(`/${url}`)
+      .then(function (response) {
+        setEmpProjAlocList(response.data.empProjAlloc);
+        setFilteredList(response.data.empProjAlloc);
+        const defaultKeys = Object.keys(response?.data?.empProjAlloc[0]);
+        const extraKeys = ["project_name"]; // add any other custom keys like employee_name, etc.
+        setSearchKeys([...defaultKeys, ...extraKeys]);
+      })
+      .catch(function (error) {
+        console.log(error);
+      })
+      .finally(() => {
+          setIsLoading(false);
+      })
+  }
 
     const handleDelete = (emp_proj_aloc_id) => {
         Swal.fire({
@@ -234,78 +240,86 @@ function EmpProjAlocList() {
 
             {/* Table Section */}
             <div className="list-table-container">
-              <table className="table list-table" id='allocationListTable'>
-                <thead>
-                  <tr>
-                    <th hidden={hasReadOnlyAccess}>Action</th>
-                    <th>Project Name</th>
-                    <th>Resource Name</th>
-                    <th>Start Date</th>
-                    <th>End Date</th>
-                    <th>Work Location</th>
-                    <th>Hours per Day</th>
-                    <th>Rate Per Hour (USD)</th>
-                    <th>Shift Start Time</th>
-                    <th>Shift End Time</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentItems.length === 0 ? (
+            {isLoading ? (
+                <Loader 
+                  size="large" 
+                  variant="spinner" 
+                  containerHeight="200px"
+                />
+              ) : (
+                <table className="table list-table" id='allocationListTable'>
+                  <thead>
                     <tr>
-                      <td colSpan="10" className="empty-state">
-                        <i className="bi bi-diagram-3"></i>
-                        <p>No allocations found</p>
-                      </td>
+                      <th hidden={hasReadOnlyAccess}>Action</th>
+                      <th>Project Name</th>
+                      <th>Resource Name</th>
+                      <th>Start Date</th>
+                      <th>End Date</th>
+                      <th>Work Location</th>
+                      <th>Hours per Day</th>
+                      <th>Rate Per Hour (USD)</th>
+                      <th>Shift Start Time</th>
+                      <th>Shift End Time</th>
                     </tr>
-                  ) : (
-                    currentItems.map((empProjAlloc, key) => {
-                      return (
-                        <tr key={key}>
-                          <td hidden={hasReadOnlyAccess}>
-                            <div className="action-buttons-cell">
-                              <button
-                                onClick={() => handleDelete(empProjAlloc.emp_proj_aloc_id)}
-                                className="delete-btn"
-                                title="Delete Allocation"
-                              >
-                                <i className="bi bi-trash"></i>
-                              </button>
+                  </thead>
+                  <tbody>
+                    {currentItems.length === 0 ? (
+                      <tr>
+                        <td colSpan="10" className="empty-state">
+                          <i className="bi bi-diagram-3"></i>
+                          <p>No allocations found</p>
+                        </td>
+                      </tr>
+                    ) : (
+                      currentItems.map((empProjAlloc, key) => {
+                        return (
+                          <tr key={key}>
+                            <td hidden={hasReadOnlyAccess}>
+                              <div className="action-buttons-cell">
+                                <button
+                                  onClick={() => handleDelete(empProjAlloc.emp_proj_aloc_id)}
+                                  className="delete-btn"
+                                  title="Delete Allocation"
+                                >
+                                  <i className="bi bi-trash"></i>
+                                </button>
+                                <Link
+                                  className="edit-btn"
+                                  to={`/empProjEdit/${empProjAlloc.emp_proj_aloc_id}`}
+                                  title="Edit Allocation"
+                                >
+                                  <i className="bi bi-pencil"></i>
+                                </Link>
+                              </div>
+                            </td>
+                            <td>
                               <Link
-                                className="edit-btn"
-                                to={`/empProjEdit/${empProjAlloc.emp_proj_aloc_id}`}
-                                title="Edit Allocation"
+                                className="project-link"
+                                to={`/projectShow/${empProjAlloc.projectDetails.project_id}`}
                               >
-                                <i className="bi bi-pencil"></i>
+                                {empProjAlloc.projectDetails.project_name}
                               </Link>
-                            </div>
-                          </td>
-                          <td>
-                            <Link
-                              className="project-link"
-                              to={`/projectShow/${empProjAlloc.projectDetails.project_id}`}
-                            >
-                              {empProjAlloc.projectDetails.project_name}
-                            </Link>
-                          </td>
-                          <td>
-                            <a href='#' id={key} key={key} onClick={(e) => openEmpDetailsModal(empProjAlloc.empDetails.emp_id)}>
-                              {empProjAlloc.empDetails.first_name}, 
-                              {empProjAlloc.empDetails.last_name}
-                            </a>
-                          </td>
-                          <td>{Utils.formatDateYYYYMMDD(empProjAlloc.start_date)}</td>
-                          <td>{Utils.formatDateYYYYMMDD(empProjAlloc.end_date)}</td>
-                          <td>{empProjAlloc.work_location}</td>
-                          <td>{empProjAlloc.hours_per_day}</td>
-                          <td>{empProjAlloc.rate_per_hour}</td>
-                          <td>{empProjAlloc.shift_start_time}</td>
-                          <td>{empProjAlloc.shift_end_time}</td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
+                            </td>
+                            <td>
+                              <a href='#' id={key} key={key} onClick={(e) => openEmpDetailsModal(empProjAlloc.empDetails.emp_id)}>
+                                {empProjAlloc.empDetails.first_name}, 
+                                {empProjAlloc.empDetails.last_name}
+                              </a>
+                            </td>
+                            <td>{Utils.formatDateYYYYMMDD(empProjAlloc.start_date)}</td>
+                            <td>{Utils.formatDateYYYYMMDD(empProjAlloc.end_date)}</td>
+                            <td>{empProjAlloc.work_location}</td>
+                            <td>{empProjAlloc.hours_per_day}</td>
+                            <td>{empProjAlloc.rate_per_hour}</td>
+                            <td>{empProjAlloc.shift_start_time}</td>
+                            <td>{empProjAlloc.shift_end_time}</td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              )}
             </div>
 
             {/* Pagination */}

@@ -9,8 +9,10 @@ import * as AppFunc from "../../lib/AppFunctions";
 import APP_CONSTANTS from "../../appConstants";
 import Pagination from "../../components/Pagination";
 import "../ListPages.css";
+import Loader from "../../components/Loader";
 
 function EmpProjUtiliList() {
+    const [isLoading, setIsLoading] = useState(false);
     const  [empProjUtiliList, setEmpProjUtiliList] = useState([]);
     const [modalIsOpen, setIsOpen] = useState(false);
     const [empModalDetails, setEmpModalDetails] = useState({});
@@ -31,12 +33,16 @@ function EmpProjUtiliList() {
     }, [])
     
     const fetchEmpProjUtiliList = () => {
+        setIsLoading(true);
         axios.get('/empPrjUtili')
         .then(function (response) {
           setEmpProjUtiliList(response.data.empProjUtili);
         })
         .catch(function (error) {
           console.log(error);
+        })
+        .finally(() => {
+            setIsLoading(false);
         })
     }
 
@@ -148,74 +154,82 @@ function EmpProjUtiliList() {
 
             {/* Table Section */}
             <div className="list-table-container">
-              <table className="table list-table" id='utilizationListTable'>
-                <thead>
-                  <tr>
-                    <th hidden={hasReadOnlyAccess}>Action</th>
-                    <th>Project Name</th>
-                    <th>Resource Name</th>
-                    <th>Week Starting</th>
-                    <th>Project Hours per Week</th>
-                    <th>Allocation Hours per Week</th>
-                    <th>Forecast Hours per Week</th>
-                    <th>PTO Hours per Week</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentItems.length === 0 ? (
+            {isLoading ? (
+                <Loader 
+                  size="large" 
+                  variant="spinner" 
+                  containerHeight="200px"
+                />
+              ) : (
+                <table className="table list-table" id='utilizationListTable'>
+                  <thead>
                     <tr>
-                      <td colSpan="8" className="empty-state">
-                        <i className="bi bi-graph-up"></i>
-                        <p>No utilization records found</p>
-                      </td>
+                      <th hidden={hasReadOnlyAccess}>Action</th>
+                      <th>Project Name</th>
+                      <th>Resource Name</th>
+                      <th>Week Starting</th>
+                      <th>Project Hours per Week</th>
+                      <th>Allocation Hours per Week</th>
+                      <th>Forecast Hours per Week</th>
+                      <th>PTO Hours per Week</th>
                     </tr>
-                  ) : (
-                    currentItems.map((empProjUtili, key) => {
-                      return (
-                        <tr key={key}>
-                          <td hidden={hasReadOnlyAccess}>
-                            <div className="action-buttons-cell">
-                              <button
-                                onClick={() => handleDelete(empProjUtili.emp_proj_utili_id)}
-                                className="delete-btn"
-                                title="Delete Utilization"
-                              >
-                                <i className="bi bi-trash"></i>
-                              </button>
+                  </thead>
+                  <tbody>
+                    {currentItems.length === 0 ? (
+                      <tr>
+                        <td colSpan="8" className="empty-state">
+                          <i className="bi bi-graph-up"></i>
+                          <p>No utilization records found</p>
+                        </td>
+                      </tr>
+                    ) : (
+                      currentItems.map((empProjUtili, key) => {
+                        return (
+                          <tr key={key}>
+                            <td hidden={hasReadOnlyAccess}>
+                              <div className="action-buttons-cell">
+                                <button
+                                  onClick={() => handleDelete(empProjUtili.emp_proj_utili_id)}
+                                  className="delete-btn"
+                                  title="Delete Utilization"
+                                >
+                                  <i className="bi bi-trash"></i>
+                                </button>
+                                <Link
+                                  className="edit-btn"
+                                  to={`/empProjUtiliEdit/${empProjUtili.emp_proj_utili_id}`}
+                                  title="Edit Utilization"
+                                >
+                                  <i className="bi bi-pencil"></i>
+                                </Link>
+                              </div>
+                            </td>
+                            <td>
                               <Link
-                                className="edit-btn"
-                                to={`/empProjUtiliEdit/${empProjUtili.emp_proj_utili_id}`}
-                                title="Edit Utilization"
+                                className="project-link"
+                                to={`/projectShow/${empProjUtili.projectDetails.project_id}`}
                               >
-                                <i className="bi bi-pencil"></i>
+                                {empProjUtili.projectDetails.project_name}
                               </Link>
-                            </div>
-                          </td>
-                          <td>
-                            <Link
-                              className="project-link"
-                              to={`/projectShow/${empProjUtili.projectDetails.project_id}`}
-                            >
-                              {empProjUtili.projectDetails.project_name}
-                            </Link>
-                          </td>
-                          <td>
-                            <a href="javascript:void(0)" id={key} key={key} onClick={(e) => openEmpDetailsModal(empProjUtili.empDetails.emp_id)}>
-                              {empProjUtili.empDetails.first_name}, 
-                              {empProjUtili.empDetails.last_name}
-                            </a>
-                          </td>
-                          <td>{Utils.formatDateYYYYMMDD(empProjUtili.week_starting)}</td>
-                          <td>{empProjUtili.proj_hours_per_week}</td>
-                          <td>{empProjUtili.allc_work_hours_per_week}</td>
-                          <td>{empProjUtili.forecast_hours_per_week}</td>
-                          <td>{empProjUtili.pto_hours_per_week}</td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
+                            </td>
+                            <td>
+                              <a href="javascript:void(0)" id={key} key={key} onClick={(e) => openEmpDetailsModal(empProjUtili.empDetails.emp_id)}>
+                                {empProjUtili.empDetails.first_name}, 
+                                {empProjUtili.empDetails.last_name}
+                              </a>
+                            </td>
+                            <td>{Utils.formatDateYYYYMMDD(empProjUtili.week_starting)}</td>
+                            <td>{empProjUtili.proj_hours_per_week}</td>
+                            <td>{empProjUtili.allc_work_hours_per_week}</td>
+                            <td>{empProjUtili.forecast_hours_per_week}</td>
+                            <td>{empProjUtili.pto_hours_per_week}</td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              )}
             </div>
 
             {/* Pagination */}

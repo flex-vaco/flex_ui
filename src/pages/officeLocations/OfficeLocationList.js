@@ -5,8 +5,10 @@ import Layout from "../../components/Layout"
 import * as Utils from "../../lib/Utils"
 import Pagination from "../../components/Pagination";
 import "../ListPages.css";
+import Loader from "../../components/Loader";
 
 function OfficeLocationList() {
+    const [isLoading, setIsLoading] = useState(false);
     const [locationList, setLocationList] = useState([])
     const navigate = useNavigate();
 
@@ -23,12 +25,16 @@ function OfficeLocationList() {
     }, [])
   
     const fetchLocationList = () => {
+        setIsLoading(true);
         axios.get('/officeLocation')
         .then(function (response) {
           setLocationList(response.data.locations);
         })
         .catch(function (error) {
           console.log(error);
+        })
+        .finally(() => {
+            setIsLoading(false);
         })
     }
 
@@ -93,50 +99,58 @@ function OfficeLocationList() {
 
             {/* Table Section */}
             <div className="list-table-container">
-              <table className="table list-table" id='officeLocationListTable'>
-                <thead>
-                  <tr>
-                    <th>Action</th>
-                    <th>City Name</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentItems.length === 0 ? (
+            {isLoading ? (
+                <Loader 
+                  size="large" 
+                  variant="spinner" 
+                  containerHeight="200px"
+                />
+              ) : (
+                <table className="table list-table" id='officeLocationListTable'>
+                  <thead>
                     <tr>
-                      <td colSpan="2" className="empty-state">
-                        <i className="bi bi-geo-alt"></i>
-                        <p>No office locations found</p>
-                      </td>
+                      <th>Action</th>
+                      <th>City Name</th>
                     </tr>
-                  ) : (
-                    currentItems.map((locationDetails, key) => {
-                      return (
-                        <tr key={key}>
-                          <td>
-                            <div className="action-buttons-cell">
+                  </thead>
+                  <tbody>
+                    {currentItems.length === 0 ? (
+                      <tr>
+                        <td colSpan="2" className="empty-state">
+                          <i className="bi bi-geo-alt"></i>
+                          <p>No office locations found</p>
+                        </td>
+                      </tr>
+                    ) : (
+                      currentItems.map((locationDetails, key) => {
+                        return (
+                          <tr key={key}>
+                            <td>
+                              <div className="action-buttons-cell">
+                                <Link
+                                  className="edit-btn"
+                                  to={`/officeLocationEdit/${locationDetails.office_location_id}`}
+                                  title="Edit Location"
+                                >
+                                  <i className="bi bi-pencil"></i>
+                                </Link>
+                              </div>
+                            </td>
+                            <td>
                               <Link
-                                className="edit-btn"
+                                className="page-link"
                                 to={`/officeLocationEdit/${locationDetails.office_location_id}`}
-                                title="Edit Location"
                               >
-                                <i className="bi bi-pencil"></i>
+                                {locationDetails.office_location_city}
                               </Link>
-                            </div>
-                          </td>
-                          <td>
-                            <Link
-                              className="page-link"
-                              to={`/officeLocationEdit/${locationDetails.office_location_id}`}
-                            >
-                              {locationDetails.office_location_city}
-                            </Link>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              )}
             </div>
 
             {/* Pagination */}

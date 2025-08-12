@@ -5,6 +5,7 @@ import { MainContainer, ChatContainer, MessageList, Message, MessageInput, Typin
 import Layout from "../../components/Layout"
 import axios from 'axios'
 import Cookies from 'universal-cookie';
+import ReactMarkdown from 'react-markdown';
 const cookies = new Cookies();
 cookies.set('chat_history', 'session', { path: '/' });
 
@@ -32,7 +33,9 @@ function InteliChat() {
   const customChatGptAPICall = async (message, chatMessages) => {
     setIsTyping(true);
   
-    const baseURL = `/talk_to_ai`;
+    // Commenting out API request for now
+    
+    const baseURL = `/genAI/talk_to_ai`;
     const params = new URLSearchParams({
       userQuery: message
     });
@@ -50,7 +53,7 @@ function InteliChat() {
   
       setMessages([
         ...chatMessages,
-        { message: aiText, sender: "ai" }
+        { message: aiText.replace(/\\n/g, '\n'), sender: "ai" }
       ]);
     } catch (error) {
       setIsTyping(false);
@@ -60,7 +63,9 @@ function InteliChat() {
         { message: "Something went wrong. Please try again later!", sender: "ai" }
       ]);
     }
+    
   };
+  
   
 
   return (
@@ -74,18 +79,23 @@ function InteliChat() {
               typingIndicator={isTyping ? <TypingIndicator content="Resume Explorer is typing" /> : null}
             >
               {messages.map((msg, i) => (
-                  <Message
-                    key={i}
-                    model={{
-                      message: msg.message,
-                      sentTime: "just now",
-                      sender: msg.sender === 'user' ? "You" : "Resume Explorer",
-                      direction: msg.sender === 'user' ? "outgoing" : "incoming"
-                    }}
-                  />
-                ))}
+                <Message
+                  key={i}
+                  model={{
+                    message: "",
+                    sentTime: "just now",
+                    sender: msg.sender === 'user' ? "You" : "Resume Explorer",
+                    direction: msg.sender === 'user' ? "outgoing" : "incoming"
+                  }}
+                >
+                  <Message.CustomContent>
+                    <ReactMarkdown>{msg.message}</ReactMarkdown>
+                  </Message.CustomContent>
+                </Message>
+              ))}
+
             </MessageList>
-            <MessageInput placeholder="Type message here" onSend={handleSend} />        
+            <MessageInput placeholder="Type message here" onSend={handleSend} attachButton={false} />        
           </ChatContainer>
         </MainContainer>
       </div>

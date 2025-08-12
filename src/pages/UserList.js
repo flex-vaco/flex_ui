@@ -6,8 +6,10 @@ import Layout from "../components/Layout"
 import * as Utils from "../lib/Utils"
 import Pagination from "../components/Pagination";
 import "./ListPages.css";
+import Loader from "../components/Loader";
 
 function UserList() {
+    const [isLoading, setIsLoading] = useState(false);
     const  [userList, setUserList] = useState([])
     const  [searchKeys, setSearchKeys] = useState([])
     const  [inputType, setInputType] = useState("text");
@@ -21,6 +23,7 @@ function UserList() {
     }, [])
   
     const fetchUserList = () => {
+        setIsLoading(true);
         axios.get('/users')
         .then(function (response) {
           setUserList(response.data.users);
@@ -29,6 +32,9 @@ function UserList() {
         })
         .catch(function (error) {
           console.log(error);
+        })
+        .finally(() => {
+            setIsLoading(false);
         })
     }
     const navigate = useNavigate();
@@ -192,56 +198,64 @@ function UserList() {
 
             {/* Table Section */}
             <div className="list-table-container">
-              <table className="table list-table" id='userListTable'>
-                <thead>
-                  <tr>
-                    <th>Action</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentItems.length === 0 ? (
-                    <tr>
-                      <td colSpan="4" className="empty-state">
-                        <i className="bi bi-people"></i>
-                        <p>No users found</p>
-                      </td>
-                    </tr>
-                  ) : (
-                    currentItems.map((usersList, key) => {
-                      return (
-                        <tr key={key}>
-                          <td>
-                            <div className="action-buttons-cell">
-                              <button
-                                onClick={() => handleDelete(usersList.user_id)}
-                                className="delete-btn"
-                                title="Delete User"
-                              >
-                                <i className="bi bi-trash"></i>
-                              </button>
-                              <Link
-                                className="edit-btn"
-                                to={`/userEdit/${usersList.user_id}`}
-                                title="Edit User"
-                              >
-                                <i className="bi bi-pencil"></i>
-                              </Link>
-                            </div>
+              {isLoading ? (
+                  <Loader 
+                    size="large" 
+                    variant="spinner" 
+                    containerHeight="200px"
+                  />
+                ) : (
+                  <table className="table list-table" id='userListTable'>
+                    <thead>
+                      <tr>
+                        <th>Action</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {currentItems.length === 0 ? (
+                        <tr>
+                          <td colSpan="4" className="empty-state">
+                            <i className="bi bi-people"></i>
+                            <p>No users found</p>
                           </td>
-                          <td>
-                            {usersList.first_name}, {usersList.last_name}
-                          </td>
-                          <td>{usersList.email}</td>
-                          <td>{usersList.role.toUpperCase()}</td>
                         </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
+                      ) : (
+                        currentItems.map((usersList, key) => {
+                          return (
+                            <tr key={key}>
+                              <td>
+                                <div className="action-buttons-cell">
+                                  <button
+                                    onClick={() => handleDelete(usersList.user_id)}
+                                    className="delete-btn"
+                                    title="Delete User"
+                                  >
+                                    <i className="bi bi-trash"></i>
+                                  </button>
+                                  <Link
+                                    className="edit-btn"
+                                    to={`/userEdit/${usersList.user_id}`}
+                                    title="Edit User"
+                                  >
+                                    <i className="bi bi-pencil"></i>
+                                  </Link>
+                                </div>
+                              </td>
+                              <td>
+                                {usersList.first_name}, {usersList.last_name}
+                              </td>
+                              <td>{usersList.email}</td>
+                              <td>{usersList.role.toUpperCase()}</td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                )}
             </div>
 
             {/* Pagination */}
