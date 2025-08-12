@@ -7,8 +7,10 @@ import * as Utils from "../lib/Utils"
 import EmployeeProfileModal from '../components/employee/EmployeeProfileModal'
 import Pagination from "../components/Pagination";
 import "./ListPages.css";
+import Loader from "../components/Loader";
 
 function EmpList() {
+    const [isLoading, setIsLoading] = useState(false);
     const [empList, setEmpList] = useState([]);
     const navigate = useNavigate();
     const [inputType, setInputType] = useState("text");
@@ -41,17 +43,21 @@ function EmpList() {
     setIsOpen(true);
   }
 
-    const fetchEmpList = () => {
-        axios.get('/employees')
-        .then(function (response) {
-          setEmpList(response.data.employees);
-          setFilteredList(response.data.employees);
-          setSearchKeys(Object.keys(response?.data?.employees[0]))
-        })
-        .catch(function (error) {
-          console.log(error);
-        })
-    }
+  const fetchEmpList = () => {
+    setIsLoading(true);
+    axios.get('/employees')
+    .then(function (response) {
+      setEmpList(response.data.employees);
+      setFilteredList(response.data.employees);
+      setSearchKeys(Object.keys(response?.data?.employees[0]))
+    })
+    .catch(function (error) {
+      console.log(error);
+    })
+    .finally(() => {
+        setIsLoading(false);
+    })
+}
   
     const handleDelete = (emp_id) => {
         Swal.fire({
@@ -231,101 +237,109 @@ function EmpList() {
 
             {/* Table Section */}
             <div className="list-table-container">
-              <table className="table list-table" id='empListTable'>
-                <thead>
-                  <tr>
-                    <th>Action</th>
-                    <th>Name</th>
-                    <th className="email-column">Email</th>
-                    <th>Designation</th>
-                    <th>Primary Skills</th>
-                    <th>Secondary Skills</th>
-                    <th>Status</th>
-                    <th>Exp.(yrs.)</th>
-                    <th>Rate/hr</th>
-                    <th>Join Date</th>
-                    <th>Home Location</th>
-                    <th>Office Location</th>
-                    <th>Manager</th>
-                    <th className="email-column">Manager Email</th>
-                    <th>On Site</th>
-                    <th>Resume</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentItems.length === 0 ? (
+            {isLoading ? (
+                <Loader 
+                  size="large" 
+                  variant="spinner" 
+                  containerHeight="200px"
+                />
+              ) : (
+                <table className="table list-table" id='empListTable'>
+                  <thead>
                     <tr>
-                      <td colSpan="16" className="empty-state">
-                        <i className="bi bi-people"></i>
-                        <p>No resources found</p>
-                      </td>
+                      <th>Action</th>
+                      <th>Name</th>
+                      <th className="email-column">Email</th>
+                      <th>Designation</th>
+                      <th>Primary Skills</th>
+                      <th>Secondary Skills</th>
+                      <th>Status</th>
+                      <th>Exp.(yrs.)</th>
+                      <th>Rate/hr</th>
+                      <th>Join Date</th>
+                      <th>Home Location</th>
+                      <th>Office Location</th>
+                      <th>Manager</th>
+                      <th className="email-column">Manager Email</th>
+                      <th>On Site</th>
+                      <th>Resume</th>
                     </tr>
-                  ) : (
-                    currentItems.map((empDetails, key) => {
-                      return (
-                        <tr key={key} onClick={(e) => openModal(empDetails.emp_id)}>
-                          <td>
-                            <div className="action-buttons-cell">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDelete(empDetails.emp_id);
-                                }}
-                                className="delete-btn"
-                                title="Delete Resource"
-                              >
-                                <i className="bi bi-trash"></i>
-                              </button>
-                              <Link
-                                className="edit-btn"
-                                to={`/empEdit/${empDetails.emp_id}`}
-                                title="Edit Resource"
+                  </thead>
+                  <tbody>
+                    {currentItems.length === 0 ? (
+                      <tr>
+                        <td colSpan="16" className="empty-state">
+                          <i className="bi bi-people"></i>
+                          <p>No resources found</p>
+                        </td>
+                      </tr>
+                    ) : (
+                      currentItems.map((empDetails, key) => {
+                        return (
+                          <tr key={key} onClick={(e) => openModal(empDetails.emp_id)}>
+                            <td>
+                              <div className="action-buttons-cell">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDelete(empDetails.emp_id);
+                                  }}
+                                  className="delete-btn"
+                                  title="Delete Resource"
+                                >
+                                  <i className="bi bi-trash"></i>
+                                </button>
+                                <Link
+                                  className="edit-btn"
+                                  to={`/empEdit/${empDetails.emp_id}`}
+                                  title="Edit Resource"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <i className="bi bi-pencil"></i>
+                                </Link>
+                              </div>
+                            </td>
+                            <td>
+                              {empDetails.first_name}, {empDetails.last_name}
+                            </td>
+                            <td className="email-column">{empDetails.email}</td>
+                            <td>{empDetails.designation}</td>
+                            <td>{empDetails.primary_skills}</td>
+                            <td>{empDetails.secondary_skills}</td>
+                            <td>
+                              <span className={`status-badge ${empDetails.status === 'Active' ? 'status-active' : 'status-inactive'}`}>
+                                {empDetails.status}
+                              </span>
+                            </td>
+                            <td>{empDetails.total_work_experience_years}</td>
+                            <td>{empDetails.rate_per_hour}</td>
+                            <td>{Utils.formatDateYYYYMMDD(empDetails.vaco_join_date)}</td>
+                            <td>{empDetails.home_location_city}</td>
+                            <td>{empDetails.office_location_city}</td>
+                            <td>{empDetails.manager_name}</td>
+                            <td className="email-column">{empDetails.manager_email}</td>
+                            <td>{empDetails.is_onsite ? "YES" : "NO"}</td>
+                            <td>
+                              <a
+                                href={
+                                  empDetails.resume
+                                    ? `${process.env.REACT_APP_API_BASE_URL}/uploads/resume/${empDetails.resume}`
+                                    : null
+                                }
+                                target="_blank" 
+                                rel="noreferrer"
                                 onClick={(e) => e.stopPropagation()}
                               >
-                                <i className="bi bi-pencil"></i>
-                              </Link>
-                            </div>
-                          </td>
-                          <td>
-                            {empDetails.first_name}, {empDetails.last_name}
-                          </td>
-                          <td className="email-column">{empDetails.email}</td>
-                          <td>{empDetails.designation}</td>
-                          <td>{empDetails.primary_skills}</td>
-                          <td>{empDetails.secondary_skills}</td>
-                          <td>
-                            <span className={`status-badge ${empDetails.status === 'Active' ? 'status-active' : 'status-inactive'}`}>
-                              {empDetails.status}
-                            </span>
-                          </td>
-                          <td>{empDetails.total_work_experience_years}</td>
-                          <td>{empDetails.rate_per_hour}</td>
-                          <td>{Utils.formatDateYYYYMMDD(empDetails.vaco_join_date)}</td>
-                          <td>{empDetails.home_location_city}</td>
-                          <td>{empDetails.office_location_city}</td>
-                          <td>{empDetails.manager_name}</td>
-                          <td className="email-column">{empDetails.manager_email}</td>
-                          <td>{empDetails.is_onsite ? "YES" : "NO"}</td>
-                          <td>
-                            <a
-                              href={
-                                empDetails.resume
-                                  ? `${process.env.REACT_APP_API_BASE_URL}/uploads/resume/${empDetails.resume}`
-                                  : null
-                              }
-                              target="_blank" 
-                              rel="noreferrer"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <i className="bi bi-person-lines-fill"></i>
-                            </a>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
+                                <i className="bi bi-person-lines-fill"></i>
+                              </a>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              )}
             </div>
 
             {/* Pagination */}

@@ -7,8 +7,10 @@ import APP_CONSTANTS from "../../appConstants";
 import * as Utils from "../../lib/Utils";
 import Pagination from "../../components/Pagination";
 import "../ListPages.css";
+import Loader from "../../components/Loader";
 
 function CategoryList() {
+    const [isLoading, setIsLoading] = useState(false);
     const  [categoryList, setCategoryList] = useState([])
     const hasReadOnlyAccess = AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.PRODUCER;
     
@@ -27,12 +29,16 @@ function CategoryList() {
     }, [])
     
     const fetchCategoryList = () => {
+        setIsLoading(true);
         axios.get('/categories')
         .then(function (response) {
           setCategoryList(response.data.categories);
         })
         .catch(function (error) {
           console.log(error);
+        })
+        .finally(() => {
+            setIsLoading(false);
         })
     }
 
@@ -98,56 +104,64 @@ function CategoryList() {
 
             {/* Table Section */}
             <div className="list-table-container">
-              <table className="table list-table" id='categoryListTable'>
-                <thead>
-                  <tr>
-                    <th hidden={hasReadOnlyAccess}>Action</th>
-                    <th>Category Name</th>
-                    <th>Technologies</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentItems.length === 0 ? (
-                    <tr>
-                      <td colSpan="3" className="empty-state">
-                        <i className="bi bi-tags"></i>
-                        <p>No categories found</p>
-                      </td>
-                    </tr>
-                  ) : (
-                    currentItems.map((categoryDetails, key) => {
-                      return (
-                        <tr key={key}>
-                          <td hidden={hasReadOnlyAccess}>
-                            <div className="action-buttons-cell">
-                              <Link
-                                className="edit-btn"
-                                to={`/categoryEdit/${categoryDetails.category_id}`}
-                                title="Edit Category"
-                              >
-                                <i className="bi bi-pencil"></i>
-                              </Link>
-                            </div>
-                          </td>
-                          <td>
-                            <Link
-                              className="page-link"
-                              to={`/categoryEdit/${categoryDetails.category_id}`}
-                            >
-                              {categoryDetails.category_name}
-                            </Link>
-                          </td>
-                          <td>
-                            <div style={{ maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                              {categoryDetails.technologies}
-                            </div>
+              {isLoading ? (
+                  <Loader 
+                    size="large" 
+                    variant="spinner" 
+                    containerHeight="200px"
+                  />
+                ) : (
+                  <table className="table list-table" id='categoryListTable'>
+                    <thead>
+                      <tr>
+                        <th hidden={hasReadOnlyAccess}>Action</th>
+                        <th>Category Name</th>
+                        <th>Technologies</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {currentItems.length === 0 ? (
+                        <tr>
+                          <td colSpan="3" className="empty-state">
+                            <i className="bi bi-tags"></i>
+                            <p>No categories found</p>
                           </td>
                         </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
+                      ) : (
+                        currentItems.map((categoryDetails, key) => {
+                          return (
+                            <tr key={key}>
+                              <td hidden={hasReadOnlyAccess}>
+                                <div className="action-buttons-cell">
+                                  <Link
+                                    className="edit-btn"
+                                    to={`/categoryEdit/${categoryDetails.category_id}`}
+                                    title="Edit Category"
+                                  >
+                                    <i className="bi bi-pencil"></i>
+                                  </Link>
+                                </div>
+                              </td>
+                              <td>
+                                <Link
+                                  className="page-link"
+                                  to={`/categoryEdit/${categoryDetails.category_id}`}
+                                >
+                                  {categoryDetails.category_name}
+                                </Link>
+                              </td>
+                              <td>
+                                <div style={{ maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  {categoryDetails.technologies}
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+              )}
             </div>
 
             {/* Pagination */}

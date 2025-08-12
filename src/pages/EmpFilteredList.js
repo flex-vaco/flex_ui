@@ -5,7 +5,7 @@ import Layout from "../components/Layout"
 import EmployeeProfileCard from '../components/employee/EmploeeProfileCard'
 import EmployeeProfileModal from '../components/employee/EmployeeProfileModal'
 import $ from 'jquery';
-
+import Loader from "../components/Loader";
 
 function EmpFilteredList() {
     const [isInitialLoad, setIsInitialLoad] = useState(true);
@@ -286,11 +286,11 @@ function EmpFilteredList() {
         </p>
         <div className="col-xs-12 col-lg-12 mx-1">
             {isLoading ? (
-                <div className="d-flex justify-content-center align-items-center" style={{ height: '200px' }}>
-                    <div className="spinner-border text-primary" role="status" style={{ width: '5rem', height: '5rem', borderWidth: '0.4em' }}>
-                        <span className="sr-only"></span>
-                    </div>
-                </div>
+                <Loader 
+                    size="large" 
+                    variant="spinner" 
+                    containerHeight="200px"
+                />
             ) : (
                 (empFilteredList?.length > 0) ? empFilteredList.map((empDetails, key) => (
                     <EmployeeProfileCard 
