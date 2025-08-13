@@ -520,6 +520,9 @@ input.form-control.homepage_search_input {
 .cs-message-input__tools {
   align-self: center;
   min-height: 80px;
+  justify-content: center;
+  vertical-align: center;
+  flex-direction: column !important;
 }
 .cs-button.cs-button--send {
   align-self: center;
@@ -1799,4 +1802,3 @@ span.badge.bg-light {
 .cs-message.cs-message--incoming.cs-message--last .cs-message__sent-time {
   display: block;
 }
-

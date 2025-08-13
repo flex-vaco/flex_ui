@@ -14,6 +14,8 @@ import Loader from "../../components/Loader";
 function EmpProjUtiliList() {
     const [isLoading, setIsLoading] = useState(false);
     const  [empProjUtiliList, setEmpProjUtiliList] = useState([]);
+    const [searchKeys, setSearchKeys] = useState([]);
+    const [inputType, setInputType] = useState("text");
     const [modalIsOpen, setIsOpen] = useState(false);
     const [empModalDetails, setEmpModalDetails] = useState({});
     const hasReadOnlyAccess = AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.PRODUCER;
@@ -37,6 +39,9 @@ function EmpProjUtiliList() {
         axios.get('/empPrjUtili')
         .then(function (response) {
           setEmpProjUtiliList(response.data.empProjUtili);
+          setFilteredList(response.data.empProjUtili);
+          // Only allow filtering by Project Name and Resource Name
+          setSearchKeys(["project_name", "resource_name"]);
         })
         .catch(function (error) {
           console.log(error);
@@ -78,12 +83,64 @@ function EmpProjUtiliList() {
                 });
             }
           })
-          navigate("/empUtiliList");
     }
+
+    const [filteredList, setFilteredList] = useState(empProjUtiliList);
+    const [searchKey, setSearchKey] = useState("");
+
+    const handleSearch = (event) => {
+      event.stopPropagation();
+    
+      if (!searchKey || searchKey === "-select-") {
+        Swal.fire({
+          title: 'Select Search Key ',
+          text: "Please select a key to search!",
+          icon: 'warning',
+          showCancelButton: false,
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'OK'
+        });
+      } else {
+        const searchValue = event.target.value?.toString().toLowerCase();
+        let dbVal = "";
+    
+        const fList = empProjUtiliList.filter((item) => {
+          if (searchKey === "project_name") {
+            dbVal = item?.projectDetails?.project_name?.toLowerCase() || "";
+          } else if (searchKey === "resource_name") {
+            dbVal = `${item?.empDetails?.first_name} ${item?.empDetails?.last_name}`.toLowerCase() || "";
+          } else {
+            dbVal = item[`${searchKey}`]?.toString().toLowerCase();
+          }
+    
+          return dbVal?.includes(searchValue);
+        });
+    
+        setFilteredList(fList);
+        setCurrentPage(1); // Reset to first page when searching
+      }
+    };
+    
+
+    const handleSearchKeyChange = (event) => {
+      event.stopPropagation();
+      if (event.target.value === "-select-"){
+        document.getElementById("search-value").value = "";
+      } else {
+        setSearchKey(event.target.value);
+      }
+      setInputType("text"); // Always text input for project name and resource name
+    };
+
+    const handleSearchRefreshClick = () => {
+      window.location.reload(true);
+    };
 
     const handleExcelExport = () => {
       Utils.exportHTMLTableToExcel('utilizationListTable', 'Utilization List', ["Action"])
     };
+
+    // No need for searchKeysToIgnore since we're only showing specific keys
 
     const openEmpDetailsModal = (empId) => {
       axios.get(`/employees/${empId}`)
@@ -107,11 +164,11 @@ function EmpProjUtiliList() {
     };
 
     // Calculate pagination
-    const totalItems = empProjUtiliList.length;
+    const totalItems = filteredList.length;
     const totalPages = Math.ceil(totalItems / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    const currentItems = empProjUtiliList.slice(startIndex, endIndex);
+    const currentItems = filteredList.slice(startIndex, endIndex);
 
     return (
       <Layout>
@@ -119,16 +176,45 @@ function EmpProjUtiliList() {
           <div className="list-page-card">
             {/* Header Section */}
             <div className="list-page-header">
-              <h1 className="list-page-title">Resource Utilization List</h1>
+              <h1 className="list-page-title">Utilization List</h1>
             </div>
 
-            {/* Action Buttons */}
+            {/* Search Controls */}
             <div className="search-controls">
               <div className="search-row">
-                <div className="search-input-group" style={{ flex: '0 1 auto' }}>
-                  {/* Placeholder for future search functionality */}
+                <div className="search-input-group">
+                  <span className="search-icon">
+                    <i className="bi bi-search"></i>
+                  </span>
+                  <select 
+                    className="search-select" 
+                    name="searchKey" 
+                    id="searchKey" 
+                    onChange={handleSearchKeyChange}
+                  > 
+                    <option value="-select-">-- Select Key --</option>
+                    {searchKeys.map((k) => 
+                      <option key={k} value={k}>{k.replace(/_/g, ' ').toUpperCase()}</option>
+                    )}
+                  </select>
+                  <input 
+                    className="search-input" 
+                    id="search-value" 
+                    type={inputType} 
+                    placeholder="Type a value" 
+                    onChange={handleSearch} 
+                  />
                 </div>
                 
+                <button 
+                  className="search-refresh-btn"
+                  onClick={handleSearchRefreshClick}
+                  hidden={modalIsOpen}
+                >
+                  <i className="bi bi-arrow-counterclockwise"></i>
+                  Refresh
+                </button>
+
                 <div className="action-buttons">
                   <button
                     type="button"
@@ -177,9 +263,9 @@ function EmpProjUtiliList() {
                   <tbody>
                     {currentItems.length === 0 ? (
                       <tr>
-                        <td colSpan="8" className="empty-state">
+                        <td colSpan="10" className="empty-state">
                           <i className="bi bi-graph-up"></i>
-                          <p>No utilization records found</p>
+                          <p>No utilizations found</p>
                         </td>
                       </tr>
                     ) : (
@@ -246,6 +332,7 @@ function EmpProjUtiliList() {
           </div>
         </div>
 
+        {/* Employee Profile Modal */}
         <EmployeeProfileModal
           modelstatus={modalIsOpen}
           close={() => setIsOpen(false)}

@@ -54,6 +54,11 @@ import OfficeLocationList from "./pages/officeLocations/OfficeLocationList"
 import OfficeLocationCreate from "./pages/officeLocations/OfficeLocationCreate"
 import OfficeLocationEdit from "./pages/officeLocations/OfficeLocationEdit"
 
+import LineOfBusinessList from "./pages/lineOfBusiness/LineOfBusinessList"
+import LineOfBusinessCreate from "./pages/lineOfBusiness/LineOfBusinessCreate"
+import LineOfBusinessEdit from "./pages/lineOfBusiness/LineOfBusinessEdit"
+import LineOfBusinessShow from "./pages/lineOfBusiness/LineOfBusinessShow"
+
 function App() {
   const needsPasswordReset = JSON.parse(localStorage.getItem("user"))?.needsPasswordReset || null;
   const isLoggedIn= ((localStorage.getItem("user") !== null) && (needsPasswordReset !== 1));
@@ -107,6 +112,10 @@ function App() {
           <Route path="/officeLocations"  element={isLoggedIn ? <OfficeLocationList/> : <Login/>} />
           <Route path="/officeLocationCreate"  element={isLoggedIn ? <OfficeLocationCreate/> : <Login/>} />
           <Route path="/officeLocationEdit/:id"  element={isLoggedIn ? <OfficeLocationEdit/> : <Login/>} />
+          <Route path="/lineOfBusiness"  element={isLoggedIn ? <LineOfBusinessList/> : <Login/>} />
+          <Route path="/lineOfBusinessCreate"  element={isLoggedIn ? <LineOfBusinessCreate/> : <Login/>} />
+          <Route path="/lineOfBusinessEdit/:id"  element={isLoggedIn ? <LineOfBusinessEdit/> : <Login/>} />
+          <Route path="/lineOfBusinessShow/:id"  element={isLoggedIn ? <LineOfBusinessShow/> : <Login/>} />
       </Routes>
     </Router>
   );
