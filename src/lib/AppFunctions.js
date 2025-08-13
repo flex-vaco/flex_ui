@@ -30,7 +30,6 @@ const clientAccessRoles = [
   APP_CONSTANTS.USER_ROLES.ADMINISTRATOR
 ];
 const lineOfBusinessAccessRoles = [
-  APP_CONSTANTS.USER_ROLES.MANAGER,
   APP_CONSTANTS.USER_ROLES.ADMINISTRATOR
 ];
 const reportAccessRoles = [
