@@ -29,6 +29,9 @@ const clientAccessRoles = [
   APP_CONSTANTS.USER_ROLES.MANAGER,
   APP_CONSTANTS.USER_ROLES.ADMINISTRATOR
 ];
+const lineOfBusinessAccessRoles = [
+  APP_CONSTANTS.USER_ROLES.ADMINISTRATOR
+];
 const reportAccessRoles = [
   APP_CONSTANTS.USER_ROLES.MANAGER,
   APP_CONSTANTS.USER_ROLES.ADMINISTRATOR,
@@ -92,6 +95,9 @@ export const hasAIChatAccess = (activeUserRole) => {
 };
 export const hasClientAccess = (activeUserRole) => {
   return clientAccessRoles.includes(activeUserRole) ? true : false;
+};
+export const hasLineOfBusinessAccess = (activeUserRole) => {
+  return lineOfBusinessAccessRoles.includes(activeUserRole) ? true : false;
 };
 export const hasApproveTimesheetAccess = (activeUserRole) => {
   return reportAccessTimesheetApprove.includes(activeUserRole) ? true : false;

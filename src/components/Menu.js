@@ -109,6 +109,13 @@ return(
               </div>
             )}
             
+            {AppFunc.hasLineOfBusinessAccess(activeUserRole) && (
+              <div className="sidebar-item" onClick={() => handleMenuClick('/lineOfBusiness')}>
+                <i className="bi bi-briefcase-fill me-2"></i>
+                Line of Business
+              </div>
+            )}
+            
             {AppFunc.hasAllocationAccess(activeUserRole) && (
               <div className="sidebar-item" onClick={() => handleMenuClick('/empProjList')}>
                 <i className="bi bi-diagram-3-fill me-2"></i>
