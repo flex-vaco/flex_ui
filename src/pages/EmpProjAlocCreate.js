@@ -12,7 +12,7 @@ function EmpProjAlocCreate() {
     const [end_date, setEndDate] = useState('');
     const [work_location, setWorkLocation] = useState('');
     const [hours_per_day, setHoursPerDay] = useState('');
-    const [rate_per_hour, setRatePerHour] = useState('');
+    const [bill_rate_per_hour, setBillRatePerHour] = useState('');
     const [shift_start_time, setShiftStartTime] = useState('');
     const [shift_end_time, setShiftEndTime] = useState('');
 
@@ -109,7 +109,7 @@ function EmpProjAlocCreate() {
             hours_per_day :hours_per_day,
             shift_start_time : shift_start_time, // 'hh:mi:ss',
             shift_end_time : shift_end_time,
-            rate_per_hour : rate_per_hour
+            bill_rate_per_hour : bill_rate_per_hour
         };
 
         axios.post('/empPrjAloc/add', data, config)
@@ -130,7 +130,7 @@ function EmpProjAlocCreate() {
             setHoursPerDay('');
             setShiftStartTime('');
             setShiftEndTime('');
-            setRatePerHour('');
+            setBillRatePerHour('');
           })
           .catch(function (error) {
             Swal.fire({
@@ -268,16 +268,16 @@ function EmpProjAlocCreate() {
                                 </div>
                                 <div className="form-row">
                                     <div className="form-group">
-                                        <label htmlFor="rate_per_hour" className="form-label">
-                                            Rate Per Hour (USD)
+                                        <label htmlFor="bill_rate_per_hour" className="form-label">
+                                            Cost Per Hour (USD)
                                         </label>
                                         <input 
-                                            onChange={(event)=>{setRatePerHour(event.target.value)}}
-                                            value={rate_per_hour}
+                                            onChange={(event)=>{setBillRatePerHour(event.target.value)}}
+                                            value={bill_rate_per_hour}
                                             type="number"
                                             className="form-control"
-                                            id="rate_per_hour"
-                                            name="rate_per_hour"
+                                            id="bill_rate_per_hour"
+                                            name="bill_rate_per_hour"
                                             placeholder="Enter rate per hour"
                                             min="0"
                                             step="0.01"

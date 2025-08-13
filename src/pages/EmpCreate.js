@@ -13,7 +13,7 @@ function EmpCreate() {
     const [education, setEducation] = useState('');
     const [profile_information, setProfileInformation] = useState('');
     const [total_work_experience_years, setTotWorkExp] = useState('');
-    const [rate_per_hour, setRatePerHour] = useState('');
+    const [cost_per_hour, setCostPerHour] = useState('');
     const [home_location_city, setHomeLocCity] = useState('');
     const [office_location_city, setOfficeLocCity] = useState('-select-');
     const [designation, setDesignation] = useState('');
@@ -33,15 +33,14 @@ function EmpCreate() {
     const [locationList, setLocationList] = useState([]);
     const [functional_focus, setFunctionalFocus] = useState('-select-');
     const [vaco_division, setVacoDivision] = useState('-select-');
-    const [core_skillset, setCoreSkillset] = useState([]); // multiple
+    const [core_skillset, setCoreSkillset] = useState(''); // textarea
     const [revenue_company_size, setRevenueCompanySize] = useState([]); // multiple
     const [industries, setIndustries] = useState([]); // multiple
     const [software_erp_experience, setSoftwareErpExperience] = useState([]); // multiple
     const [hours_preference, setHoursPreference] = useState('40.00');
-
+    const [line_of_business_id, setLineOfBusinessId] = useState('-select-');
+    const [lineOfBusinessList, setLineofBusinessList] = useState([]);
     const functionalFocusOptions = ['A/F', 'HR', 'Technology', 'Marketing', 'Operations'];
-    const vacoDivisionOptions = ['VR', 'VS', 'VT'];
-    const coreSkillsetOptions = ['Java', 'React', 'Node', 'Python', 'Angular'];
     const revenueCompanySizeOptions = ['<$10M', '$10M-$100M', '$100M-$1B', '$1B+'];
     const industriesOptions = ['Healthcare', 'Finance', 'Retail', 'Technology', 'Manufacturing'];
     const softwareErpExperienceOptions = ['SAP', 'Oracle', 'Dynamics', 'NetSuite', 'QuickBooks'];
@@ -64,12 +63,24 @@ function EmpCreate() {
           console.log(error);
         })
         fetchLocationList();
+        fetchLineofBusinessList();
     }, []);
 
     const fetchLocationList = () => {
         axios.get('/officeLocation')
         .then(function (response) {
           setLocationList(response.data.locations);
+        })
+        .catch(function (error) {
+          console.log(error);
+        })
+        
+    }
+
+    const fetchLineofBusinessList = () => {
+        axios.get('/lineOfBusiness')
+        .then(function (response) {
+          setLineofBusinessList(response.data.lineOfBusiness);
         })
         .catch(function (error) {
           console.log(error);
@@ -162,7 +173,7 @@ function EmpCreate() {
             return;
         }
 
-        if (!rate_per_hour) {
+        if (!cost_per_hour) {
             Swal.fire({
                 icon: 'warning',
                 title: 'Please enter rate per hour!',
@@ -216,7 +227,7 @@ function EmpCreate() {
         data.append('education', education);
         data.append('profile_information', profile_information);
         data.append('total_work_experience_years', total_work_experience_years);
-        data.append('rate_per_hour', rate_per_hour);
+        data.append('cost_per_hour', cost_per_hour);
         data.append('vaco_join_date', vaco_join_date);
         data.append('home_location_city', home_location_city);
         data.append('office_location_city', office_location_city);
@@ -227,8 +238,8 @@ function EmpCreate() {
         data.append('profile_picture', profile_picture);
         data.append('employment_type', employment_type);
         data.append('functional_focus_area', functional_focus);
-        data.append('highspring_division', vaco_division);
-        data.append('primary_skills', core_skillset.join(','));
+        data.append('line_of_business_id', line_of_business_id);
+        data.append('primary_skills', core_skillset);
         data.append('max_company_revenue_size', revenue_company_size.join(','));
         data.append('industries_experience', industries.join(','));
         data.append('erp_software_experience', software_erp_experience.join(','));  
@@ -250,7 +261,7 @@ function EmpCreate() {
             setEducation('');
             setProfileInformation('');
             setTotWorkExp('');
-            setRatePerHour('');
+            setCostPerHour('');
             setVacoJoinDate('');
             setHomeLocCity('');
             setOfficeLocCity('');
@@ -264,7 +275,7 @@ function EmpCreate() {
             setSelectedProfilePicture(null);
             setFunctionalFocus('-select-');
             setVacoDivision('-select-');
-            setCoreSkillset([]);
+            setCoreSkillset('');
             setRevenueCompanySize([]);
             setIndustries([]);
             setSoftwareErpExperience([]);
@@ -380,16 +391,16 @@ function EmpCreate() {
                                         />
                                     </div>
                                     <div className="form-group">
-                                        <label htmlFor="rate_per_hour" className="form-label required-field">
+                                        <label htmlFor="cost_per_hour" className="form-label required-field">
                                             Rate Per Hour (USD)
                                         </label>
                                         <input 
-                                            onChange={(event)=>{setRatePerHour(event.target.value)}}
-                                            value={rate_per_hour}
+                                            onChange={(event)=>{setCostPerHour(event.target.value)}}
+                                            value={cost_per_hour}
                                             type="number"
                                             className="form-control"
-                                            id="rate_per_hour"
-                                            name="rate_per_hour"
+                                            id="cost_per_hour"
+                                            name="cost_per_hour"
                                             placeholder="Enter hourly rate"
                                             min="0"
                                             step="0.01"
@@ -399,20 +410,18 @@ function EmpCreate() {
                                 </div>
                                 <div className="form-group full-width">
                                     <label htmlFor="core_skillset" className="form-label required-field">
-                                        Core Skillset (Top 3)
+                                        Core Skillset
                                     </label>
-                                    <select
-                                        id="core_skillset"
-                                        multiple
-                                        className="form-select"
+                                    <textarea 
                                         value={core_skillset}
-                                        onChange={(e) => setCoreSkillset(Array.from(e.target.selectedOptions, option => option.value))}
+                                        onChange={(event)=>{setCoreSkillset(event.target.value)}}
+                                        className="form-textarea"
+                                        id="core_skillset"
+                                        name="core_skillset"
+                                        placeholder="Enter core skills (comma separated)"
+                                        rows="3"
                                         required
-                                    >
-                                        {coreSkillsetOptions.map(opt => (
-                                            <option key={opt} value={opt}>{opt}</option>
-                                        ))}
-                                    </select>
+                                    ></textarea>
                                 </div>
                                 <div className="form-group full-width">
                                     <label htmlFor="secondary_skills" className="form-label">
@@ -604,18 +613,18 @@ function EmpCreate() {
                                         </select>
                                     </div>
                                     <div className="form-group">
-                                        <label htmlFor="vaco_division" className="form-label">
-                                            Vaco Division
+                                        <label htmlFor="line_of_business_id" className="form-label">
+                                            Line of Business
                                         </label>
                                         <select
-                                            id="vaco_division"
+                                            id="line_of_business_id"
                                             className="form-select"
-                                            value={vaco_division}
-                                            onChange={(e) => setVacoDivision(e.target.value)}
+                                            value={line_of_business_id}
+                                            onChange={(e) => setLineOfBusinessId(e.target.value)}
                                         >
                                             <option value="-select-">-- Select Division --</option>
-                                            {vacoDivisionOptions.map(opt => (
-                                                <option key={opt} value={opt}>{opt}</option>
+                                            {lineOfBusinessList.map(opt => (
+                                                <option key={opt.id} value={opt.id}>{opt.name}</option>
                                             ))}
                                         </select>
                                     </div>

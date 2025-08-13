@@ -46,7 +46,7 @@ function EmployeeProfileCard(props) {
                             </div>
                             <div className="detail-item">
                                 <span className="detail-label">Starting At: </span>
-                                <span className="detail-value starting-price"><b>${props.employee.rate_per_hour} PER HOUR</b></span>
+                                <span className="detail-value starting-price"><b>${props.employee.cost_per_hour} PER HOUR</b></span>
                             </div>
                         </div>
                     </div>

@@ -169,7 +169,7 @@ function ProjectList() {
                   > 
                     <option value="-select-">-- Search Key --</option>
                     {searchKeys.map((k) => (!searchKeysToIgnore.includes(k)) ? 
-                      <option key={k} value={k}>{k.toLocaleUpperCase()}</option> : ""
+                      <option key={k} value={k}>{k.replace(/_/g, ' ').toUpperCase()}</option> : ""
                     )}
                   </select>
                   <input 

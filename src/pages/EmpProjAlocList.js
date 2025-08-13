@@ -194,7 +194,7 @@ function EmpProjAlocList() {
                   > 
                     <option value="-select-">-- Select Key --</option>
                     {searchKeys.map((k) => (!searchKeysToIgnore.includes(k)) ? 
-                      <option key={k} value={k}>{k.toLocaleUpperCase()}</option> : ""
+                      <option key={k} value={k}>{k.replace(/_/g, ' ').toUpperCase()}</option> : ""
                     )}
                   </select>
                   <input 
@@ -257,7 +257,7 @@ function EmpProjAlocList() {
                       <th>End Date</th>
                       <th>Work Location</th>
                       <th>Hours per Day</th>
-                      <th>Rate Per Hour (USD)</th>
+                      <th>Cost Per Hour (USD)</th>
                       <th>Shift Start Time</th>
                       <th>Shift End Time</th>
                     </tr>
@@ -310,7 +310,7 @@ function EmpProjAlocList() {
                             <td>{Utils.formatDateYYYYMMDD(empProjAlloc.end_date)}</td>
                             <td>{empProjAlloc.work_location}</td>
                             <td>{empProjAlloc.hours_per_day}</td>
-                            <td>{empProjAlloc.rate_per_hour}</td>
+                            <td>{empProjAlloc.bill_rate_per_hour}</td>
                             <td>{empProjAlloc.shift_start_time}</td>
                             <td>{empProjAlloc.shift_end_time}</td>
                           </tr>

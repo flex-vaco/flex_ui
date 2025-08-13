@@ -65,7 +65,7 @@ const EmployeeProfileModal = (props) => {
             <p>Email: {props.employee.email}</p>
             <p>Role: {props.employee.designation}</p>
             <p>Exp (Yrs.): {props.employee.total_work_experience_years}</p>
-            <p>Rate/HR: {props.employee.rate_per_hour}</p>
+            <p>Rate/HR: {props.employee.cost_per_hour}</p>
             <p>Vaco Join Date: {Utils.formatDateYYYYMMDD(props.employee.vaco_join_date)}</p>
             <p>Home Location: {props.employee.home_location_city}</p>
             <p>Office Location: {props.employee.office_location_city}</p>
@@ -88,7 +88,7 @@ const EmployeeProfileModal = (props) => {
             <a href={(props.employee.resume) ? `${process.env.REACT_APP_API_BASE_URL}/uploads/resume/${props.employee.resume}` : null} rel="noreferrer" target="_blank" className="add-btn">Resume</a>
           </div>
           <h3>
-              {props.employee.designation} <span className="price">$ {props.employee.rate_per_hour}/hr</span>
+              {props.employee.designation} <span className="price">$ {props.employee.cost_per_hour}/hr</span>
           </h3>
           <p>{props.employee.profile_information}</p>
           <div className="skills">
