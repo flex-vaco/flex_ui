@@ -16,7 +16,7 @@ function EmpEdit() {
     const [education, setEducation] = useState('');
     const [profile_information, setProfileInformation] = useState('');
     const [total_work_experience_years, setTotWorkExp] = useState('');
-    const [rate_per_hour, setRatePerHour] = useState('');
+    const [cost_per_hour, setCostPerHour] = useState('');
     const [home_location_city, setHomeLocCity] = useState('');
     const [office_location_city, setOfficeLocCity] = useState('-select-');
     const [designation, setDesignation] = useState('');
@@ -40,7 +40,7 @@ function EmpEdit() {
     // New fields from create form
     const [functional_focus, setFunctionalFocus] = useState('-select-');
     const [vaco_division, setVacoDivision] = useState('-select-');
-    const [core_skillset, setCoreSkillset] = useState([]);
+    const [core_skillset, setCoreSkillset] = useState('');
     const [revenue_company_size, setRevenueCompanySize] = useState([]);
     const [industries, setIndustries] = useState([]);
     const [software_erp_experience, setSoftwareErpExperience] = useState([]);
@@ -117,7 +117,7 @@ function EmpEdit() {
             setEducation(empDetails.education);
             setProfileInformation(empDetails.profile_information);
             setTotWorkExp(empDetails.total_work_experience_years);
-            setRatePerHour(empDetails.rate_per_hour);
+            setCostPerHour(empDetails.cost_per_hour);
             setVacoJoinDate(Utils.formatDateYYYYMMDD(empDetails.vaco_join_date));
             setHomeLocCity(empDetails.home_location_city);
             setOfficeLocCity(empDetails.office_location_city);
@@ -132,7 +132,7 @@ function EmpEdit() {
             // Set new fields from response
             setFunctionalFocus(empDetails.functional_focus_area || '-select-');
             setVacoDivision(empDetails.highspring_division || '-select-');
-            setCoreSkillset(empDetails.primary_skills ? empDetails.primary_skills.split(',') : []);
+            setCoreSkillset(empDetails.primary_skills || '');
             setRevenueCompanySize(empDetails.max_company_revenue_size ? empDetails.max_company_revenue_size.split(',') : []);
             setIndustries(empDetails.industries_experience ? empDetails.industries_experience.split(',') : []);
             setSoftwareErpExperience(empDetails.erp_software_experience ? empDetails.erp_software_experience.split(',') : []);
@@ -230,7 +230,7 @@ function EmpEdit() {
         data.append('education', education);
         data.append('profile_information', profile_information);
         data.append('total_work_experience_years', total_work_experience_years);
-        data.append('rate_per_hour', rate_per_hour);
+        data.append('cost_per_hour', cost_per_hour);
         data.append('vaco_join_date', vaco_join_date);
         data.append('home_location_city', home_location_city);
         data.append('office_location_city', office_location_city);
@@ -245,7 +245,7 @@ function EmpEdit() {
         // Add new fields to FormData
         data.append('functional_focus_area', functional_focus);
         data.append('highspring_division', vaco_division);
-        data.append('primary_skills', core_skillset.join(','));
+        data.append('primary_skills', core_skillset);
         data.append('max_company_revenue_size', revenue_company_size.join(','));
         data.append('industries_experience', industries.join(','));
         data.append('erp_software_experience', software_erp_experience.join(','));  
@@ -393,16 +393,16 @@ function EmpEdit() {
                                         />
                                     </div>
                                     <div className="form-group">
-                                        <label htmlFor="rate_per_hour" className="form-label">
+                                        <label htmlFor="cost_per_hour" className="form-label">
                                             Rate Per Hour (USD)
                                         </label>
                                         <input 
-                                            onChange={(event)=>{setRatePerHour(event.target.value)}}
-                                            value={rate_per_hour}
+                                            onChange={(event)=>{setCostPerHour(event.target.value)}}
+                                            value={cost_per_hour}
                                             type="number"
                                             className="form-control"
-                                            id="rate_per_hour"
-                                            name="rate_per_hour"
+                                            id="cost_per_hour"
+                                            name="cost_per_hour"
                                             placeholder="Enter hourly rate"
                                             min="0"
                                             step="0.01"
@@ -411,20 +411,18 @@ function EmpEdit() {
                                 </div>
                                 <div className="form-group full-width">
                                     <label htmlFor="core_skillset" className="form-label required-field">
-                                        Core Skillset (Top 3)
+                                        Core Skillset
                                     </label>
-                                    <select
-                                        id="core_skillset"
-                                        multiple
-                                        className="form-select"
+                                    <textarea 
                                         value={core_skillset}
-                                        onChange={(e) => setCoreSkillset(Array.from(e.target.selectedOptions, option => option.value))}
+                                        onChange={(event)=>{setCoreSkillset(event.target.value)}}
+                                        className="form-textarea"
+                                        id="core_skillset"
+                                        name="core_skillset"
+                                        placeholder="Enter core skills (comma separated)"
+                                        rows="3"
                                         required
-                                    >
-                                        {coreSkillsetOptions.map(opt => (
-                                            <option key={opt} value={opt}>{opt}</option>
-                                        ))}
-                                    </select>
+                                    ></textarea>
                                 </div>
                                 <div className="form-group full-width">
                                     <label htmlFor="secondary_skills" className="form-label">

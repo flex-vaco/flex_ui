@@ -30,7 +30,7 @@ function EmpFilteredList() {
         education: '',
         profile_information: '',
         total_work_experience_years: '',
-        rate_per_hour: '',
+        cost_per_hour: '',
         vaco_join_date: '',
         home_location_city: '',
         office_location_city: '',

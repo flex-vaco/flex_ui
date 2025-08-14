@@ -111,7 +111,7 @@ function UserList() {
       Utils.exportHTMLTableToExcel('userListTable', 'User List', ["Action"])
     };
 
-    const searchKeysToIgnore = ["password","user_id"];
+    const searchKeysToIgnore = ["password","user_id", "project_id", "needsPasswordReset", "emp_id"];
 
     // Pagination handlers
     const handlePageChange = (page) => {
@@ -154,7 +154,7 @@ function UserList() {
                   > 
                     <option value="-select-">-- Search Key --</option>
                     {searchKeys.map((k) => (!searchKeysToIgnore.includes(k)) ? 
-                      <option key={k} value={k}>{k.toLocaleUpperCase()}</option> : ""
+                      <option key={k} value={k}>{k.replace(/_/g, ' ').toUpperCase()}</option> : ""
                     )}
                   </select>
                   <input 

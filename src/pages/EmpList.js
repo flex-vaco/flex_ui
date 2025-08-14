@@ -193,7 +193,7 @@ function EmpList() {
                   > 
                     <option value="-select-">-- Search Key --</option>
                     {searchKeys.map((k) => (!searchKeysToIgnore.includes(k)) ? 
-                      <option key={k} value={k}>{k.toLocaleUpperCase()}</option> : ""
+                      <option key={k} value={k}>{k.replace(/_/g, ' ').toUpperCase()}</option> : ""
                     )}
                   </select>
                   <input 
@@ -312,7 +312,7 @@ function EmpList() {
                               </span>
                             </td>
                             <td>{empDetails.total_work_experience_years}</td>
-                            <td>{empDetails.rate_per_hour}</td>
+                            <td>{empDetails.cost_per_hour}</td>
                             <td>{Utils.formatDateYYYYMMDD(empDetails.vaco_join_date)}</td>
                             <td>{empDetails.home_location_city}</td>
                             <td>{empDetails.office_location_city}</td>

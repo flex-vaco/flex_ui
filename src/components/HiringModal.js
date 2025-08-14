@@ -158,7 +158,7 @@ const HiringModal = (props) => {
                             <p><b className="text-muted">Project: </b>{props.hiringDetails.project_name}</p>
                             <p hidden={APP_FUNCTIONS.userIsProducer()}><b className="text-muted">Email: </b>{props.hiringDetails.employee_details?.emp_email}</p>
                             <p><b className="text-muted">Designation: </b>{props.hiringDetails.employee_details?.designation}</p>
-                            <p><b className="text-muted">Rate/HR: </b>{props.hiringDetails.employee_details?.rate_per_hour} USD</p>
+                            <p><b className="text-muted">Rate/HR: </b>{props.hiringDetails.employee_details?.cost_per_hour} USD</p>
                             <p><b className="text-muted">Manager Name: </b>{props.hiringDetails.employee_details?.manager_name}</p>
                             <p><b className="text-muted">Manager Email: </b> <a href={`mailto:${props.hiringDetails.employee_details?.manager_email}`}>{props.hiringDetails.employee_details?.manager_email}</a></p>
                             <p><b className="text-muted">Hours Per Week: </b>{props.hiringDetails.hours_per_week}</p>
