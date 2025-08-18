@@ -34,7 +34,9 @@ function UserEdit() {
     const [showClientSel, setShowClientSel] = useState(false);
     const [showProjectSel, setShowProjectSel] = useState(false);
     const [errMsg, setErrMsg] = useState('');
-
+    const [lineOfBusinessList, setLineOfBusinessList] = useState([]);
+    const [lineOfBusiness_id, setLineOfBusinessId] = useState('');
+    const [disableLineOfBusiness, setDisableLineOfBusiness] = useState(false);
     const handleCancel = () => {
         navigate("/userList");
     }
@@ -49,6 +51,7 @@ function UserEdit() {
                 showConfirmButton: true
             })
         } else {
+                
                 setRole(roleVal);
                 validateRoleDependencies();
         }
@@ -90,7 +93,15 @@ function UserEdit() {
           console.log(error);
         })
     }
-
+    const fetchLineofBusinessList = () => {
+        axios.get('/lineOfBusiness')
+        .then(function (response) {
+          setLineOfBusinessList(response.data.lineOfBusiness);
+        })
+        .catch(function (error) {
+          console.log(error);
+        })
+    }
     const handlEmployeeChange = (e) => {
         const empRequiredRoles = [APP_CONSTANTS.USER_ROLES.EMPLOYEE]
         if((empRequiredRoles.includes(role)) && (e.target.value === "-select-")){
@@ -118,6 +129,7 @@ function UserEdit() {
         fetchClients();
         fetchProjects();
         fetchEmployees();
+        fetchLineofBusinessList();
     }, []);
 
     useEffect(() => {
@@ -136,7 +148,9 @@ function UserEdit() {
             setShowProjectSel(userDetatils.project_id ? true : false);
             setEmployee(userDetatils.emp_id);
             setShowEmpSel(userDetatils.role === APP_CONSTANTS.USER_ROLES.EMPLOYEE);
+            setLineOfBusinessId(userDetatils.line_of_business_id);
             setIsLoading(false);
+            setDisableLineOfBusiness(userDetatils.role === APP_CONSTANTS.USER_ROLES.EMPLOYEE);
         })
         .catch(function (error) {
             Swal.fire({
@@ -221,6 +235,16 @@ function UserEdit() {
             return;
         }
 
+        if (!lineOfBusiness_id || lineOfBusiness_id === "-- Select line of business --") {
+
+            Swal.fire({
+                icon: 'warning',
+                title: 'Please select a line of business!',
+                showConfirmButton: true
+            })
+            return;
+        }
+
         if(validateRoleDependencies()) {
             setIsSaving(true);
 
@@ -231,7 +255,8 @@ function UserEdit() {
                 role: role,
                 password: password,
                 emp_id: employee,
-                project_id: project
+                project_id: project,
+                line_of_business_id: lineOfBusiness_id
             }
             if (role === APP_CONSTANTS.USER_ROLES.PRODUCER) {
                 const clientIds = (selectedClients?.length > 0) ? selectedClients.map(s=>s.client_id) : producerClientIds;
@@ -388,21 +413,45 @@ function UserEdit() {
                                         />
                                     </div>
                                 </div>
-                                <div className="form-group full-width">
-                                    <label htmlFor="email" className="form-label required-field">
-                                        Email ID
-                                    </label>
-                                    <input 
-                                        onChange={(event)=>{setEmail(event.target.value)}}
-                                        value={email}
-                                        type="email"
-                                        className="form-control"
-                                        id="email"
-                                        name="email"
-                                        placeholder="Enter email address"
-                                        required
-                                    />
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="email" className="form-label required-field">
+                                            Email ID
+                                        </label>
+                                        <input 
+                                            onChange={(event)=>{setEmail(event.target.value)}}
+                                            value={email}
+                                            type="email"
+                                            className="form-control"
+                                            id="email"
+                                            name="email"
+                                            placeholder="Enter email address"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="line_of_business" className="form-label required-field">
+                                            Line of Business
+                                        </label>
+                                        <select 
+                                            name="line_of_business" 
+                                            id="line_of_business" 
+                                            className="form-select" 
+                                            onChange={(e) => setLineOfBusinessId(e.target.value)}
+                                            value={lineOfBusiness_id}
+                                            required
+                                            disabled={disableLineOfBusiness}
+                                        >
+                                            <option value=""> -- Select line of business -- </option>
+                                            {lineOfBusinessList.map((lineOfBusiness) => (
+                                                <option key={lineOfBusiness.id} value={lineOfBusiness.id}>
+                                                    {lineOfBusiness.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
                                 </div>
+                                
                             </div>
 
                             <div className="form-section">

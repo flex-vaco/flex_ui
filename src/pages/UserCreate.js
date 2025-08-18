@@ -29,7 +29,9 @@ function UserCreate() {
     const [showEmpSel, setShowEmpSel] = useState(false);
     const [showClientSel, setShowClientSel] = useState(false);
     const [showProjectSel, setShowProjectSel] = useState(false);
-
+    const [lineOfBusinessList, setLineOfBusinessList] = useState([]);
+    const [lineOfBusiness_id, setLineOfBusinessId] = useState('');
+    const [disableLineOfBusiness, setDisableLineOfBusiness] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -37,6 +39,7 @@ function UserCreate() {
         fetchClients();
         fetchProjects();
         fetchEmployees();
+        fetchLineofBusinessList();
     }, []);
 
     const verifyPassword = (pswd) => {
@@ -93,6 +96,15 @@ function UserCreate() {
           console.log(error);
         })
     }
+    const fetchLineofBusinessList = () => {
+        axios.get('/lineOfBusiness')
+        .then(function (response) {
+          setLineOfBusinessList(response.data.lineOfBusiness);
+        })
+        .catch(function (error) {
+          console.log(error);
+        })
+    }
     const handleRoleChange = (e) => {
         const roleVal =  e.target.value;
         e.stopPropagation();
@@ -101,6 +113,8 @@ function UserCreate() {
             setEmail('');
             setFirstName('');
             setLastName('');
+            setDisableLineOfBusiness(false);
+            setLineOfBusinessId('');
         }
         
         if (roleVal === "-select-") {
@@ -150,8 +164,10 @@ function UserCreate() {
         setEmpId(selectedEmpId);
         const selectedEmployee = employees.filter(e => e.emp_id === selectedEmpId);
         setEmail(selectedEmployee[0].email);
+        setLineOfBusinessId(selectedEmployee[0].line_of_business_id);
         setFirstName(selectedEmployee[0].first_name);
         setLastName(selectedEmployee[0].last_name);
+        setDisableLineOfBusiness(true);
     }
     const handleProjectChange = (e) => {
         if(e.target.value === "-select-"){
@@ -168,6 +184,15 @@ function UserCreate() {
             Swal.fire({
                 icon: 'warning',
                 title: 'Please select a role!',
+                showConfirmButton: true
+            })
+            return;
+        }
+
+        if (!lineOfBusiness_id || lineOfBusiness_id === "-- Select line of business --") {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Please select a line of business!',
                 showConfirmButton: true
             })
             return;
@@ -232,7 +257,8 @@ function UserCreate() {
             role: role,
             password: password,
             emp_id: empId,
-            project_id: project
+            project_id: project,
+            line_of_business_id: lineOfBusiness_id
         }
 
         const clientIds = selectedClients.map(s=>s.client_id);
@@ -268,6 +294,8 @@ function UserCreate() {
             setEmpId(null);
             setProject(null);
             setSelectedClients([]);
+            setDisableLineOfBusiness(false);
+            setLineOfBusinessId('');
           })
           .catch(function (error) {
             Swal.fire({
@@ -409,21 +437,44 @@ function UserCreate() {
                                         />
                                     </div>
                                 </div>
-                                <div className="form-group full-width">
-                                    <label htmlFor="email" className="form-label required-field">
-                                        Email ID
-                                    </label>
-                                    <input 
-                                        onChange={(event)=>{setEmail(event.target.value)}}
-                                        value={email}
-                                        type="email"
-                                        className="form-control"
-                                        id="email"
-                                        name="email"
-                                        placeholder="Enter email address"
-                                        readOnly={role === APP_CONSTANTS.USER_ROLES.EMPLOYEE}
-                                        required
-                                    />
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="email" className="form-label required-field">
+                                            Email ID
+                                        </label>
+                                        <input 
+                                            onChange={(event)=>{setEmail(event.target.value)}}
+                                            value={email}
+                                            type="email"
+                                            className="form-control"
+                                            id="email"
+                                            name="email"
+                                            placeholder="Enter email address"
+                                            readOnly={role === APP_CONSTANTS.USER_ROLES.EMPLOYEE}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="line_of_business" className="form-label required-field">
+                                            Line of Business
+                                        </label>
+                                        <select 
+                                            name="line_of_business" 
+                                            id="line_of_business" 
+                                            className="form-select" 
+                                            onChange={(e) => setLineOfBusinessId(e.target.value)}
+                                            value={lineOfBusiness_id}
+                                            required
+                                            disabled={disableLineOfBusiness}
+                                        >
+                                            <option value=""> -- Select line of business -- </option>
+                                            {lineOfBusinessList.map((lineOfBusiness) => (
+                                                <option key={lineOfBusiness.id} value={lineOfBusiness.id}>
+                                                    {lineOfBusiness.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
 

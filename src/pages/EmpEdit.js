@@ -36,6 +36,8 @@ function EmpEdit() {
     const [manager_id, setSelectedManager] = useState("-select-");
     const [managerList, setManagerList] = useState([]);
     const [locationList, setLocationList] = useState([]);
+    const [lineOfBusinessList, setLineOfBusinessList] = useState([]);
+    const [lineOfBusiness_id, setLineOfBusinessId] = useState('');
     
     // New fields from create form
     const [functional_focus, setFunctionalFocus] = useState('-select-');
@@ -75,6 +77,7 @@ function EmpEdit() {
 
     useEffect(() => {
         fetchLocationList();
+        fetchLineofBusinessList();
     }, []);
 
     const handleManagerChange = (event) => {
@@ -95,6 +98,16 @@ function EmpEdit() {
         axios.get('/officeLocation')
         .then(function (response) {
           setLocationList(response.data.locations);
+        })
+        .catch(function (error) {
+          console.log(error);
+        })
+    }
+
+    const fetchLineofBusinessList = () => {
+        axios.get('/lineOfBusiness')
+        .then(function (response) {
+          setLineOfBusinessList(response.data.lineOfBusiness);
         })
         .catch(function (error) {
           console.log(error);
@@ -131,13 +144,12 @@ function EmpEdit() {
             
             // Set new fields from response
             setFunctionalFocus(empDetails.functional_focus_area || '-select-');
-            setVacoDivision(empDetails.highspring_division || '-select-');
             setCoreSkillset(empDetails.primary_skills || '');
             setRevenueCompanySize(empDetails.max_company_revenue_size ? empDetails.max_company_revenue_size.split(',') : []);
             setIndustries(empDetails.industries_experience ? empDetails.industries_experience.split(',') : []);
             setSoftwareErpExperience(empDetails.erp_software_experience ? empDetails.erp_software_experience.split(',') : []);
             setHoursPreference(empDetails.max_work_hours_prefered || '40.00');
-
+            setLineOfBusinessId(empDetails.line_of_business_id);
             const selectedManagerDetails = managerList.find((manager) => manager.email === empDetails.manager_email);
             if (selectedManagerDetails) {
                 setSelectedManager(selectedManagerDetails.user_id);
@@ -244,7 +256,7 @@ function EmpEdit() {
         
         // Add new fields to FormData
         data.append('functional_focus_area', functional_focus);
-        data.append('highspring_division', vaco_division);
+        data.append('line_of_business_id', lineOfBusiness_id);
         data.append('primary_skills', core_skillset);
         data.append('max_company_revenue_size', revenue_company_size.join(','));
         data.append('industries_experience', industries.join(','));
@@ -612,21 +624,25 @@ function EmpEdit() {
                                         </select>
                                     </div>
                                     <div className="form-group">
-                                        <label htmlFor="vaco_division" className="form-label">
-                                            Vaco Division
+                                        <label htmlFor="line_of_business" className="form-label">
+                                            Line of Business
                                         </label>
-                                        <select
-                                            id="vaco_division"
-                                            className="form-select"
-                                            value={vaco_division}
-                                            onChange={(e) => setVacoDivision(e.target.value)}
+                                        <select 
+                                            name="line_of_business" 
+                                            id="line_of_business" 
+                                            className="form-select" 
+                                            onChange={(e) => setLineOfBusinessId(e.target.value)}
+                                            value={lineOfBusiness_id}
+                                            required
                                         >
-                                            <option value="-select-">-- Select Division --</option>
-                                            {vacoDivisionOptions.map(opt => (
-                                                <option key={opt} value={opt}>{opt}</option>
+                                            <option value=""> -- Select line of business -- </option>
+                                            {lineOfBusinessList.map((lineOfBusiness) => (
+                                                <option key={lineOfBusiness.id} value={lineOfBusiness.id}>
+                                                    {lineOfBusiness.name}
+                                                </option>
                                             ))}
                                         </select>
-                                    </div>
+                                    </div> 
                                 </div>
                                 <div className="form-row">
                                     <div className="form-group">

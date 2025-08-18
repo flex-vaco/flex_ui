@@ -25,15 +25,28 @@ function ProjectEdit() {
     const navigate = useNavigate();
     const [client_id, setClientId] = useState('');
     const [clientList, setClientList] = useState([]);
+    const [lineOfBusinessList, setLineOfBusinessList] = useState([]);
+    const [lineOfBusiness_id, setLineOfBusinessId] = useState('');
 
     useEffect(() => {
         fetchClientList();
+        fetchLineofBusinessList();
     }, [])
 
     const fetchClientList = () => {
         axios.get('/clients')
         .then(function (response) {
           setClientList(response.data.clients);
+        })
+        .catch(function (error) {
+          console.log(error);
+        })
+    }
+
+    const fetchLineofBusinessList = () => {
+        axios.get('/lineOfBusiness')
+        .then(function (response) {
+          setLineOfBusinessList(response.data.lineOfBusiness);
         })
         .catch(function (error) {
           console.log(error);
@@ -49,6 +62,17 @@ function ProjectEdit() {
             })
         }
         setClientId(e.target.value);
+    }
+
+    const handleLineOfBusinessChange = (e) => {
+        if(e.target.value === "-select-"){
+            Swal.fire({
+                icon: 'warning',
+                title: 'Line of Business is required!',
+                showConfirmButton: true
+            })
+        }
+        setLineOfBusinessId(e.target.value);
     }
 
     useEffect(() => {
@@ -68,6 +92,7 @@ function ProjectEdit() {
             setStatus(projectDetails.status);
             setDescription(projectDetails.description);
             setHeadCount(projectDetails.head_count);
+            setLineOfBusinessId(projectDetails.line_of_business_id);
             setIsLoading(false);
         })
         .catch(function (error) {
@@ -107,6 +132,7 @@ function ProjectEdit() {
             description: description,
             status: status,
             head_count: head_count,
+            line_of_business_id: lineOfBusiness_id,
         })
         .then(function (response) {
             Swal.fire({
@@ -185,6 +211,28 @@ function ProjectEdit() {
                                         </select>
                                     </div>
                                     <div className="form-group">
+                                        <label htmlFor="line_of_business" className="form-label required-field">
+                                            Line of Business
+                                        </label>
+                                        <select 
+                                            name="line_of_business" 
+                                            id="line_of_business" 
+                                            className="form-select" 
+                                            onChange={handleLineOfBusinessChange}
+                                            value={lineOfBusiness_id}
+                                            required
+                                        >
+                                            <option value=""> -- Select line of business -- </option>
+                                            {lineOfBusinessList.map((lineOfBusiness) => (
+                                                <option key={lineOfBusiness.id} value={lineOfBusiness.id}>
+                                                    {lineOfBusiness.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="form-row">
+                                    <div className="form-group">
                                         <label htmlFor="project_name" className="form-label required-field">
                                             Project Name
                                         </label>
@@ -199,8 +247,6 @@ function ProjectEdit() {
                                             required
                                         />
                                     </div>
-                                </div>
-                                <div className="form-row">
                                     <div className="form-group">
                                         <label htmlFor="project_location" className="form-label required-field">
                                             Project Location
@@ -216,6 +262,9 @@ function ProjectEdit() {
                                             required
                                         />
                                     </div>
+                                    
+                                </div>
+                                <div className="form-row">
                                     <div className="form-group">
                                         <label htmlFor="head_count" className="form-label">
                                             Head Count

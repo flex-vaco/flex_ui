@@ -144,7 +144,10 @@ function LineOfBusinessList() {
                   <thead>
                     <tr>
                       <th>Action</th>
-                      <th>Line of Business Name</th>
+                      <th>Name</th>
+                      <th>Location</th>
+                      <th>Contact Person</th>
+                      <th>Contact Email</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -191,6 +194,15 @@ function LineOfBusinessList() {
                               >
                                 {lineOfBusiness.name}
                               </Link>
+                            </td>
+                            <td>
+                              {lineOfBusiness.location}
+                            </td>
+                            <td>
+                              {lineOfBusiness.contact_person}
+                            </td>
+                            <td>
+                              {lineOfBusiness.contact_email}
                             </td>
                           </tr>
                         );

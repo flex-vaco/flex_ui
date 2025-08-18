@@ -14,7 +14,7 @@ cookies.set('chat_history', 'session', { path: '/' });
 function InteliChat() {
   const [messages, setMessages] = useState([
     {
-      message: "Hello, I'm Resume Explorer! Ask me anything!",
+      message: `Hey ${JSON.parse(localStorage.getItem("user")).first_name} how can I help you?`,
       sender: "ai"
     }
   ]);
@@ -31,6 +31,7 @@ function InteliChat() {
     setIsTyping(true)
     customChatGptAPICall(message, chatMessages)
   },[messages.length]);
+
   const customChatGptAPICall = async (message, chatMessages) => {
     setIsTyping(true);
     

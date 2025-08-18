@@ -22,6 +22,8 @@ function ProjectCreate() {
     const navigate = useNavigate();
     const [clientList, setClientList] = useState([]);
     const [client_id, setClientId] = useState('');
+    const [lineOfBusinessList, setLineOfBusinessList] = useState([]);
+    const [lineOfBusiness_id, setLineOfBusinessId] = useState('');
 
     const handleCancel = () => {
         navigate("/projects");
@@ -29,12 +31,23 @@ function ProjectCreate() {
 
     useEffect(() => {
         fetchClientList();
+        fetchLineofBusinessList();
     }, [])
 
     const fetchClientList = () => {
         axios.get('/clients')
         .then(function (response) {
           setClientList(response.data.clients);
+        })
+        .catch(function (error) {
+          console.log(error);
+        })
+    }
+
+    const fetchLineofBusinessList = () => {
+        axios.get('/lineOfBusiness')
+        .then(function (response) {
+          setLineOfBusinessList(response.data.lineOfBusiness);
         })
         .catch(function (error) {
           console.log(error);
@@ -152,6 +165,28 @@ function ProjectCreate() {
                                         </select>
                                     </div>
                                     <div className="form-group">
+                                        <label htmlFor="line_of_business" className="form-label required-field">
+                                            Line of Business
+                                        </label>
+                                        <select 
+                                            name="line_of_business" 
+                                            id="line_of_business" 
+                                            className="form-select" 
+                                            onChange={(e) => setLineOfBusinessId(e.target.value)}
+                                            value={lineOfBusiness_id}
+                                            required
+                                        >
+                                            <option value=""> -- Select line of business -- </option>
+                                            {lineOfBusinessList.map((lineOfBusiness) => (
+                                                <option key={lineOfBusiness.id} value={lineOfBusiness.id}>
+                                                    {lineOfBusiness.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="form-row">
+                                    <div className="form-group">
                                         <label htmlFor="project_name" className="form-label required-field">
                                             Project Name
                                         </label>
@@ -166,8 +201,6 @@ function ProjectCreate() {
                                             required
                                         />
                                     </div>
-                                </div>
-                                <div className="form-row">
                                     <div className="form-group">
                                         <label htmlFor="project_location" className="form-label required-field">
                                             Project Location
@@ -183,6 +216,9 @@ function ProjectCreate() {
                                             required
                                         />
                                     </div>
+                                    
+                                </div>
+                                <div className="form-row">
                                     <div className="form-group">
                                         <label htmlFor="head_count" className="form-label">
                                             Head Count
