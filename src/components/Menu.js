@@ -116,6 +116,20 @@ return(
               </div>
             )}
             
+            {AppFunc.hasServiceLineAccess(activeUserRole) && (
+              <div className="sidebar-item" onClick={() => handleMenuClick('/serviceLine')}>
+                <i className="bi bi-diagram-2-fill me-2"></i>
+                Service Lines
+              </div>
+            )}
+            
+            {AppFunc.hasCapabilityAreaAccess(activeUserRole) && (
+              <div className="sidebar-item" onClick={() => handleMenuClick('/capabilityArea')}>
+                <i className="bi bi-gear-fill me-2"></i>
+                Capability Areas
+              </div>
+            )}
+            
             {AppFunc.hasAllocationAccess(activeUserRole) && (
               <div className="sidebar-item" onClick={() => handleMenuClick('/empProjList')}>
                 <i className="bi bi-diagram-3-fill me-2"></i>

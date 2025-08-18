@@ -32,6 +32,12 @@ const clientAccessRoles = [
 const lineOfBusinessAccessRoles = [
   APP_CONSTANTS.USER_ROLES.ADMINISTRATOR
 ];
+const serviceLineAccessRoles = [
+  APP_CONSTANTS.USER_ROLES.ADMINISTRATOR
+];
+const capabilityAreaAccessRoles = [
+  APP_CONSTANTS.USER_ROLES.ADMINISTRATOR
+];
 const reportAccessRoles = [
   APP_CONSTANTS.USER_ROLES.MANAGER,
   APP_CONSTANTS.USER_ROLES.ADMINISTRATOR,
@@ -98,6 +104,12 @@ export const hasClientAccess = (activeUserRole) => {
 };
 export const hasLineOfBusinessAccess = (activeUserRole) => {
   return lineOfBusinessAccessRoles.includes(activeUserRole) ? true : false;
+};
+export const hasServiceLineAccess = (activeUserRole) => {
+  return serviceLineAccessRoles.includes(activeUserRole) ? true : false;
+};
+export const hasCapabilityAreaAccess = (activeUserRole) => {
+  return capabilityAreaAccessRoles.includes(activeUserRole) ? true : false;
 };
 export const hasApproveTimesheetAccess = (activeUserRole) => {
   return reportAccessTimesheetApprove.includes(activeUserRole) ? true : false;

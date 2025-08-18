@@ -59,6 +59,16 @@ import LineOfBusinessCreate from "./pages/lineOfBusiness/LineOfBusinessCreate"
 import LineOfBusinessEdit from "./pages/lineOfBusiness/LineOfBusinessEdit"
 import LineOfBusinessShow from "./pages/lineOfBusiness/LineOfBusinessShow"
 
+import ServiceLineList from "./pages/serviceLine/ServiceLineList"
+import ServiceLineCreate from "./pages/serviceLine/ServiceLineCreate"
+import ServiceLineEdit from "./pages/serviceLine/ServiceLineEdit"
+import ServiceLineShow from "./pages/serviceLine/ServiceLineShow"
+
+import CapabilityAreaList from "./pages/capabilityArea/CapabilityAreaList"
+import CapabilityAreaCreate from "./pages/capabilityArea/CapabilityAreaCreate"
+import CapabilityAreaEdit from "./pages/capabilityArea/CapabilityAreaEdit"
+import CapabilityAreaShow from "./pages/capabilityArea/CapabilityAreaShow"
+
 function App() {
   const needsPasswordReset = JSON.parse(localStorage.getItem("user"))?.needsPasswordReset || null;
   const isLoggedIn= ((localStorage.getItem("user") !== null) && (needsPasswordReset !== 1));
@@ -116,6 +126,14 @@ function App() {
           <Route path="/lineOfBusinessCreate"  element={isLoggedIn ? <LineOfBusinessCreate/> : <Login/>} />
           <Route path="/lineOfBusinessEdit/:id"  element={isLoggedIn ? <LineOfBusinessEdit/> : <Login/>} />
           <Route path="/lineOfBusinessShow/:id"  element={isLoggedIn ? <LineOfBusinessShow/> : <Login/>} />
+          <Route path="/serviceLine"  element={isLoggedIn ? <ServiceLineList/> : <Login/>} />
+          <Route path="/serviceLineCreate"  element={isLoggedIn ? <ServiceLineCreate/> : <Login/>} />
+          <Route path="/serviceLineEdit/:id"  element={isLoggedIn ? <ServiceLineEdit/> : <Login/>} />
+          <Route path="/serviceLineShow/:id"  element={isLoggedIn ? <ServiceLineShow/> : <Login/>} />
+          <Route path="/capabilityArea"  element={isLoggedIn ? <CapabilityAreaList/> : <Login/>} />
+          <Route path="/capabilityAreaCreate"  element={isLoggedIn ? <CapabilityAreaCreate/> : <Login/>} />
+          <Route path="/capabilityAreaEdit/:id"  element={isLoggedIn ? <CapabilityAreaEdit/> : <Login/>} />
+          <Route path="/capabilityAreaShow/:id"  element={isLoggedIn ? <CapabilityAreaShow/> : <Login/>} />
       </Routes>
     </Router>
   );
