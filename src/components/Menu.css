@@ -142,7 +142,6 @@
 .sidebar-item:hover {
   background-color: #f8f9fa;
   color: #072942;
-  transform: translateX(5px);
 }
 
 .sidebar-item i {

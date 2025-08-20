@@ -50,6 +50,7 @@ function ServiceLineShow() {
                     <div className="card-body fw-bold">
                         <p><b className="text-muted">Service Line Name: </b>{serviceLineDetails.name}</p>
                         <p><b className="text-muted">Description: </b>{serviceLineDetails.description || 'N/A'}</p>
+                        <p><b className="text-muted">Line of Business: </b>{serviceLineDetails.line_of_business_name || 'N/A'}</p>
                         <p><b className="text-muted">Created At: </b>{new Date(serviceLineDetails.created_at).toLocaleDateString()}</p>
                     </div>
                 </div>

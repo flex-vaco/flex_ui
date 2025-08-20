@@ -10,28 +10,28 @@ import Pagination from "../../components/Pagination";
 import "../ListPages.css";
 import Loader from "../../components/Loader";
 
-function ServiceLineList() {
+function WorkRequestList() {
     const [isLoading, setIsLoading] = useState(false);
-    const [serviceLineList, setServiceLineList] = useState([]);
-    const hasReadOnlyAccess = AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.PRODUCER;
+    const [workRequestList, setWorkRequestList] = useState([]);
+    const hasReadOnlyAccess = AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.EMPLOYEE;
 
     const navigate = useNavigate();
 
     const handleAddButtonClick = () => {
-      navigate("/serviceLineCreate");
+      navigate("/workRequestCreate");
     }
 
     useEffect(() => {
-        fetchServiceLineList()
+        fetchWorkRequestList()
     }, [])
   
-    const fetchServiceLineList = () => {
+    const fetchWorkRequestList = () => {
         setIsLoading(true);
-        axios.get('/serviceLine')
+        axios.get('/workRequest')
         .then(function (response) {
-          setServiceLineList(response.data.serviceLines);
-          setFilteredList(response.data.serviceLines);
-          setSearchKeys(Object.keys(response?.data?.serviceLines[0] || {}))
+          setWorkRequestList(response.data.workRequests);
+          setFilteredList(response.data.workRequests);
+          setSearchKeys(Object.keys(response?.data?.workRequests[0] || {}))
         })
         .catch(function (error) {
           console.log(error);
@@ -52,15 +52,15 @@ function ServiceLineList() {
             confirmButtonText: 'Yes, delete it!'
           }).then((result) => {
             if (result.isConfirmed) {
-                axios.get(`/serviceLine/delete/${id}`)
+                axios.get(`/workRequest/delete/${id}`)
                 .then(function (response) {
                     Swal.fire({
                         icon: 'success',
-                        title: 'Service Line deleted successfully!',
+                        title: 'Work Request deleted successfully!',
                         showConfirmButton: false,
                         timer: 1500
                     })
-                    fetchServiceLineList()
+                    fetchWorkRequestList()
                 })
                 .catch(function (error) {
                     Swal.fire({
@@ -74,7 +74,7 @@ function ServiceLineList() {
           })
     };
 
-  const [filteredList, setFilteredList] = useState(serviceLineList);
+  const [filteredList, setFilteredList] = useState(workRequestList);
   const [searchKey, setSearchKey] = useState("");
   const  [inputType, setInputType] = useState("text");
   const  [searchKeys, setSearchKeys] = useState([])
@@ -87,7 +87,7 @@ function ServiceLineList() {
     event.stopPropagation();
     const searchValue = event.target.value.toString().toLowerCase();
     let dbVal = "";
-    const fList = serviceLineList.filter((item) => {
+    const fList = workRequestList.filter((item) => {
       if (searchKey.includes("date")) {
         dbVal = Utils.formatDateYYYYMMDD(item[`${searchKey}`]).toString();
       } else {
@@ -114,10 +114,21 @@ function ServiceLineList() {
   };
 
   const handleExcelExport = () => {
-    Utils.exportHTMLTableToExcel('serviceLineListTable', 'Service Line List', ["Action"])
+    Utils.exportHTMLTableToExcel('workRequestListTable', 'Work Request List', ["Action"])
   };
 
-  const searchKeysToIgnore = ["id", "created_at"];
+  const searchKeysToIgnore = ["id", "service_line_id", "project_id", "submitted_by", "submitted_at", "created_at", "updated_at"];
+
+  const getStatusBadgeClass = (status) => {
+    const statusLower = status?.toLowerCase();
+    if (statusLower === 'draft') return 'status-pending';
+    if (statusLower === 'submitted') return 'status-active';
+    if (statusLower === 'approved') return 'status-completed';
+    if (statusLower === 'rejected') return 'status-cancelled';
+    if (statusLower === 'in_progress') return 'status-active';
+    if (statusLower === 'completed') return 'status-completed';
+    return 'status-pending';
+  };
 
   // Pagination handlers
   const handlePageChange = (page) => {
@@ -142,7 +153,7 @@ function ServiceLineList() {
           <div className="list-page-card">
             {/* Header Section */}
             <div className="list-page-header">
-              <h1 className="list-page-title">Service Line List</h1>
+              <h1 className="list-page-title">Work Request List</h1>
             </div>
 
             {/* Search Controls */}
@@ -197,7 +208,7 @@ function ServiceLineList() {
                     className="add-btn"
                   >
                     <i className="bi bi-plus-square"></i>
-                    ADD SERVICE LINE
+                    ADD WORK REQUEST
                   </button>
                 </div>
               </div>
@@ -212,40 +223,47 @@ function ServiceLineList() {
                     containerHeight="200px"
                   />
               ) : (
-                <table className="table list-table" id='serviceLineListTable'>
+                <table className="table list-table" id='workRequestListTable'>
                   <thead>
                     <tr>
                       <th hidden={hasReadOnlyAccess}>Action</th>
-                      <th>Name</th>
-                      <th>Description</th>
-                      <th>Line of Business</th>
+                      <th>Title</th>
+                      <th>Service Line</th>
+                      <th>Project</th>
+                      <th>Duration</th>
+                      <th>Hours/Week</th>
+                      <th>Capability Areas</th>
+                      <th>Assigned Resources</th>
+                      <th>Status</th>
+                      <th>Submitted By</th>
+                      <th>Submitted At</th>
                     </tr>
                   </thead>
                   <tbody>
                     {currentItems.length === 0 ? (
                       <tr>
-                        <td colSpan="6" className="empty-state">
-                          <i className="bi bi-diagram-2"></i>
-                          <p>No service lines found</p>
+                        <td colSpan="10" className="empty-state">
+                          <i className="bi bi-clipboard-data"></i>
+                          <p>No work requests found</p>
                         </td>
                       </tr>
                     ) : (
-                      currentItems.map((serviceLine, key) => {
+                      currentItems.map((workRequest, key) => {
                         return (
                           <tr key={key}>
                             <td hidden={hasReadOnlyAccess}>
                               <div className="action-buttons-cell">
                                 <button
-                                  onClick={() => handleDelete(serviceLine.id)}
+                                  onClick={() => handleDelete(workRequest.id)}
                                   className="delete-btn"
-                                  title="Delete Service Line"
+                                  title="Delete Work Request"
                                 >
                                   <i className="bi bi-trash"></i>
                                 </button>
                                 <Link
                                   className="edit-btn"
-                                  to={`/serviceLineEdit/${serviceLine.id}`}
-                                  title="Edit Service Line"
+                                  to={`/workRequestEdit/${workRequest.id}`}
+                                  title="Edit Work Request"
                                 >
                                   <i className="bi bi-pencil"></i>
                                 </Link>
@@ -254,13 +272,26 @@ function ServiceLineList() {
                             <td>
                               <Link
                                 className="project-link"
-                                to={`/serviceLineShow/${serviceLine.id}`}
+                                to={`/workRequestShow/${workRequest.id}`}
                               >
-                                {serviceLine.name}
+                                {workRequest.title}
                               </Link>
                             </td>
-                            <td>{serviceLine.description || '-'}</td>
-                            <td>{serviceLine.line_of_business_name || '-'}</td>
+                            <td>{workRequest.service_line_name || '-'}</td>
+                            <td>{workRequest.project_name || '-'}</td>
+                            <td>
+                              {Utils.formatDateYYYYMMDD(workRequest.duration_from)} - {Utils.formatDateYYYYMMDD(workRequest.duration_to)}
+                            </td>
+                            <td>{workRequest.hours_per_week}</td>
+                            <td>{workRequest.capability_areas || '-'}</td>
+                            <td>{workRequest.assigned_resources || '-'}</td>
+                            <td>
+                              <span className={`status-badge ${getStatusBadgeClass(workRequest.status)}`}>
+                                {workRequest.status?.replace('_', ' ').toUpperCase()}
+                              </span>
+                            </td>
+                            <td>{workRequest.first_name} {workRequest.last_name}</td>
+                            <td>{Utils.formatDateYYYYMMDD(workRequest.submitted_at)}</td>
                           </tr>
                         );
                       })
@@ -287,4 +318,4 @@ function ServiceLineList() {
     );
 }
   
-export default ServiceLineList; 
+export default WorkRequestList; 

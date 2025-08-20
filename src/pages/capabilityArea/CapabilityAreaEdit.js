@@ -10,22 +10,40 @@ function CapabilityAreaEdit() {
     const navigate = useNavigate();
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
+    const [lineOfBusinessId, setLineOfBusinessId] = useState('');
     const [serviceLineId, setServiceLineId] = useState('');
+    const [lineOfBusinesses, setLineOfBusinesses] = useState([]);
     const [serviceLines, setServiceLines] = useState([]);
     const [isSaving, setIsSaving] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [dataLoaded, setDataLoaded] = useState(false);
 
     const handleCancel = () => {
         navigate("/capabilityArea");
     }
 
     useEffect(() => {
-        fetchServiceLines();
+        fetchLineOfBusinesses();
         fetchCapabilityAreaDetails();
     }, [id]);
 
-    const fetchServiceLines = () => {
-        axios.get('/serviceLine')
+    useEffect(() => {
+        fetchServiceLinesByLineOfBusiness(lineOfBusinessId);
+    }, [lineOfBusinessId]);
+
+    const fetchLineOfBusinesses = () => {
+        axios.get('/lineOfBusiness')
+        .then(function (response) {
+            setLineOfBusinesses(response.data.lineOfBusiness);
+            
+        })
+        .catch(function (error) {
+            console.log(error);
+        })
+    }
+
+    const fetchServiceLinesByLineOfBusiness = (lineOfBusinessId) => {
+        axios.get(`/serviceLine/lineOfBusiness/${lineOfBusinessId}`)
         .then(function (response) {
             setServiceLines(response.data.serviceLines);
         })
@@ -40,8 +58,10 @@ function CapabilityAreaEdit() {
             let capabilityAreaDetails = response.data.capabilityArea[0];
             setName(capabilityAreaDetails.name);
             setDescription(capabilityAreaDetails.description || '');
+            setLineOfBusinessId(capabilityAreaDetails.line_of_business_id);
             setServiceLineId(capabilityAreaDetails.service_line_id);
             setIsLoading(false);
+            setDataLoaded(true);
         })
         .catch(function (error) {
             Swal.fire({
@@ -60,6 +80,16 @@ function CapabilityAreaEdit() {
             Swal.fire({
                 icon: 'warning',
                 title: 'Please enter capability area name!',
+                showConfirmButton: true
+            })
+            return;
+        }
+
+        if (lineOfBusinessId === "" || lineOfBusinessId === null) {
+            console.log("lineOfBusinessId: ", lineOfBusinessId);
+            Swal.fire({
+                icon: 'warning',
+                title: 'Please select a line of business!',
                 showConfirmButton: true
             })
             return;
@@ -85,6 +115,7 @@ function CapabilityAreaEdit() {
         const data = {
           name: name,
           description: description,
+          line_of_business_id: lineOfBusinessId,
           service_line_id: serviceLineId,
         };
         axios.post(`/capabilityArea/update/${id}`, data, config)
@@ -156,6 +187,26 @@ function CapabilityAreaEdit() {
                                     />
                                 </div>
                                 <div className="form-group full-width">
+                                    <label htmlFor="lineOfBusiness" className="form-label required-field">
+                                        Line of Business
+                                    </label>
+                                    <select 
+                                        name="lineOfBusiness" 
+                                        id="lineOfBusiness" 
+                                        className="form-select" 
+                                        onChange={(e) => setLineOfBusinessId(e.target.value)}
+                                        value={lineOfBusinessId}
+                                        required
+                                    >
+                                        <option value=""> -- Select a Line of Business -- </option>
+                                        {lineOfBusinesses?.map((lineOfBusiness) => (
+                                            <option key={lineOfBusiness.id} value={lineOfBusiness.id}>
+                                                {lineOfBusiness.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="form-group full-width">
                                     <label htmlFor="serviceLine" className="form-label required-field">
                                         Service Line
                                     </label>
@@ -168,7 +219,7 @@ function CapabilityAreaEdit() {
                                         required
                                     >
                                         <option value=""> -- Select a Service Line -- </option>
-                                        {serviceLines.map((serviceLine) => (
+                                        {serviceLines?.map((serviceLine) => (
                                             <option key={serviceLine.id} value={serviceLine.id}>
                                                 {serviceLine.name}
                                             </option>

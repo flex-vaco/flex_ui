@@ -51,6 +51,7 @@ function CapabilityAreaShow() {
                     <div className="card-body fw-bold">
                         <p><b className="text-muted">Capability Area Name: </b>{capabilityAreaDetails.name}</p>
                         <p><b className="text-muted">Description: </b>{capabilityAreaDetails.description || 'N/A'}</p>
+                        <p><b className="text-muted">Line of Business: </b>{capabilityAreaDetails.line_of_business_name || 'N/A'}</p>
                         <p><b className="text-muted">Service Line: </b>{capabilityAreaDetails.service_line_name || 'N/A'}</p>
                         <p><b className="text-muted">Created At: </b>{new Date(capabilityAreaDetails.created_at).toLocaleDateString()}</p>
                     </div>

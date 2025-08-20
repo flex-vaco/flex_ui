@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import { useNavigate } from "react-router-dom"
 import Swal from 'sweetalert2'
 import axios from 'axios'
@@ -8,8 +8,24 @@ import "../FormStyles.css"
 function ServiceLineCreate() {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
+    const [lineOfBusinessId, setLineOfBusinessId] = useState('');
+    const [lineOfBusinesses, setLineOfBusinesses] = useState([]);
     const [isSaving, setIsSaving] = useState(false)
     const navigate = useNavigate();
+
+    useEffect(() => {
+        fetchLineOfBusinesses();
+    }, []);
+
+    const fetchLineOfBusinesses = () => {
+        axios.get('/lineOfBusiness')
+        .then(function (response) {
+            setLineOfBusinesses(response.data.lineOfBusiness);
+        })
+        .catch(function (error) {
+            console.log(error);
+        })
+    }
 
     const handleCancel = () => {
         navigate("/serviceLine");
@@ -36,6 +52,7 @@ function ServiceLineCreate() {
         const data = {
           name: name,
           description: description,
+          line_of_business_id: lineOfBusinessId,
         };
         axios.post('/serviceLine/add', data, config)
           .then(function (response) {
@@ -49,6 +66,7 @@ function ServiceLineCreate() {
             setIsSaving(false);
             setName('');
             setDescription('');
+            setLineOfBusinessId('');
           })
           .catch(function (error) {
             Swal.fire({
@@ -100,6 +118,26 @@ function ServiceLineCreate() {
                                         placeholder="Enter description (optional)"
                                         rows="3"
                                     />
+                                </div>
+                                <div className="form-group full-width">
+                                    <label htmlFor="lineOfBusiness" className="form-label required-field">
+                                        Line of Business
+                                    </label>
+                                    <select 
+                                        id="lineOfBusiness"
+                                        value={lineOfBusinessId}
+                                        onChange={(e) => setLineOfBusinessId(e.target.value)}
+                                        className="form-select"
+                                        required
+                                    >
+                                        <option value=""> -- Select a Line of Business -- </option>
+                                        {lineOfBusinesses?.map((lineOfBusiness) => (
+                                            
+                                            <option key={lineOfBusiness.id} value={lineOfBusiness.id}>
+                                                {lineOfBusiness.name}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
                             </div>
 

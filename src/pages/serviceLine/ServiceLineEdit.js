@@ -10,6 +10,8 @@ function ServiceLineEdit() {
     const navigate = useNavigate();
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
+    const [lineOfBusinessId, setLineOfBusinessId] = useState('');
+    const [lineOfBusinesses, setLineOfBusinesses] = useState([]);
     const [isSaving, setIsSaving] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -18,11 +20,13 @@ function ServiceLineEdit() {
     }
 
     useEffect(() => {
+        fetchLineOfBusinesses();
         axios.get(`/serviceLine/${id}`)
         .then(function (response) {
             let serviceLineDetails = response.data.serviceLine[0];
             setName(serviceLineDetails.name);
             setDescription(serviceLineDetails.description || '');
+            setLineOfBusinessId(serviceLineDetails.line_of_business_id || '');
             setIsLoading(false);
         })
         .catch(function (error) {
@@ -36,6 +40,16 @@ function ServiceLineEdit() {
             setIsLoading(false);
         })
     }, [id])
+
+    const fetchLineOfBusinesses = () => {
+        axios.get('/lineOfBusiness')
+        .then(function (response) {
+            setLineOfBusinesses(response.data.lineOfBusiness);
+        })
+        .catch(function (error) {
+            console.log(error);
+        })
+    }
 
     const handleSave = () => {
         if (!name.trim()) {
@@ -58,6 +72,7 @@ function ServiceLineEdit() {
         const data = {
           name: name,
           description: description,
+          line_of_business_id: lineOfBusinessId,
         };
         axios.post(`/serviceLine/update/${id}`, data, config)
           .then(function (response) {
@@ -140,6 +155,25 @@ function ServiceLineEdit() {
                                         placeholder="Enter description (optional)"
                                         rows="3"
                                     />
+                                </div>
+                                <div className="form-group full-width">
+                                    <label htmlFor="lineOfBusiness" className="form-label required-field">
+                                        Line of Business
+                                    </label>
+                                    <select 
+                                        id="lineOfBusiness"
+                                        value={lineOfBusinessId}
+                                        onChange={(e) => setLineOfBusinessId(e.target.value)}
+                                        className="form-select"
+                                        required
+                                    >
+                                        <option value=""> -- Select a Line of Business -- </option>
+                                        {lineOfBusinesses.map((lineOfBusiness) => (
+                                            <option key={lineOfBusiness.id} value={lineOfBusiness.id}>
+                                                {lineOfBusiness.name}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
                             </div>
 

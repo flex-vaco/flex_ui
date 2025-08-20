@@ -130,6 +130,13 @@ return(
               </div>
             )}
             
+            {AppFunc.hasWorkRequestAccess(activeUserRole) && (
+              <div className="sidebar-item" onClick={() => handleMenuClick('/workRequest')}>
+                <i className="bi bi-clipboard-data-fill me-2"></i>
+                Work Requests
+              </div>
+            )}
+            
             {AppFunc.hasAllocationAccess(activeUserRole) && (
               <div className="sidebar-item" onClick={() => handleMenuClick('/empProjList')}>
                 <i className="bi bi-diagram-3-fill me-2"></i>

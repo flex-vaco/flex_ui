@@ -69,6 +69,11 @@ import CapabilityAreaCreate from "./pages/capabilityArea/CapabilityAreaCreate"
 import CapabilityAreaEdit from "./pages/capabilityArea/CapabilityAreaEdit"
 import CapabilityAreaShow from "./pages/capabilityArea/CapabilityAreaShow"
 
+import WorkRequestList from "./pages/workRequest/WorkRequestList"
+import WorkRequestCreate from "./pages/workRequest/WorkRequestCreate"
+import WorkRequestEdit from "./pages/workRequest/WorkRequestEdit"
+import WorkRequestShow from "./pages/workRequest/WorkRequestShow"
+
 function App() {
   const needsPasswordReset = JSON.parse(localStorage.getItem("user"))?.needsPasswordReset || null;
   const isLoggedIn= ((localStorage.getItem("user") !== null) && (needsPasswordReset !== 1));
@@ -134,6 +139,10 @@ function App() {
           <Route path="/capabilityAreaCreate"  element={isLoggedIn ? <CapabilityAreaCreate/> : <Login/>} />
           <Route path="/capabilityAreaEdit/:id"  element={isLoggedIn ? <CapabilityAreaEdit/> : <Login/>} />
           <Route path="/capabilityAreaShow/:id"  element={isLoggedIn ? <CapabilityAreaShow/> : <Login/>} />
+          <Route path="/workRequest"  element={isLoggedIn ? <WorkRequestList/> : <Login/>} />
+          <Route path="/workRequestCreate"  element={isLoggedIn ? <WorkRequestCreate/> : <Login/>} />
+          <Route path="/workRequestEdit/:id"  element={isLoggedIn ? <WorkRequestEdit/> : <Login/>} />
+          <Route path="/workRequestShow/:id"  element={isLoggedIn ? <WorkRequestShow/> : <Login/>} />
       </Routes>
     </Router>
   );

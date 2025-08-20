@@ -219,12 +219,13 @@ function CapabilityAreaList() {
                       <th>Name</th>
                       <th>Description</th>
                       <th>Service Line</th>
+                      <th>Line of Business</th>
                     </tr>
                   </thead>
                   <tbody>
                     {currentItems.length === 0 ? (
                       <tr>
-                        <td colSpan="6" className="empty-state">
+                        <td colSpan="7" className="empty-state">
                           <i className="bi bi-gear"></i>
                           <p>No capability areas found</p>
                         </td>
@@ -261,6 +262,7 @@ function CapabilityAreaList() {
                             </td>
                             <td>{capabilityArea.description || '-'}</td>
                             <td>{capabilityArea.service_line_name || '-'}</td>
+                            <td>{capabilityArea.line_of_business_name || '-'}</td>
                           </tr>
                         );
                       })
