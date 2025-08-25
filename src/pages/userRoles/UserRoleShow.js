@@ -102,7 +102,7 @@ function UserRoleShow() {
                                 </div>
                             </div>
                             <div className="form-group full-width">
-                                <label className="form-label">Role Type</label>
+                                <label className="form-label">Role</label>
                                 <div className="form-control-static">
                                     {userRole.role}
                                 </div>

@@ -117,7 +117,7 @@ function UserRoleCreate() {
                                         onChange={handleInputChange}
                                         required
                                     >
-                                        <option value="">Select Role Capability</option>
+                                        <option value="">Select Role</option>
                                         {roleOptions.map((option) => (
                                             <option key={option.value} value={option.value}>
                                                 {option.label}
