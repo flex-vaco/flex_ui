@@ -5,6 +5,7 @@ import axios from 'axios'
 import Layout from "../components/Layout"
 import * as AppFunc from "../lib/AppFunctions";
 import "./FormStyles.css";
+import APP_CONSTANTS from "../appConstants";
  
 function EmpCreate() {
     const [first_name, setFirstName] = useState('');
@@ -32,13 +33,13 @@ function EmpCreate() {
     const [manager_id, setSelectedManager] = useState("-select-");
     const [locationList, setLocationList] = useState([]);
     const [functional_focus, setFunctionalFocus] = useState('-select-');
-    const [vaco_division, setVacoDivision] = useState('-select-');
     const [core_skillset, setCoreSkillset] = useState(''); // textarea
     const [revenue_company_size, setRevenueCompanySize] = useState([]); // multiple
     const [industries, setIndustries] = useState([]); // multiple
     const [software_erp_experience, setSoftwareErpExperience] = useState([]); // multiple
     const [hours_preference, setHoursPreference] = useState('40.00');
-    const [line_of_business_id, setLineOfBusinessId] = useState('-select-');
+    const [line_of_business_id, setLineOfBusinessId] = useState(JSON.parse(localStorage.getItem("user")).line_of_business_id);
+    const [userRole, setUserRole] = useState(JSON.parse(localStorage.getItem("user")).role);
     const [lineOfBusinessList, setLineofBusinessList] = useState([]);
     const functionalFocusOptions = ['A/F', 'HR', 'Technology', 'Marketing', 'Operations'];
     const revenueCompanySizeOptions = ['<$10M', '$10M-$100M', '$100M-$1B', '$1B+'];
@@ -46,6 +47,78 @@ function EmpCreate() {
     const softwareErpExperienceOptions = ['SAP', 'Oracle', 'Dynamics', 'NetSuite', 'QuickBooks'];
 
     useEffect(() => {
+        fetchLocationList();
+        fetchLineofBusinessList();
+        
+        // Set initial manager list based on user role
+        if (userRole === 'administrator') {
+            // For admin, fetch all managers initially
+            fetchAllManagers();
+        } else {
+            // For manager/offshorelead, set their own details
+            const currentUser = JSON.parse(localStorage.getItem("user"));
+            if (currentUser) {
+                setManagerList([{
+                    user_id: currentUser.user_id,
+                    first_name: currentUser.first_name,
+                    last_name: currentUser.last_name,
+                    email: currentUser.email
+                }]);
+                setSelectedManager(currentUser.user_id);
+                setManagerName(`${currentUser.first_name} ${currentUser.last_name}`);
+                setManagerEmail(currentUser.email);
+            }
+        }
+    }, [userRole]);
+
+    // // Ensure line_of_business_id is set for non-administrator users
+    // useEffect(() => {
+    //     if (userRole !== 'administrator') {
+    //         const user = JSON.parse(localStorage.getItem("user"));
+    //         if (user && user.line_of_business_id) {
+    //             setLineOfBusinessId(user.line_of_business_id);
+    //         }
+    //     }
+    // }, [userRole]);
+
+    // Handle line of business changes for administrators
+    useEffect(() => {
+        if (userRole === 'administrator' && line_of_business_id && line_of_business_id !== '-select-') {
+            fetchManagersByLineOfBusiness(line_of_business_id);
+        }
+    }, [line_of_business_id, userRole]);
+
+    const fetchLocationList = () => {
+        axios.get('/officeLocation')
+        .then(function (response) {
+          setLocationList(response.data.locations);
+        })
+        .catch(function (error) {
+          console.log(error);
+        })
+        
+    }
+
+    const fetchLineofBusinessList = () => {
+        if (AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR) {
+            axios.get('/lineOfBusiness')
+            .then(function (response) {
+                setLineofBusinessList(response.data.lineOfBusiness);
+            })
+            .catch(function (error) {
+                console.log(error);
+            })
+            
+        } else {
+            const user = JSON.parse(localStorage.getItem("user"));
+            if (user && user.line_of_business_id) {
+                setLineOfBusinessId(user.line_of_business_id);
+            }
+            
+        }
+    }
+
+    const fetchAllManagers = () => {
         const configs = {
             headers: {
               "Content-Type": "application/json",
@@ -62,25 +135,25 @@ function EmpCreate() {
         .catch(function (error) {
           console.log(error);
         })
-        fetchLocationList();
-        fetchLineofBusinessList();
-    }, []);
-
-    const fetchLocationList = () => {
-        axios.get('/officeLocation')
-        .then(function (response) {
-          setLocationList(response.data.locations);
-        })
-        .catch(function (error) {
-          console.log(error);
-        })
-        
     }
 
-    const fetchLineofBusinessList = () => {
-        axios.get('/lineOfBusiness')
+    const fetchManagersByLineOfBusiness = (lineOfBusinessId) => {
+        const configs = {
+            headers: {
+              "Content-Type": "application/json",
+            },
+        };
+        const datas = {
+            line_of_business_id: lineOfBusinessId,
+        };
+  
+        axios.post('/users/getManagersByLineOfBusiness', datas, configs)
         .then(function (response) {
-          setLineofBusinessList(response.data.lineOfBusiness);
+          setManagerList(response.data.users);
+          // Reset manager selection when line of business changes
+          setSelectedManager("-select-");
+          setManagerName('');
+          setManagerEmail('');
         })
         .catch(function (error) {
           console.log(error);
@@ -116,7 +189,6 @@ function EmpCreate() {
         setSelectedManager(selectedManagerId);
 
         const selectedManagerDetails = managerList.find((manager) => manager.user_id == selectedManagerId);
-        console.log(selectedManagerDetails);
         if (selectedManagerDetails) {
             setManagerName(`${selectedManagerDetails.first_name} ${selectedManagerDetails.last_name}`);
             setManagerEmail(selectedManagerDetails.email);
@@ -209,6 +281,17 @@ function EmpCreate() {
             return;
         }
 
+        // Validate line of business for non-administrator users
+        if (userRole !== 'administrator' && (!line_of_business_id || line_of_business_id === '-select-')) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Line of Business is required!',
+                text: 'Please ensure you have a valid line of business assigned.',
+                showConfirmButton: true
+            })
+            return;
+        }
+
         setIsSaving(true);
         const config = {
           headers: {
@@ -274,7 +357,6 @@ function EmpCreate() {
             setSelectedResume(null);
             setSelectedProfilePicture(null);
             setFunctionalFocus('-select-');
-            setVacoDivision('-select-');
             setCoreSkillset('');
             setRevenueCompanySize([]);
             setIndustries([]);
@@ -612,22 +694,28 @@ function EmpCreate() {
                                             ))}
                                         </select>
                                     </div>
-                                    <div className="form-group">
-                                        <label htmlFor="line_of_business_id" className="form-label">
+                                    {userRole === 'administrator' && (
+                                        <div className="form-group">
+                                            <label htmlFor="line_of_business_id" className="form-label">
                                             Line of Business
-                                        </label>
-                                        <select
+                                            </label>
+
+                                            <select
                                             id="line_of_business_id"
                                             className="form-select"
                                             value={line_of_business_id}
                                             onChange={(e) => setLineOfBusinessId(e.target.value)}
-                                        >
-                                            <option value="-select-">-- Select Division --</option>
-                                            {lineOfBusinessList.map(opt => (
-                                                <option key={opt.id} value={opt.id}>{opt.name}</option>
+                                            >
+                                            <option value="">-- Select Division --</option>
+                                            {lineOfBusinessList.map((opt) => (
+                                                <option key={opt.id} value={opt.id}>
+                                                {opt.name}
+                                                </option>
                                             ))}
-                                        </select>
-                                    </div>
+                                            </select>
+                                        </div>
+                                    )}
+
                                 </div>
                                 <div className="form-row">
                                     <div className="form-group">
@@ -705,20 +793,40 @@ function EmpCreate() {
                                         <label htmlFor="manager_id" className="form-label">
                                             Manager Name
                                         </label>
-                                        <select 
-                                            name="manager_id" 
-                                            id="manager_id" 
-                                            className="form-select" 
-                                            value={manager_id} 
-                                            onChange={handleManagerChange}
-                                        > 
-                                            <option value="-select-"> -- Select Manager -- </option>
-                                            {managerList.map((manager) => (
-                                                <option key={manager.user_id} value={manager.user_id}>
-                                                    {manager.first_name}, {manager.last_name}
+                                        {userRole === 'administrator' ? (
+                                            <select 
+                                                name="manager_id" 
+                                                id="manager_id" 
+                                                className="form-select" 
+                                                value={manager_id} 
+                                                onChange={handleManagerChange}
+                                                disabled={!line_of_business_id || line_of_business_id === '-select-'}
+                                            > 
+                                                <option value="-select-"> 
+                                                    {!line_of_business_id || line_of_business_id === '-select-' 
+                                                        ? '-- Select Line of Business First --' 
+                                                        : '-- Select Manager --'} 
                                                 </option>
-                                            ))}
-                                        </select>
+                                                {managerList.map((manager) => (
+                                                    <option key={manager.user_id} value={manager.user_id}>
+                                                        {manager.first_name} {manager.last_name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        ) : (
+                                            <input 
+                                                type="text"
+                                                className="form-control"
+                                                value={manager_name || 'Loading...'}
+                                                readOnly
+                                                style={{ backgroundColor: '#f8f9fa', cursor: 'not-allowed' }}
+                                            />
+                                        )}
+                                        {userRole === 'administrator' && (!line_of_business_id || line_of_business_id === '-select-') && (
+                                            <small className="form-text text-muted">
+                                                Please select a Line of Business first to enable manager selection
+                                            </small>
+                                        )}
                                     </div>
                                     <div className="form-group">
                                         <label htmlFor="manager_email" className="form-label">
@@ -736,6 +844,15 @@ function EmpCreate() {
                                         />
                                     </div>
                                 </div>
+                                {userRole !== 'administrator' && (
+                                    <div className="form-row">
+                                        <div className="form-group full-width">
+                                            <small className="form-text text-muted">
+                                                Manager is automatically set to your account as you can only create employees under your management
+                                            </small>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="form-section">

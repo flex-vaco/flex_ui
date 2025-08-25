@@ -13,7 +13,7 @@ import Loader from "../../components/Loader";
 function CapabilityAreaList() {
     const [isLoading, setIsLoading] = useState(false);
     const [capabilityAreaList, setCapabilityAreaList] = useState([]);
-    const hasReadOnlyAccess = AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.PRODUCER;
+    const hasReadOnlyAccess = !(AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR || AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.LOB_ADMIN);
 
     const navigate = useNavigate();
 
@@ -225,7 +225,7 @@ function CapabilityAreaList() {
                   <tbody>
                     {currentItems.length === 0 ? (
                       <tr>
-                        <td colSpan="7" className="empty-state">
+                        <td colSpan={hasReadOnlyAccess ? "5" : "6"} className="empty-state">
                           <i className="bi bi-gear"></i>
                           <p>No capability areas found</p>
                         </td>

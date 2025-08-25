@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom"
 import Swal from 'sweetalert2'
 import axios from 'axios'
 import Layout from "../../components/Layout"
+import * as AppFunc from "../../lib/AppFunctions";
+import APP_CONSTANTS from "../../appConstants";
 import "../FormStyles.css"
  
 function ServiceLineEdit() {
@@ -14,6 +16,15 @@ function ServiceLineEdit() {
     const [lineOfBusinesses, setLineOfBusinesses] = useState([]);
     const [isSaving, setIsSaving] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [disableLineOfBusiness, setDisableLineOfBusiness] = useState(false);
+    
+    const hasAccess = AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR || AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.LOB_ADMIN;
+    
+    useEffect(() => {
+        if (!hasAccess) {
+            navigate('/serviceLine');
+        }
+    }, [hasAccess, navigate]);
 
     const handleCancel = () => {
         navigate("/serviceLine");
@@ -23,7 +34,7 @@ function ServiceLineEdit() {
         fetchLineOfBusinesses();
         axios.get(`/serviceLine/${id}`)
         .then(function (response) {
-            let serviceLineDetails = response.data.serviceLine[0];
+            let serviceLineDetails = response.data.serviceLine;
             setName(serviceLineDetails.name);
             setDescription(serviceLineDetails.description || '');
             setLineOfBusinessId(serviceLineDetails.line_of_business_id || '');
@@ -42,13 +53,22 @@ function ServiceLineEdit() {
     }, [id])
 
     const fetchLineOfBusinesses = () => {
-        axios.get('/lineOfBusiness')
-        .then(function (response) {
-            setLineOfBusinesses(response.data.lineOfBusiness);
-        })
-        .catch(function (error) {
-            console.log(error);
-        })
+        if (AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR) {
+            // For Administrator, fetch all line of businesses
+            axios.get('/lineOfBusiness')
+            .then(function (response) {
+                setLineOfBusinesses(response.data.lineOfBusiness);
+            })
+            .catch(function (error) {
+                console.log(error);
+            })
+        } else {
+            const user = JSON.parse(localStorage.getItem("user"));
+            if (user && user.line_of_business_id) {
+                setLineOfBusinessId(user.line_of_business_id);
+                setDisableLineOfBusiness(true);
+            }
+        }
     }
 
     const handleSave = () => {
@@ -156,25 +176,28 @@ function ServiceLineEdit() {
                                         rows="3"
                                     />
                                 </div>
-                                <div className="form-group full-width">
-                                    <label htmlFor="lineOfBusiness" className="form-label required-field">
-                                        Line of Business
-                                    </label>
-                                    <select 
-                                        id="lineOfBusiness"
-                                        value={lineOfBusinessId}
-                                        onChange={(e) => setLineOfBusinessId(e.target.value)}
-                                        className="form-select"
-                                        required
-                                    >
-                                        <option value=""> -- Select a Line of Business -- </option>
-                                        {lineOfBusinesses.map((lineOfBusiness) => (
-                                            <option key={lineOfBusiness.id} value={lineOfBusiness.id}>
-                                                {lineOfBusiness.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
+                                {AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR && (
+                                    <div className="form-group full-width">
+                                        <label htmlFor="lineOfBusiness" className="form-label required-field">
+                                            Line of Business
+                                        </label>
+                                        <select 
+                                            id="lineOfBusiness"
+                                            value={lineOfBusinessId}
+                                            onChange={(e) => setLineOfBusinessId(e.target.value)}
+                                            className="form-select"
+                                            required
+                                            disabled={disableLineOfBusiness || AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.LOB_ADMIN}
+                                        >
+                                            <option value=""> -- Select a Line of Business -- </option>
+                                            {lineOfBusinesses?.map((lineOfBusiness) => (
+                                                <option key={lineOfBusiness.id} value={lineOfBusiness.id}>
+                                                    {lineOfBusiness.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="form-actions">

@@ -13,7 +13,7 @@ import Loader from "../../components/Loader";
 function ServiceLineList() {
     const [isLoading, setIsLoading] = useState(false);
     const [serviceLineList, setServiceLineList] = useState([]);
-    const hasReadOnlyAccess = AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.PRODUCER;
+    const hasReadOnlyAccess = !(AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR || AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.LOB_ADMIN);
 
     const navigate = useNavigate();
 
@@ -224,7 +224,7 @@ function ServiceLineList() {
                   <tbody>
                     {currentItems.length === 0 ? (
                       <tr>
-                        <td colSpan="6" className="empty-state">
+                        <td colSpan={hasReadOnlyAccess ? "4" : "5"} className="empty-state">
                           <i className="bi bi-diagram-2"></i>
                           <p>No service lines found</p>
                         </td>

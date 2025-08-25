@@ -4,15 +4,18 @@ import Swal from 'sweetalert2'
 import axios from 'axios'
 import Layout from "../components/Layout"
 import * as Utils from "../lib/Utils"
+import * as AppFunc from "../lib/AppFunctions";
+import APP_CONSTANTS from "../appConstants";
 import Pagination from "../components/Pagination";
 import "./ListPages.css";
 import Loader from "../components/Loader";
 
 function UserList() {
     const [isLoading, setIsLoading] = useState(false);
-    const  [userList, setUserList] = useState([])
-    const  [searchKeys, setSearchKeys] = useState([])
-    const  [inputType, setInputType] = useState("text");
+    const [userList, setUserList] = useState([])
+    const [searchKeys, setSearchKeys] = useState([])
+    const [inputType, setInputType] = useState("text");
+    const hasReadOnlyAccess = !(AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR || AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.LOB_ADMIN);
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
@@ -186,6 +189,7 @@ function UserList() {
                   
                   <button 
                     type="button"
+                    hidden={hasReadOnlyAccess}
                     onClick={handleAddButtonClick}
                     className="add-btn"
                   >
@@ -208,16 +212,17 @@ function UserList() {
                   <table className="table list-table" id='userListTable'>
                     <thead>
                       <tr>
-                        <th>Action</th>
+                        <th hidden={hasReadOnlyAccess}>Action</th>
                         <th>Name</th>
                         <th>Email</th>
                         <th>Role</th>
+                        <th>Line of Business</th>
                       </tr>
                     </thead>
                     <tbody>
                       {currentItems.length === 0 ? (
                         <tr>
-                          <td colSpan="4" className="empty-state">
+                          <td colSpan={hasReadOnlyAccess ? "4" : "5"} className="empty-state">
                             <i className="bi bi-people"></i>
                             <p>No users found</p>
                           </td>
@@ -226,7 +231,7 @@ function UserList() {
                         currentItems.map((usersList, key) => {
                           return (
                             <tr key={key}>
-                              <td>
+                              <td hidden={hasReadOnlyAccess}>
                                 <div className="action-buttons-cell">
                                   <button
                                     onClick={() => handleDelete(usersList.user_id)}
@@ -249,6 +254,7 @@ function UserList() {
                               </td>
                               <td>{usersList.email}</td>
                               <td>{usersList.role.toUpperCase()}</td>
+                              <td>{usersList.line_of_business_name || 'N/A'}</td>
                             </tr>
                           );
                         })

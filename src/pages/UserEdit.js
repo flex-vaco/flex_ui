@@ -4,6 +4,7 @@ import Swal from 'sweetalert2'
 import axios from 'axios'
 import Layout from "../components/Layout"
 import APP_CONSTANTS from "../appConstants";
+import * as AppFunc from "../lib/AppFunctions";
 import * as Utils from "../lib/Utils";
 import Multiselect from 'multiselect-react-dropdown';
 import "./FormStyles.css";
@@ -11,6 +12,8 @@ import "./FormStyles.css";
 function UserEdit() {
     const { id } = useParams();
     const navigate = useNavigate();
+    const hasAccess = AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR || AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.LOB_ADMIN;
+    
     const [first_name, setFirstName] = useState('');
     const [last_name, setLastName] = useState('');
     const [password, setPassword] = useState('');
@@ -94,13 +97,26 @@ function UserEdit() {
         })
     }
     const fetchLineofBusinessList = () => {
-        axios.get('/lineOfBusiness')
-        .then(function (response) {
-          setLineOfBusinessList(response.data.lineOfBusiness);
-        })
-        .catch(function (error) {
-          console.log(error);
-        })
+        if (AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR) {
+            // For Administrator, show all line of businesses
+            axios.get('/lineOfBusiness')
+            .then(function (response) {
+              setLineOfBusinessList(response.data.lineOfBusiness);
+            })
+            .catch(function (error) {
+              console.log(error);
+            })
+        } else {
+            // For non-administrator users, set their line of business by default
+            const currentUser = JSON.parse(localStorage.getItem('user'));
+            if (currentUser && currentUser.line_of_business_id) {
+                setLineOfBusinessList([{
+                    id: currentUser.line_of_business_id,
+                    name: currentUser.line_of_business_name || 'Current LOB'
+                }]);
+                setDisableLineOfBusiness(true);
+            }
+        }
     }
     const handlEmployeeChange = (e) => {
         const empRequiredRoles = [APP_CONSTANTS.USER_ROLES.EMPLOYEE]
@@ -125,12 +141,16 @@ function UserEdit() {
     }
 
     useEffect(() => {
+        if (!hasAccess) {
+            navigate("/userList");
+            return;
+        }
         fetchRoles();
         fetchClients();
         fetchProjects();
         fetchEmployees();
         fetchLineofBusinessList();
-    }, []);
+    }, [hasAccess, navigate]);
 
     useEffect(() => {
         axios.get(`/users/${id}`)
@@ -429,27 +449,29 @@ function UserEdit() {
                                             required
                                         />
                                     </div>
-                                    <div className="form-group">
-                                        <label htmlFor="line_of_business" className="form-label required-field">
-                                            Line of Business
-                                        </label>
-                                        <select 
-                                            name="line_of_business" 
-                                            id="line_of_business" 
-                                            className="form-select" 
-                                            onChange={(e) => setLineOfBusinessId(e.target.value)}
-                                            value={lineOfBusiness_id}
-                                            required
-                                            disabled={disableLineOfBusiness}
-                                        >
-                                            <option value=""> -- Select line of business -- </option>
-                                            {lineOfBusinessList.map((lineOfBusiness) => (
-                                                <option key={lineOfBusiness.id} value={lineOfBusiness.id}>
-                                                    {lineOfBusiness.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
+                                    {AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR && (
+                                        <div className="form-group">
+                                            <label htmlFor="line_of_business" className="form-label required-field">
+                                                Line of Business
+                                            </label>
+                                            <select 
+                                                name="line_of_business" 
+                                                id="line_of_business" 
+                                                className="form-select" 
+                                                onChange={(e) => setLineOfBusinessId(e.target.value)}
+                                                value={lineOfBusiness_id}
+                                                required
+                                                disabled={disableLineOfBusiness || AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.LOB_ADMIN}
+                                            >
+                                                <option value=""> -- Select line of business -- </option>
+                                                {lineOfBusinessList.map((lineOfBusiness) => (
+                                                    <option key={lineOfBusiness.id} value={lineOfBusiness.id}>
+                                                        {lineOfBusiness.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    )}
                                 </div>
                                 
                             </div>

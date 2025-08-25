@@ -4,7 +4,12 @@ import Swal from 'sweetalert2';
 const menuAccessRoles = [
   APP_CONSTANTS.USER_ROLES.MANAGER,
   APP_CONSTANTS.USER_ROLES.ADMINISTRATOR,
-  APP_CONSTANTS.USER_ROLES.PRODUCER
+  APP_CONSTANTS.USER_ROLES.PRODUCER,
+  APP_CONSTANTS.USER_ROLES.USCONSULTANT,
+  APP_CONSTANTS.USER_ROLES.OFFSHORELEAD,
+  APP_CONSTANTS.USER_ROLES.LEADERSHIP,
+  APP_CONSTANTS.USER_ROLES.LOB_ADMIN,
+  APP_CONSTANTS.USER_ROLES.PROJECT_MANAGER
 ];
 const utilizationAccessRoles = [
   APP_CONSTANTS.USER_ROLES.MANAGER,
@@ -19,6 +24,8 @@ const allocationAccessRoles = [
 const employeeAccessRoles = [
   APP_CONSTANTS.USER_ROLES.MANAGER,
   APP_CONSTANTS.USER_ROLES.ADMINISTRATOR,
+  APP_CONSTANTS.USER_ROLES.OFFSHORELEAD,
+  APP_CONSTANTS.USER_ROLES.LOB_ADMIN,
 ];
 const projectAccessRoles = [
   APP_CONSTANTS.USER_ROLES.MANAGER,
@@ -33,15 +40,19 @@ const lineOfBusinessAccessRoles = [
   APP_CONSTANTS.USER_ROLES.ADMINISTRATOR
 ];
 const serviceLineAccessRoles = [
-  APP_CONSTANTS.USER_ROLES.ADMINISTRATOR
+  APP_CONSTANTS.USER_ROLES.ADMINISTRATOR,
+  APP_CONSTANTS.USER_ROLES.LOB_ADMIN
 ];
 const capabilityAreaAccessRoles = [
-  APP_CONSTANTS.USER_ROLES.ADMINISTRATOR
+  APP_CONSTANTS.USER_ROLES.ADMINISTRATOR,
+  APP_CONSTANTS.USER_ROLES.LOB_ADMIN
 ];
 const workRequestAccessRoles = [
   APP_CONSTANTS.USER_ROLES.ADMINISTRATOR,
   APP_CONSTANTS.USER_ROLES.MANAGER,
-  APP_CONSTANTS.USER_ROLES.PRODUCER
+  APP_CONSTANTS.USER_ROLES.PRODUCER,
+  APP_CONSTANTS.USER_ROLES.OFFSHORELEAD,
+  APP_CONSTANTS.USER_ROLES.LOB_ADMIN
 ];
 const reportAccessRoles = [
   APP_CONSTANTS.USER_ROLES.MANAGER,
@@ -60,7 +71,8 @@ const hiringAccessRole = [
   APP_CONSTANTS.USER_ROLES.PRODUCER
 ];
 const aiChatAccessRoles = reportAccessRoles;
-const userAccessRoles = [APP_CONSTANTS.USER_ROLES.ADMINISTRATOR];
+const userAccessRoles = [APP_CONSTANTS.USER_ROLES.ADMINISTRATOR, APP_CONSTANTS.USER_ROLES.LOB_ADMIN];
+const userRoleAccessRoles = [APP_CONSTANTS.USER_ROLES.ADMINISTRATOR, APP_CONSTANTS.USER_ROLES.MANAGER];
 const locationAccessRoles = [APP_CONSTANTS.USER_ROLES.ADMINISTRATOR];
 export const activeUserRole = localStorage.getItem("user_role");
 export const activeUser = JSON.parse(localStorage.getItem("user"));
@@ -94,6 +106,9 @@ export const hasUtilizationAccess = (activeUserRole) => {
 };
 export const hasUserAccess = (activeUserRole) => {
   return userAccessRoles.includes(activeUserRole) ? true : false;
+};
+export const hasUserRoleAccess = (activeUserRole) => {
+  return userRoleAccessRoles.includes(activeUserRole) ? true : false;
 };
 export const hasLocationAccess = (activeUserRole) => {
   return locationAccessRoles.includes(activeUserRole) ? true : false;

@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom"
 import Swal from 'sweetalert2'
 import axios from 'axios'
 import Layout from "../../components/Layout"
+import * as AppFunc from "../../lib/AppFunctions";
+import APP_CONSTANTS from "../../appConstants";
 import "../FormStyles.css"
  
 function CapabilityAreaCreate() {
@@ -13,7 +15,16 @@ function CapabilityAreaCreate() {
     const [lineOfBusinesses, setLineOfBusinesses] = useState([]);
     const [serviceLines, setServiceLines] = useState([]);
     const [isSaving, setIsSaving] = useState(false)
+    const [disableLineOfBusiness, setDisableLineOfBusiness] = useState(false);
     const navigate = useNavigate();
+    
+    const hasAccess = AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR || AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.LOB_ADMIN;
+    
+    useEffect(() => {
+        if (!hasAccess) {
+            navigate('/capabilityArea');
+        }
+    }, [hasAccess, navigate]);
 
     const handleCancel = () => {
         navigate("/capabilityArea");
@@ -33,13 +44,23 @@ function CapabilityAreaCreate() {
     }, [lineOfBusinessId]);
 
     const fetchLineOfBusinesses = () => {
-        axios.get('/lineOfBusiness')
-        .then(function (response) {
-            setLineOfBusinesses(response.data.lineOfBusiness);
-        })
-        .catch(function (error) {
-            console.log(error);
-        })
+        if (AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR) {    
+            // For Administrator, fetch all line of businesses
+            axios.get('/lineOfBusiness')
+            .then(function (response) {
+                setLineOfBusinesses(response.data.lineOfBusiness);
+            })
+            .catch(function (error) {
+                console.log(error);
+            })
+        } else {
+            // For LOBADMIN, only show their own line of business   
+            const user = JSON.parse(localStorage.getItem("user"));
+            if (user && user.line_of_business_id) {
+                setLineOfBusinessId(user.line_of_business_id);
+                setDisableLineOfBusiness(true);
+            }
+        }
     }
 
     const fetchServiceLinesByLineOfBusiness = (lineOfBusinessId) => {
@@ -62,7 +83,7 @@ function CapabilityAreaCreate() {
             return;
         }
 
-        if (lineOfBusinessId === "" || lineOfBusinessId === "") {
+        if (!lineOfBusinessId || lineOfBusinessId === "") {
             Swal.fire({
                 icon: 'warning',
                 title: 'Please select a line of business!',
@@ -146,26 +167,29 @@ function CapabilityAreaCreate() {
                                         required
                                     />
                                 </div>
-                                <div className="form-group full-width">
-                                    <label htmlFor="lineOfBusiness" className="form-label required-field">
-                                        Line of Business
-                                    </label>
-                                    <select 
-                                        name="lineOfBusiness" 
-                                        id="lineOfBusiness" 
-                                        className="form-select" 
-                                        onChange={(e) => setLineOfBusinessId(e.target.value)}
-                                        value={lineOfBusinessId}
-                                        required
-                                    >
-                                        <option value=""> -- Select a Line of Business -- </option>
-                                        {lineOfBusinesses?.map((lineOfBusiness) => (
-                                            <option key={lineOfBusiness.id} value={lineOfBusiness.id}>
-                                                {lineOfBusiness.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
+                                {AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR && (
+                                    <div className="form-group full-width">
+                                        <label htmlFor="lineOfBusiness" className="form-label required-field">
+                                            Line of Business
+                                        </label>
+                                        <select 
+                                            name="lineOfBusiness" 
+                                            id="lineOfBusiness" 
+                                            className="form-select" 
+                                            onChange={(e) => setLineOfBusinessId(e.target.value)}
+                                            value={lineOfBusinessId}
+                                            required
+                                            disabled={disableLineOfBusiness}
+                                        >
+                                            <option value=""> -- Select a Line of Business -- </option>
+                                            {lineOfBusinesses?.map((lineOfBusiness) => (
+                                                <option key={lineOfBusiness.id} value={lineOfBusiness.id}>
+                                                    {lineOfBusiness.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
                                 <div className="form-group full-width">
                                     <label htmlFor="serviceLine" className="form-label required-field">
                                         Service Line

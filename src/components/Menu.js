@@ -165,6 +165,13 @@ return(
               </div>
             )}
             
+            {AppFunc.hasUserRoleAccess(activeUserRole) && (
+              <div className="sidebar-item" onClick={() => handleMenuClick('/userRoleList')}>
+                <i className="bi bi-shield-fill me-2"></i>
+                User Roles
+              </div>
+            )}
+            
             {AppFunc.hasLocationAccess(activeUserRole) && (
               <div className="sidebar-item" onClick={() => handleMenuClick('/officeLocations')}>
                 <i className="bi bi-geo-alt-fill me-2"></i>

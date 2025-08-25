@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom"
 import Swal from 'sweetalert2'
 import axios from 'axios'
 import Layout from "../components/Layout"
+import * as AppFunc from "../lib/AppFunctions";
+import APP_CONSTANTS from "../appConstants";
 import "./FormStyles.css"
  
 function ProjectCreate() {
@@ -45,13 +47,22 @@ function ProjectCreate() {
     }
 
     const fetchLineofBusinessList = () => {
-        axios.get('/lineOfBusiness')
-        .then(function (response) {
-          setLineOfBusinessList(response.data.lineOfBusiness);
-        })
-        .catch(function (error) {
-          console.log(error);
-        })
+        if (AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR) {
+            // For Administrator, fetch all line of businesses
+            axios.get('/lineOfBusiness')
+            .then(function (response) {
+              setLineOfBusinessList(response.data.lineOfBusiness);
+            })
+            .catch(function (error) {
+              console.log(error);
+            })
+        } else {
+            // For non-administrator users, set their line of business by default
+            const user = JSON.parse(localStorage.getItem("user"));
+            if (user && user.line_of_business_id) {
+                setLineOfBusinessId(user.line_of_business_id);
+            }
+        }
     }
 
     const handleClientChange = (e) => {
@@ -85,6 +96,7 @@ function ProjectCreate() {
         };
         const data = {
           client_id: client_id,
+          line_of_business_id: lineOfBusiness_id,
           project_name: project_name,
           project_location: project_location,
           contact_person: contact_person,
@@ -164,26 +176,28 @@ function ProjectCreate() {
                                             ))}
                                         </select>
                                     </div>
-                                    <div className="form-group">
-                                        <label htmlFor="line_of_business" className="form-label required-field">
-                                            Line of Business
-                                        </label>
-                                        <select 
-                                            name="line_of_business" 
-                                            id="line_of_business" 
-                                            className="form-select" 
-                                            onChange={(e) => setLineOfBusinessId(e.target.value)}
-                                            value={lineOfBusiness_id}
-                                            required
-                                        >
-                                            <option value=""> -- Select line of business -- </option>
-                                            {lineOfBusinessList.map((lineOfBusiness) => (
-                                                <option key={lineOfBusiness.id} value={lineOfBusiness.id}>
-                                                    {lineOfBusiness.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
+                                    {AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR && (
+                                        <div className="form-group">
+                                            <label htmlFor="line_of_business" className="form-label required-field">
+                                                Line of Business
+                                            </label>
+                                            <select 
+                                                name="line_of_business" 
+                                                id="line_of_business" 
+                                                className="form-select" 
+                                                onChange={(e) => setLineOfBusinessId(e.target.value)}
+                                                value={lineOfBusiness_id}
+                                                required
+                                            >
+                                                <option value=""> -- Select line of business -- </option>
+                                                {lineOfBusinessList.map((lineOfBusiness) => (
+                                                    <option key={lineOfBusiness.id} value={lineOfBusiness.id}>
+                                                        {lineOfBusiness.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="form-row">
                                     <div className="form-group">

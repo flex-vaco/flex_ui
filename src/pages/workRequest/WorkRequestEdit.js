@@ -3,6 +3,8 @@ import { useNavigate, useParams } from "react-router-dom"
 import Swal from 'sweetalert2'
 import axios from 'axios'
 import Layout from "../../components/Layout"
+import * as AppFunc from "../../lib/AppFunctions";
+import APP_CONSTANTS from "../../appConstants";
 import "../FormStyles.css"
 import Multiselect from 'multiselect-react-dropdown';
 import ResourceSelectionModal from './ResourceSelectionModal';
@@ -11,6 +13,7 @@ import * as Utils from "../../lib/Utils";
 function WorkRequestEdit() {
     const { id } = useParams();
     const [title, setTitle] = useState('');
+    const [lineOfBusinessId, setLineOfBusinessId] = useState('');
     const [serviceLineId, setServiceLineId] = useState('');
     const [capabilityAreaIds, setCapabilityAreaIds] = useState([]);
     const [projectId, setProjectId] = useState('');
@@ -24,6 +27,7 @@ function WorkRequestEdit() {
     const [selectedResources, setSelectedResources] = useState([]);
     
     // Dropdown data
+    const [lineOfBusinesses, setLineOfBusinesses] = useState([]);
     const [serviceLines, setServiceLines] = useState([]);
     const [capabilityAreas, setCapabilityAreas] = useState([]);
     const [projects, setProjects] = useState([]);
@@ -35,10 +39,20 @@ function WorkRequestEdit() {
     }
 
     useEffect(() => {
-        fetchServiceLines();
+        fetchLineOfBusinesses();
         fetchProjects();
         fetchWorkRequest();
     }, []);
+
+    useEffect(() => {
+        if (lineOfBusinessId) {
+            fetchServiceLinesByLineOfBusiness(lineOfBusinessId);
+        } else {
+            setServiceLines([]);
+        }
+        setServiceLineId('');
+        setCapabilityAreas([]);
+    }, [lineOfBusinessId]);
 
     useEffect(() => {
         if (serviceLineId) {
@@ -60,6 +74,7 @@ function WorkRequestEdit() {
         .then(function (response) {
             const workRequest = response.data.workRequest;
             setTitle(workRequest.title);
+            setLineOfBusinessId(workRequest.line_of_business_id);
             setServiceLineId(workRequest.service_line_id);
             setProjectId(workRequest.project_id);
             setDurationFrom(Utils.formatDateYYYYMMDD(workRequest.duration_from));
@@ -87,8 +102,21 @@ function WorkRequestEdit() {
         })
     }
 
-    const fetchServiceLines = () => {
-        axios.get('/serviceLine')
+    const fetchLineOfBusinesses = () => {
+        if (AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR) {
+            // For Administrator, fetch all line of businesses
+            axios.get('/lineOfBusiness')
+            .then(function (response) {
+                setLineOfBusinesses(response.data.lineOfBusiness);
+            })
+            .catch(function (error) {
+                console.log(error);
+            })
+        }
+    }
+
+    const fetchServiceLinesByLineOfBusiness = (lineOfBusinessId) => {
+        axios.get(`/serviceLine/lineOfBusiness/${lineOfBusinessId}`)
         .then(function (response) {
             setServiceLines(response.data.serviceLines);
         })
@@ -107,14 +135,31 @@ function WorkRequestEdit() {
         })
     }
 
+
+
     const fetchProjects = () => {
-        axios.get('/projects')
-        .then(function (response) {
-            setProjects(response.data.projects);
-        })
-        .catch(function (error) {
-            console.log(error);
-        })
+        if (AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR) {
+            // For Administrator, fetch all projects
+            axios.get('/projects')
+            .then(function (response) {
+                setProjects(response.data.projects);
+            })
+            .catch(function (error) {
+                console.log(error);
+            })
+        } else {
+            // For non-administrator users, fetch projects by their line of business
+            const user = JSON.parse(localStorage.getItem("user"));
+            if (user && user.line_of_business_id) {
+                axios.get(`/projects/lineOfBusiness/${user.line_of_business_id}`)
+                .then(function (response) {
+                    setProjects(response.data.projects);
+                })
+                .catch(function (error) {
+                    console.log(error);
+                })
+            }
+        }
     }
 
     const handleCapabilityAreaAdd = (selectedList, selectedItem) => {
@@ -138,6 +183,14 @@ function WorkRequestEdit() {
                 icon: 'error',
                 title: 'Validation Error',
                 text: 'Title is required'
+            });
+            return false;
+        }
+        if (AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR && !lineOfBusinessId) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                text: 'Line of Business is required'
             });
             return false;
         }
@@ -203,6 +256,7 @@ function WorkRequestEdit() {
 
         const formData = new FormData();
         formData.append('title', title);
+        formData.append('line_of_business_id', lineOfBusinessId);
         formData.append('service_line_id', serviceLineId);
         formData.append('project_id', projectId);
         formData.append('duration_from', durationFrom);
@@ -273,6 +327,28 @@ function WorkRequestEdit() {
                                         required
                                     />
                                 </div>
+                                
+                                {AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR && (
+                                    <div className="form-group full-width">
+                                        <label htmlFor="lineOfBusiness" className="form-label required-field">
+                                            Line of Business
+                                        </label>
+                                        <select 
+                                            id="lineOfBusiness"
+                                            value={lineOfBusinessId}
+                                            onChange={(e) => setLineOfBusinessId(e.target.value)}
+                                            className="form-select"
+                                            required
+                                        >
+                                            <option value=""> -- Select a Line of Business -- </option>
+                                            {lineOfBusinesses.map((lineOfBusiness) => (
+                                                <option key={lineOfBusiness.id} value={lineOfBusiness.id}>
+                                                    {lineOfBusiness.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
                                 
                                 <div className="form-row">
                                     <div className="form-group">

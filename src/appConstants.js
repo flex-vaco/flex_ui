@@ -3,7 +3,11 @@ const USER_ROLES = {
     MANAGER: "manager",
     EMPLOYEE: "employee",
     PROJECT_MANAGER: "project_manager",
-    PRODUCER: "producer"
+    PRODUCER: "producer",
+    USCONSULTANT: "usconsultant",
+    OFFSHORELEAD: "offshorelead",
+    LEADERSHIP: "leadership",
+    LOB_ADMIN: "lobadmin"
   };
   
   module.exports ={

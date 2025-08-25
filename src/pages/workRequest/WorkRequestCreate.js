@@ -3,12 +3,15 @@ import { useNavigate } from "react-router-dom"
 import Swal from 'sweetalert2'
 import axios from 'axios'
 import Layout from "../../components/Layout"
+import * as AppFunc from "../../lib/AppFunctions";
+import APP_CONSTANTS from "../../appConstants";
 import "../FormStyles.css"
 import Multiselect from 'multiselect-react-dropdown';
 import ResourceSelectionModal from './ResourceSelectionModal';
 
 function WorkRequestCreate() {
     const [title, setTitle] = useState('');
+    const [lineOfBusinessId, setLineOfBusinessId] = useState('');
     const [serviceLineId, setServiceLineId] = useState('');
     const [capabilityAreaIds, setCapabilityAreaIds] = useState([]);
     const [projectId, setProjectId] = useState('');
@@ -22,6 +25,7 @@ function WorkRequestCreate() {
     const [selectedResources, setSelectedResources] = useState([]);
     
     // Dropdown data
+    const [lineOfBusinesses, setLineOfBusinesses] = useState([]);
     const [serviceLines, setServiceLines] = useState([]);
     const [capabilityAreas, setCapabilityAreas] = useState([]);
     const [projects, setProjects] = useState([]);
@@ -33,9 +37,19 @@ function WorkRequestCreate() {
     }
 
     useEffect(() => {
-        fetchServiceLines();
+        fetchLineOfBusinesses();
         fetchProjects();
     }, []);
+
+    useEffect(() => {
+        if (lineOfBusinessId) {
+            fetchServiceLinesByLineOfBusiness(lineOfBusinessId);
+        } else {
+            setServiceLines([]);
+        }
+        setServiceLineId('');
+        setCapabilityAreas([]);
+    }, [lineOfBusinessId]);
 
     useEffect(() => {
         if (serviceLineId) {
@@ -52,8 +66,27 @@ function WorkRequestCreate() {
         }
     }, [durationFrom]);
 
-    const fetchServiceLines = () => {
-        axios.get('/serviceLine')
+    const fetchLineOfBusinesses = () => {
+        if (AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR) {
+            // For Administrator, fetch all line of businesses
+            axios.get('/lineOfBusiness')
+            .then(function (response) {
+                setLineOfBusinesses(response.data.lineOfBusiness);
+            })
+            .catch(function (error) {
+                console.log(error);
+            })
+        } else {
+            // For non-administrator users, set their line of business by default
+            const user = JSON.parse(localStorage.getItem("user"));
+            if (user && user.line_of_business_id) {
+                setLineOfBusinessId(user.line_of_business_id);
+            }
+        }
+    }
+
+    const fetchServiceLinesByLineOfBusiness = (lineOfBusinessId) => {
+        axios.get(`/serviceLine/lineOfBusiness/${lineOfBusinessId}`)
         .then(function (response) {
             setServiceLines(response.data.serviceLines);
         })
@@ -72,14 +105,31 @@ function WorkRequestCreate() {
         })
     }
 
+
+
     const fetchProjects = () => {
-        axios.get('/projects')
-        .then(function (response) {
-            setProjects(response.data.projects);
-        })
-        .catch(function (error) {
-            console.log(error);
-        })
+        if (AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR) {
+            // For Administrator, fetch all projects
+            axios.get('/projects')
+            .then(function (response) {
+                setProjects(response.data.projects);
+            })
+            .catch(function (error) {
+                console.log(error);
+            })
+        } else {
+            // For non-administrator users, fetch projects by their line of business
+            const user = JSON.parse(localStorage.getItem("user"));
+            if (user && user.line_of_business_id) {
+                axios.get(`/projects/lineOfBusiness/${user.line_of_business_id}`)
+                .then(function (response) {
+                    setProjects(response.data.projects);
+                })
+                .catch(function (error) {
+                    console.log(error);
+                })
+            }
+        }
     }
 
     const handleCapabilityAreaAdd = (selectedList, selectedItem) => {
@@ -102,6 +152,15 @@ function WorkRequestCreate() {
             Swal.fire({
                 icon: 'warning',
                 title: 'Please enter work request title!',
+                showConfirmButton: true
+            })
+            return false;
+        }
+
+        if (AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR && !lineOfBusinessId) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Please select a line of business!',
                 showConfirmButton: true
             })
             return false;
@@ -180,6 +239,7 @@ function WorkRequestCreate() {
         setIsSaving(true);
         const requestData = {
             title: title,
+            line_of_business_id: lineOfBusinessId,
             service_line_id: serviceLineId,
             capability_area_ids: capabilityAreaIds,
             project_id: projectId,
@@ -279,6 +339,29 @@ function WorkRequestCreate() {
                                         required
                                     />
                                 </div>
+                                
+                                {AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR && (
+                                    <div className="form-group full-width">
+                                        <label htmlFor="lineOfBusiness" className="form-label required-field">
+                                            Line of Business
+                                        </label>
+                                        <select 
+                                            name="lineOfBusiness" 
+                                            id="lineOfBusiness" 
+                                            className="form-select" 
+                                            onChange={(e) => setLineOfBusinessId(e.target.value)}
+                                            value={lineOfBusinessId}
+                                            required
+                                        >
+                                            <option value=""> -- Select a Line of Business -- </option>
+                                            {lineOfBusinesses.map((lineOfBusiness) => (
+                                                <option key={lineOfBusiness.id} value={lineOfBusiness.id}>
+                                                    {lineOfBusiness.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
                                 
                                 <div className="form-row">
                                     <div className="form-group">

@@ -74,6 +74,11 @@ import WorkRequestCreate from "./pages/workRequest/WorkRequestCreate"
 import WorkRequestEdit from "./pages/workRequest/WorkRequestEdit"
 import WorkRequestShow from "./pages/workRequest/WorkRequestShow"
 
+import UserRoleList from "./pages/userRoles/UserRoleList"
+import UserRoleCreate from "./pages/userRoles/UserRoleCreate"
+import UserRoleEdit from "./pages/userRoles/UserRoleEdit"
+import UserRoleShow from "./pages/userRoles/UserRoleShow"
+
 function App() {
   const needsPasswordReset = JSON.parse(localStorage.getItem("user"))?.needsPasswordReset || null;
   const isLoggedIn= ((localStorage.getItem("user") !== null) && (needsPasswordReset !== 1));
@@ -143,6 +148,10 @@ function App() {
           <Route path="/workRequestCreate"  element={isLoggedIn ? <WorkRequestCreate/> : <Login/>} />
           <Route path="/workRequestEdit/:id"  element={isLoggedIn ? <WorkRequestEdit/> : <Login/>} />
           <Route path="/workRequestShow/:id"  element={isLoggedIn ? <WorkRequestShow/> : <Login/>} />
+          <Route path="/userRoleList"  element={isLoggedIn ? <UserRoleList/> : <Login/>} />
+          <Route path="/userRoleCreate"  element={isLoggedIn ? <UserRoleCreate/> : <Login/>} />
+          <Route path="/userRoleEdit/:id"  element={isLoggedIn ? <UserRoleEdit/> : <Login/>} />
+          <Route path="/userRoleShow/:id"  element={isLoggedIn ? <UserRoleShow/> : <Login/>} />
       </Routes>
     </Router>
   );

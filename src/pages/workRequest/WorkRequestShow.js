@@ -8,6 +8,7 @@ function WorkRequestShow() {
     const { id } = useParams();
     const [workRequestDetails, setWorkRequestDetails] = useState({
         title: '',
+        line_of_business_name: '',
         service_line_name: '',
         project_name: '',
         project_location: '',
@@ -75,6 +76,7 @@ function WorkRequestShow() {
                         <div className="row">
                             <div className="col-md-6">
                                 <p><b className="text-muted">Title: </b>{workRequestDetails.title}</p>
+                                <p><b className="text-muted">Line of Business: </b>{workRequestDetails.line_of_business_name || 'N/A'}</p>
                                 <p><b className="text-muted">Service Line: </b>{workRequestDetails.service_line_name || 'N/A'}</p>
                                 <p><b className="text-muted">Project: </b>{workRequestDetails.project_name || 'N/A'}</p>
                                 <p><b className="text-muted">Project Location: </b>{workRequestDetails.project_location || 'N/A'}</p>

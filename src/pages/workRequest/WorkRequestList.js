@@ -228,6 +228,7 @@ function WorkRequestList() {
                     <tr>
                       <th hidden={hasReadOnlyAccess}>Action</th>
                       <th>Title</th>
+                      <th>Line of Business</th>
                       <th>Service Line</th>
                       <th>Project</th>
                       <th>Duration</th>
@@ -242,7 +243,7 @@ function WorkRequestList() {
                   <tbody>
                     {currentItems.length === 0 ? (
                       <tr>
-                        <td colSpan="10" className="empty-state">
+                        <td colSpan="11" className="empty-state">
                           <i className="bi bi-clipboard-data"></i>
                           <p>No work requests found</p>
                         </td>
@@ -277,6 +278,7 @@ function WorkRequestList() {
                                 {workRequest.title}
                               </Link>
                             </td>
+                            <td>{workRequest.line_of_business_name || '-'}</td>
                             <td>{workRequest.service_line_name || '-'}</td>
                             <td>{workRequest.project_name || '-'}</td>
                             <td>
