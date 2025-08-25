@@ -4,8 +4,7 @@ const USER_ROLES = {
     EMPLOYEE: "employee",
     PROJECT_MANAGER: "project_manager",
     PRODUCER: "producer",
-    USCONSULTANT: "usconsultant",
-    OFFSHORELEAD: "offshorelead",
+    OFF_SHORE_LEAD: "off_shore_lead",
     LEADERSHIP: "leadership",
     LOB_ADMIN: "lobadmin"
   };
