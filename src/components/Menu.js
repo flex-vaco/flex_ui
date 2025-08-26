@@ -192,6 +192,9 @@ return(
                   <div className="sidebar-item sub-item" onClick={() => handleMenuClick('/timesheet')}>
                     Timesheets
                   </div>
+                  <div className="sidebar-item sub-item" onClick={() => handleMenuClick('/importTimesheet')}>
+                    Import Timesheet
+                  </div>
                 </div>
               </div>
             )}

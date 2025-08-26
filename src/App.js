@@ -40,6 +40,7 @@ import ResetPassword from "./pages/ResetPassword";
 import TimeSheet from './pages/timesheet/Timesheet';
 import ApproveTimesheet from './pages/timesheet/ApproveTimesheetList';
 import ApproveEmpTimesheet from './pages/timesheet/ApproveEmpTimesheet';
+import ImportTimesheet from './pages/timesheet/ImportTimesheet';
 import Dashboard from "./pages/Dashboard";
 import HireResource from "./pages/HireResource";
 import IntelliDB from './pages/aiChat/InteliDB'
@@ -152,6 +153,7 @@ function App() {
           <Route path="/userRoleCreate"  element={isLoggedIn ? <UserRoleCreate/> : <Login/>} />
           <Route path="/userRoleEdit/:id"  element={isLoggedIn ? <UserRoleEdit/> : <Login/>} />
           <Route path="/userRoleShow/:id"  element={isLoggedIn ? <UserRoleShow/> : <Login/>} />
+          <Route path="/importTimesheet"  element={isLoggedIn ? <ImportTimesheet/> : <Login/>} />
       </Routes>
     </Router>
   );
