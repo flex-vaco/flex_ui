@@ -5,11 +5,13 @@ const TableFromJson = ({ data }) => {
     return <p>No data to display.</p>;
   }
   
-  // Extract keys for table headers (assuming all objects have the same keys)
+  // Extract keys for table headers 
   const headers = Object.keys(data[0]);
-  console.log(headers)
+
+  // console.log(headers)
   return (
-    <table>
+    <div className="list-table-container">
+    <table className="table list-table" id='TableFromJson'>
       <thead>
         <tr>
           {headers.map((header, index) => (
@@ -27,6 +29,7 @@ const TableFromJson = ({ data }) => {
         ))}
       </tbody>
     </table>
+    </div>
   );
 };
 

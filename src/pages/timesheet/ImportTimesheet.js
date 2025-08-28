@@ -1,14 +1,13 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import * as XLSX from 'xlsx';
 import TableFromJson from '../../components/TableFromJson'
 import Swal from 'sweetalert2'
 import axios from 'axios'
-import * as Utils from "../../lib/Utils";
 
 function ImportTimesheet() {
   const [file, setFile] = useState(null);
   const [jsonData, setJsonData] = useState('');
-
+  const [headers,  setHeaders] = useState([]);
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
   };
@@ -43,12 +42,37 @@ const handleConvert = () => {
       );
 
       setJsonData(JSON.stringify(formattedJson, null, 2));
+      setHeaders(Object.keys(formattedJson[0]));
     };
 
     reader.readAsBinaryString(file);
   }
 };
 
+  const validHeaders = [
+    "Date",
+    "Employee",
+    "Customer",
+    "Case_Task_Event",
+    "Item",
+    "Note",
+    "Approval_Status",
+    "Duration"
+]
+
+  const columnsMatch = (arr1, arr2) => {
+    const set1 = new Set(arr1);
+    const set2 = new Set(arr2);
+
+    if (set1.size !== set2.size) return false;
+
+    for (let val of set1) {
+      if (!set2.has(val)) return false;
+    }
+
+    return true;
+  }
+  
   const uploadToDB = async () => {
     Swal.showLoading();
     await axios
@@ -87,21 +111,37 @@ const handleConvert = () => {
 
   return (
     <div>
-      <h2>Export Timesheet Data</h2>
-
-      <input type="file" accept=".xls,.xlsx" onChange={handleFileChange} />
-      <button onClick={handleConvert}>Import</button>
-      <button onClick={uploadToDB}>Upload to Database</button>
-
+      <div className="list-page-header">
+        <h1 className="list-page-title">Import Timesheet Data</h1>
+      </div>
+      <div className="search-controls">
+        <div className="search-row">
+          <div className="search-input-group">
+            <input className="search-input" type="file" accept=".xls,.xlsx" onChange={handleFileChange} />
+            <button className="excel-btn" disabled={!file} onClick={handleConvert}>Import</button>
+          </div>
+            <div className="action-buttons">
+              <button className="add-btn" onClick={uploadToDB}>Upload to Database</button>
+            </div>
+        </div>
+      </div>
       {jsonData && (
         // <div>
         //   <h3>JSON Output:</h3>
         //   <pre>{jsonData}</pre>
         // </div>
-        <div>
-            <h4>Data for Importing</h4>
-            <TableFromJson data={JSON.parse(jsonData)} />
-        </div>
+        (!columnsMatch(headers, validHeaders)) ?     
+          <div>
+            <p>Invalid columns, ensure the excel file has below column headers and valid data.</p>
+            <ul>
+              {validHeaders.map(i=> <li>{i}</li>)}
+            </ul>
+          </div>
+        :
+          <div>
+              <h4>Data for Importing</h4>
+              <TableFromJson data={JSON.parse(jsonData)} />
+          </div>
       )}
     </div>
   );
