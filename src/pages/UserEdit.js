@@ -288,8 +288,8 @@ function UserEdit() {
             return;
         }
 
-        if (!lineOfBusiness_id || lineOfBusiness_id === "-- Select line of business --") {
-
+        // Only validate line of business for administrators, LOB Admins have it auto-selected
+        if (AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR && (!lineOfBusiness_id || lineOfBusiness_id === "-- Select line of business --")) {
             Swal.fire({
                 icon: 'warning',
                 title: 'Please select a line of business!',
@@ -301,6 +301,13 @@ function UserEdit() {
         if(validateRoleDependencies()) {
             setIsSaving(true);
 
+            // Ensure line of business ID is set for LOB Admins
+            let finalLineOfBusinessId = lineOfBusiness_id;
+            if (AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.LOB_ADMIN && !lineOfBusiness_id) {
+                const currentUser = JSON.parse(localStorage.getItem('user'));
+                finalLineOfBusinessId = currentUser?.line_of_business_id;
+            }
+
             let updatedData = {
                 first_name: first_name,
                 last_name: last_name,
@@ -309,7 +316,7 @@ function UserEdit() {
                 password: password,
                 emp_id: employee,
                 project_id: project,
-                line_of_business_id: lineOfBusiness_id
+                line_of_business_id: finalLineOfBusinessId
             }
             if (role === APP_CONSTANTS.USER_ROLES.PRODUCER) {
                 const clientIds = (selectedClients?.length > 0) ? selectedClients.map(s=>s.client_id) : producerClientIds;
@@ -519,7 +526,7 @@ function UserEdit() {
                                                 onChange={(e) => setLineOfBusinessId(e.target.value)}
                                                 value={lineOfBusiness_id}
                                                 required
-                                                disabled={disableLineOfBusiness || AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.LOB_ADMIN}
+                                                disabled={disableLineOfBusiness}
                                             >
                                                 <option value=""> -- Select line of business -- </option>
                                                 {lineOfBusinessList.map((lineOfBusiness) => (

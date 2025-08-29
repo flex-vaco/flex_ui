@@ -576,7 +576,7 @@ function WorkRequestCreate() {
                                         ) : (
                                             <>
                                                 <i className="bi bi-send"></i>
-                                                Submit to Offshore Lead
+                                                Save Work Request
                                             </>
                                         )}
                                     </button>
