@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom"
 import * as AppFunc from "../lib/AppFunctions";
 import "./Menu.css";
+import APP_CONSTANTS from "../appConstants";
 
 const Menu = () => { 
     const navigate = useNavigate();
@@ -134,6 +135,13 @@ return(
               <div className="sidebar-item" onClick={() => handleMenuClick('/workRequest')}>
                 <i className="bi bi-clipboard-data-fill me-2"></i>
                 Work Requests
+              </div>
+            )}
+            
+            {activeUserRole === APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD && (
+              <div className="sidebar-item" onClick={() => handleMenuClick('/offshoreLeadWorkRequests')}>
+                <i className="bi bi-clipboard-check-fill me-2"></i>
+                My Assigned Requests
               </div>
             )}
             

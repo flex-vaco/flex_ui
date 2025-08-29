@@ -25,6 +25,7 @@ function WorkRequestEdit() {
     const [isSaving, setIsSaving] = useState(false);
     const [showResourceModal, setShowResourceModal] = useState(false);
     const [selectedResources, setSelectedResources] = useState([]);
+    const [selectedOffshoreLeads, setSelectedOffshoreLeads] = useState([]);
     
     // Dropdown data
     const [lineOfBusinesses, setLineOfBusinesses] = useState([]);
@@ -57,8 +58,10 @@ function WorkRequestEdit() {
     useEffect(() => {
         if (serviceLineId) {
             fetchCapabilityAreasByServiceLine(serviceLineId);
+            fetchOffshoreLeadsByServiceLine(serviceLineId);
         } else {
             setCapabilityAreas([]);
+            setSelectedOffshoreLeads([]);
         }
     }, [serviceLineId]);
 
@@ -84,12 +87,17 @@ function WorkRequestEdit() {
             
             // Set capability areas
             if (workRequest.capability_areas) {
-                setCapabilityAreaIds(workRequest.capability_areas.map(ca => ca.id));
+                setCapabilityAreaIds(workRequest.capability_areas.map(ca => ca.capability_area_id));
             }
             
             // Set selected resources
             if (workRequest.resources) {
                 setSelectedResources(workRequest.resources);
+            }
+            
+            // Set selected offshore leads
+            if (workRequest.offshore_leads) {
+                setSelectedOffshoreLeads(workRequest.offshore_leads);
             }
         })
         .catch(function (error) {
@@ -135,6 +143,17 @@ function WorkRequestEdit() {
         })
     }
 
+    const fetchOffshoreLeadsByServiceLine = (serviceLineId) => {
+        axios.get(`/workRequest/offshoreLeads/serviceLine/${serviceLineId}`)
+        .then(function (response) {
+            // Automatically set all offshore leads for the selected service line
+            setSelectedOffshoreLeads(response.data.offshoreLeads);
+        })
+        .catch(function (error) {
+            console.log(error);
+        })
+    }
+
 
 
     const fetchProjects = () => {
@@ -163,12 +182,14 @@ function WorkRequestEdit() {
     }
 
     const handleCapabilityAreaAdd = (selectedList, selectedItem) => {
-        setCapabilityAreaIds(selectedList.map(item => item.id));
+        setCapabilityAreaIds(selectedList.map(item => item.capability_area_id));
     }
 
     const handleCapabilityAreaRemove = (selectedList, removedItem) => {
-        setCapabilityAreaIds(selectedList.map(item => item.id));
+        setCapabilityAreaIds(selectedList.map(item => item.capability_area_id));
     }
+
+
 
     const handleFileChange = (event) => {
         const file = event.target.files[0];
@@ -265,6 +286,7 @@ function WorkRequestEdit() {
         formData.append('notes', notes);
         formData.append('capability_area_ids', JSON.stringify(capabilityAreaIds));
         formData.append('resource_ids', JSON.stringify(selectedResources.map(r => r.emp_id)));
+        formData.append('offshore_lead_ids', JSON.stringify(selectedOffshoreLeads.map(r => r.user_id)));
         
         if (projectAttachment) {
             formData.append('project_attachment', projectAttachment);
@@ -342,7 +364,7 @@ function WorkRequestEdit() {
                                         >
                                             <option value=""> -- Select a Line of Business -- </option>
                                             {lineOfBusinesses.map((lineOfBusiness) => (
-                                                <option key={lineOfBusiness.id} value={lineOfBusiness.id}>
+                                                <option key={lineOfBusiness.line_of_business_id} value={lineOfBusiness.line_of_business_id}>
                                                     {lineOfBusiness.name}
                                                 </option>
                                             ))}
@@ -364,7 +386,7 @@ function WorkRequestEdit() {
                                         >
                                             <option value=""> -- Select a Service Line -- </option>
                                             {serviceLines.map((serviceLine) => (
-                                                <option key={serviceLine.id} value={serviceLine.id}>
+                                                <option key={serviceLine.service_line_id} value={serviceLine.service_line_id}>
                                                     {serviceLine.name}
                                                 </option>
                                             ))}
@@ -397,7 +419,7 @@ function WorkRequestEdit() {
                                     </label>
                                     <Multiselect
                                         options={capabilityAreas}
-                                        selectedValues={capabilityAreas.filter(ca => capabilityAreaIds.includes(ca.id))}
+                                        selectedValues={capabilityAreas.filter(ca => capabilityAreaIds.includes(ca.capability_area_id))}
                                         onSelect={handleCapabilityAreaAdd}
                                         onRemove={handleCapabilityAreaRemove}
                                         showCheckbox={true}
@@ -407,6 +429,21 @@ function WorkRequestEdit() {
                                         disabled={!serviceLineId}
                                     />
                                 </div>
+
+                                {selectedOffshoreLeads.length > 0 && (
+                                    <div className="form-group full-width">
+                                        <label htmlFor="offshoreLeads" className="form-label">
+                                            Offshore Leads (Auto-selected based on Service Line)
+                                        </label>
+                                        <div className="p-3 bg-light rounded">
+                                            {selectedOffshoreLeads.map((lead, index) => (
+                                                <span key={index} className="badge bg-info me-2 mb-2">
+                                                    {lead.first_name} {lead.last_name}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
 
                                 <div className="form-row">
                                     <div className="form-group">

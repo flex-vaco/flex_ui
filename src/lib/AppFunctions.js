@@ -6,7 +6,7 @@ const menuAccessRoles = [
   APP_CONSTANTS.USER_ROLES.ADMINISTRATOR,
   APP_CONSTANTS.USER_ROLES.PRODUCER,
   APP_CONSTANTS.USER_ROLES.USCONSULTANT,
-  APP_CONSTANTS.USER_ROLES.OFFSHORELEAD,
+  APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD,
   APP_CONSTANTS.USER_ROLES.LEADERSHIP,
   APP_CONSTANTS.USER_ROLES.LOB_ADMIN,
   APP_CONSTANTS.USER_ROLES.PROJECT_MANAGER
@@ -24,13 +24,15 @@ const allocationAccessRoles = [
 const employeeAccessRoles = [
   APP_CONSTANTS.USER_ROLES.MANAGER,
   APP_CONSTANTS.USER_ROLES.ADMINISTRATOR,
-  APP_CONSTANTS.USER_ROLES.OFFSHORELEAD,
+  APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD,
   APP_CONSTANTS.USER_ROLES.LOB_ADMIN,
 ];
 const projectAccessRoles = [
   APP_CONSTANTS.USER_ROLES.MANAGER,
   APP_CONSTANTS.USER_ROLES.ADMINISTRATOR,
-  APP_CONSTANTS.USER_ROLES.PRODUCER
+  APP_CONSTANTS.USER_ROLES.PRODUCER,
+  APP_CONSTANTS.USER_ROLES.PROJECT_MANAGER,
+  APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD
 ];
 const clientAccessRoles = [
   APP_CONSTANTS.USER_ROLES.MANAGER,
@@ -49,10 +51,11 @@ const capabilityAreaAccessRoles = [
 ];
 const workRequestAccessRoles = [
   APP_CONSTANTS.USER_ROLES.ADMINISTRATOR,
-  APP_CONSTANTS.USER_ROLES.MANAGER,
-  APP_CONSTANTS.USER_ROLES.PRODUCER,
-  APP_CONSTANTS.USER_ROLES.OFFSHORELEAD,
-  APP_CONSTANTS.USER_ROLES.LOB_ADMIN
+  APP_CONSTANTS.USER_ROLES.LOB_ADMIN,
+  APP_CONSTANTS.USER_ROLES.PROJECT_MANAGER
+];
+const offshoreLeadWorkRequestAccessRoles = [
+  APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD
 ];
 const reportAccessRoles = [
   APP_CONSTANTS.USER_ROLES.MANAGER,
@@ -133,6 +136,9 @@ export const hasCapabilityAreaAccess = (activeUserRole) => {
 };
 export const hasWorkRequestAccess = (activeUserRole) => {
   return workRequestAccessRoles.includes(activeUserRole) ? true : false;
+};
+export const hasOffshoreLeadWorkRequestAccess = (activeUserRole) => {
+  return offshoreLeadWorkRequestAccessRoles.includes(activeUserRole) ? true : false;
 };
 export const hasApproveTimesheetAccess = (activeUserRole) => {
   return reportAccessTimesheetApprove.includes(activeUserRole) ? true : false;

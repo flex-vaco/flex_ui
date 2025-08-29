@@ -73,11 +73,13 @@ import WorkRequestList from "./pages/workRequest/WorkRequestList"
 import WorkRequestCreate from "./pages/workRequest/WorkRequestCreate"
 import WorkRequestEdit from "./pages/workRequest/WorkRequestEdit"
 import WorkRequestShow from "./pages/workRequest/WorkRequestShow"
+import OffshoreLeadWorkRequestList from "./pages/workRequest/OffshoreLeadWorkRequestList"
 
 import UserRoleList from "./pages/userRoles/UserRoleList"
 import UserRoleCreate from "./pages/userRoles/UserRoleCreate"
 import UserRoleEdit from "./pages/userRoles/UserRoleEdit"
 import UserRoleShow from "./pages/userRoles/UserRoleShow"
+import ProtectedRoute from "./components/ProtectedRoute"
 
 function App() {
   const needsPasswordReset = JSON.parse(localStorage.getItem("user"))?.needsPasswordReset || null;
@@ -144,10 +146,11 @@ function App() {
           <Route path="/capabilityAreaCreate"  element={isLoggedIn ? <CapabilityAreaCreate/> : <Login/>} />
           <Route path="/capabilityAreaEdit/:id"  element={isLoggedIn ? <CapabilityAreaEdit/> : <Login/>} />
           <Route path="/capabilityAreaShow/:id"  element={isLoggedIn ? <CapabilityAreaShow/> : <Login/>} />
-          <Route path="/workRequest"  element={isLoggedIn ? <WorkRequestList/> : <Login/>} />
-          <Route path="/workRequestCreate"  element={isLoggedIn ? <WorkRequestCreate/> : <Login/>} />
-          <Route path="/workRequestEdit/:id"  element={isLoggedIn ? <WorkRequestEdit/> : <Login/>} />
-          <Route path="/workRequestShow/:id"  element={isLoggedIn ? <WorkRequestShow/> : <Login/>} />
+          <Route path="/workRequest"  element={<ProtectedRoute requiredAccess="workRequest"><WorkRequestList/></ProtectedRoute>} />
+          <Route path="/workRequestCreate"  element={<ProtectedRoute requiredAccess="workRequest"><WorkRequestCreate/></ProtectedRoute>} />
+          <Route path="/workRequestEdit/:id"  element={<ProtectedRoute requiredAccess="workRequest"><WorkRequestEdit/></ProtectedRoute>} />
+          <Route path="/workRequestShow/:id"  element={<ProtectedRoute requiredAccess="workRequest"><WorkRequestShow/></ProtectedRoute>} />
+          <Route path="/offshoreLeadWorkRequests"  element={<ProtectedRoute requiredAccess="offshoreLeadWorkRequest"><OffshoreLeadWorkRequestList/></ProtectedRoute>} />
           <Route path="/userRoleList"  element={isLoggedIn ? <UserRoleList/> : <Login/>} />
           <Route path="/userRoleCreate"  element={isLoggedIn ? <UserRoleCreate/> : <Login/>} />
           <Route path="/userRoleEdit/:id"  element={isLoggedIn ? <UserRoleEdit/> : <Login/>} />

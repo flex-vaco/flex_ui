@@ -205,7 +205,7 @@ function UserRoleEdit() {
                                     >
                                         <option value="">Select Line of Business</option>
                                         {lineOfBusinessList.map((lob) => (
-                                            <option key={lob.id} value={lob.id}>
+                                            <option key={lob.line_of_business_id} value={lob.line_of_business_id}>
                                                 {lob.name}
                                             </option>
                                         ))}

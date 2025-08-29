@@ -165,7 +165,7 @@ function LineOfBusinessList() {
                             <td style={{ textAlign: 'center' }}>
                               <div className="action-buttons-cell">
                                 <button
-                                  onClick={() => handleDelete(lineOfBusiness.id)}
+                                  onClick={() => handleDelete(lineOfBusiness.line_of_business_id)}
                                   className="delete-btn"
                                   title="Delete Line of Business"
                                 >
@@ -173,16 +173,16 @@ function LineOfBusinessList() {
                                 </button>
                                 <Link
                                   className="edit-btn"
-                                  to={`/lineOfBusinessEdit/${lineOfBusiness.id}`}
+                                  to={`/lineOfBusinessEdit/${lineOfBusiness.line_of_business_id}`}
                                   title="Edit Line of Business"
                                 >
                                   <i className="bi bi-pencil"></i>
                                 </Link>
-                                <Link
-                                  className="view-btn"
-                                  to={`/lineOfBusinessShow/${lineOfBusiness.id}`}
-                                  title="View Line of Business"
-                                >
+                                                                  <Link
+                                    className="view-btn"
+                                    to={`/lineOfBusinessShow/${lineOfBusiness.line_of_business_id}`}
+                                    title="View Line of Business"
+                                  >
                                   <i className="bi bi-eye"></i>
                                 </Link>
                               </div>
@@ -190,7 +190,7 @@ function LineOfBusinessList() {
                             <td>
                               <Link
                                 className="client-link"
-                                to={`/lineOfBusinessShow/${lineOfBusiness.id}`}
+                                to={`/lineOfBusinessShow/${lineOfBusiness.line_of_business_id}`}
                               >
                                 {lineOfBusiness.name}
                               </Link>

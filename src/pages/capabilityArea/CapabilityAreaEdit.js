@@ -222,7 +222,7 @@ function CapabilityAreaEdit() {
                                         >
                                             <option value=""> -- Select a Line of Business -- </option>
                                             {lineOfBusinesses?.map((lineOfBusiness) => (
-                                                <option key={lineOfBusiness.id} value={lineOfBusiness.id}>
+                                                <option key={lineOfBusiness.line_of_business_id} value={lineOfBusiness.line_of_business_id}>
                                                     {lineOfBusiness.name}
                                                 </option>
                                             ))}
@@ -243,7 +243,7 @@ function CapabilityAreaEdit() {
                                     >
                                         <option value=""> -- Select a Service Line -- </option>
                                         {serviceLines?.map((serviceLine) => (
-                                            <option key={serviceLine.id} value={serviceLine.id}>
+                                            <option key={serviceLine.service_line_id} value={serviceLine.service_line_id}>
                                                 {serviceLine.name}
                                             </option>
                                         ))}

@@ -26,6 +26,9 @@ function UserEdit() {
     const [clients, setClients] = useState([]);
     const [selectedClients, setSelectedClients] = useState([]);
     const [producerClientIds, setProducerClientIds] = useState([]);
+    const [serviceLines, setServiceLines] = useState([]);
+    const [selectedServiceLines, setSelectedServiceLines] = useState([]);
+    const [offshoreLeadServiceLineIds, setOffshoreLeadServiceLineIds] = useState([]);
 
     const [projects, setProjects] = useState([]);
     const [project, setProject] = useState(null);
@@ -35,6 +38,7 @@ function UserEdit() {
 
     const [showEmpSel, setShowEmpSel] = useState(false);
     const [showClientSel, setShowClientSel] = useState(false);
+    const [showServiceLineSel, setShowServiceLineSel] = useState(false);
     const [showProjectSel, setShowProjectSel] = useState(false);
     const [errMsg, setErrMsg] = useState('');
     const [lineOfBusinessList, setLineOfBusinessList] = useState([]);
@@ -77,6 +81,18 @@ function UserEdit() {
         .catch(function (error) {
           console.log(error);
         })
+    }
+    
+    const fetchServiceLines = () => {
+        if (lineOfBusiness_id) {
+            axios.get(`/serviceLine/lineOfBusiness/${lineOfBusiness_id}`)
+            .then(function (response) {
+                setServiceLines(response.data.serviceLines);
+            })
+            .catch(function (error) {
+              console.log(error);
+            })
+        }
     }
     const fetchEmployees = () => {
         axios.get('/employees')
@@ -203,6 +219,16 @@ function UserEdit() {
         case APP_CONSTANTS.USER_ROLES.PRODUCER:
             setShowEmpSel(false);
             setShowClientSel(true);
+            setShowServiceLineSel(false);
+            setShowProjectSel(false);
+            setProject(null);
+            setEmployee(null);
+            roleHasValidDependencies = true;
+            break;
+        case APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD:
+            setShowEmpSel(false);
+            setShowClientSel(false);
+            setShowServiceLineSel(true);
             setShowProjectSel(false);
             setProject(null);
             setEmployee(null);
@@ -212,6 +238,7 @@ function UserEdit() {
         case APP_CONSTANTS.USER_ROLES.MANAGER:
             setShowEmpSel(false);
             setShowClientSel(false);
+            setShowServiceLineSel(false);
             setShowProjectSel(false);
             setProject(null);
             setEmployee(null);
@@ -226,6 +253,12 @@ function UserEdit() {
     useEffect(() => { 
         validateRoleDependencies();
     }, [role])
+
+    useEffect(() => {
+        if (lineOfBusiness_id && role === APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD) {
+            fetchServiceLines();
+        }
+    }, [lineOfBusiness_id, role]);
 
     const handleSave = async () => {
         if (!first_name.trim()) {
@@ -292,6 +325,21 @@ function UserEdit() {
                     }
                 } else {
                     updatedData.client_ids = clientIds;
+                }
+            } else if (role === APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD) {
+                const serviceLineIds = (selectedServiceLines?.length > 0) ? selectedServiceLines.map(s=>s.service_line_id) : offshoreLeadServiceLineIds;
+                if ((!serviceLineIds) || (serviceLineIds.length === 0)) {
+                    const { value: isConfirmed } = await Swal.fire({
+                        icon: 'warning',
+                        title: 'Service Line is Required \n for Offshore Lead Role',
+                        showConfirmButton: true
+                    })
+                    if (isConfirmed) {
+                        setIsSaving(false);
+                        return;
+                    }
+                } else {
+                    updatedData.service_line_ids = serviceLineIds;
                 }
             }
 
@@ -364,6 +412,16 @@ function UserEdit() {
     const handleClientRemove = (selectedList, removedItem)=>{
         setSelectedClients(selectedList);
         setProducerClientIds(selectedList?.map(s=>s.client_id))
+    }
+
+    const handleServiceLineAdd = (selectedList, selectedItem)=>{
+        setSelectedServiceLines(selectedList);
+        setOffshoreLeadServiceLineIds(selectedList?.map(s=>s.service_line_id))
+    }
+
+    const handleServiceLineRemove = (selectedList, removedItem)=>{
+        setSelectedServiceLines(selectedList);
+        setOffshoreLeadServiceLineIds(selectedList?.map(s=>s.service_line_id))
     }
 
     const handleReset = ()=>{
@@ -465,7 +523,7 @@ function UserEdit() {
                                             >
                                                 <option value=""> -- Select line of business -- </option>
                                                 {lineOfBusinessList.map((lineOfBusiness) => (
-                                                    <option key={lineOfBusiness.id} value={lineOfBusiness.id}>
+                                                    <option key={lineOfBusiness.line_of_business_id} value={lineOfBusiness.line_of_business_id}>
                                                         {lineOfBusiness.name}
                                                     </option>
                                                 ))}
@@ -509,6 +567,23 @@ function UserEdit() {
                                             displayValue="name"
                                             closeIcon="close"
                                             placeholder="Select clients..."
+                                        />
+                                    </div>
+                                )}
+                                {showServiceLineSel && (
+                                    <div className="form-group full-width">
+                                        <label htmlFor="serviceLine" className="form-label required-field">
+                                            Service Lines
+                                        </label>
+                                        <Multiselect
+                                            options={serviceLines} 
+                                            selectedValues={serviceLines.filter(sl=> offshoreLeadServiceLineIds?.includes(sl.service_line_id))} 
+                                            onSelect={handleServiceLineAdd}
+                                            onRemove={handleServiceLineRemove}
+                                            showCheckbox={true}
+                                            displayValue="name"
+                                            closeIcon="close"
+                                            placeholder="Select service lines..."
                                         />
                                     </div>
                                 )}

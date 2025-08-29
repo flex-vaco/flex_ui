@@ -236,7 +236,7 @@ function ServiceLineList() {
                             <td hidden={hasReadOnlyAccess}>
                               <div className="action-buttons-cell">
                                 <button
-                                  onClick={() => handleDelete(serviceLine.id)}
+                                  onClick={() => handleDelete(serviceLine.service_line_id)}
                                   className="delete-btn"
                                   title="Delete Service Line"
                                 >
@@ -244,7 +244,7 @@ function ServiceLineList() {
                                 </button>
                                 <Link
                                   className="edit-btn"
-                                  to={`/serviceLineEdit/${serviceLine.id}`}
+                                  to={`/serviceLineEdit/${serviceLine.service_line_id}`}
                                   title="Edit Service Line"
                                 >
                                   <i className="bi bi-pencil"></i>
@@ -254,7 +254,7 @@ function ServiceLineList() {
                             <td>
                               <Link
                                 className="project-link"
-                                to={`/serviceLineShow/${serviceLine.id}`}
+                                to={`/serviceLineShow/${serviceLine.service_line_id}`}
                               >
                                 {serviceLine.name}
                               </Link>

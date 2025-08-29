@@ -3,6 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from 'axios';
 import Layout from "../../components/Layout"
 import * as Utils from "../../lib/Utils"
+
+import OffshoreLeadReviewModal from './OffshoreLeadReviewModal';
  
 function WorkRequestShow() {
     const { id } = useParams();
@@ -24,21 +26,36 @@ function WorkRequestShow() {
         capability_areas: [],
         resources: []
     });
+    const [currentUser, setCurrentUser] = useState(null);
+    const [showReviewModal, setShowReviewModal] = useState(false);
     const navigate = useNavigate();
  
     useEffect(() => {
+        fetchWorkRequestDetails();
+    }, [])
+    
+    const fetchWorkRequestDetails = () => {
         axios.get(`/workRequest/${id}`)
         .then(function (response) {
-            setWorkRequestDetails(response.data.workRequest)
+            setWorkRequestDetails(response.data.workRequest);
+            setCurrentUser(response.data.user);
         })
         .catch(function (error) {
           console.log(error);
         })
-    }, [])
-    
+    };
+
     const goBack = () => {
 		navigate(-1);
 	}
+
+    const handleReviewClick = () => {
+        setShowReviewModal(true);
+    };
+
+    const handleStatusUpdate = () => {
+        fetchWorkRequestDetails();
+    };
 
     const getStatusBadgeClass = (status) => {
         const statusLower = status?.toLowerCase();
@@ -50,6 +67,11 @@ function WorkRequestShow() {
         if (statusLower === 'completed') return 'status-completed';
         return 'status-pending';
     };
+
+    // Check if current user is an offshore lead and can review this work request
+    const canReview = currentUser?.role === 'offshore_lead' && 
+                     workRequestDetails.status === 'submitted' &&
+                     workRequestDetails.offshore_leads?.some(lead => lead.user_id === currentUser?.user_id);
     
     return (
         <Layout>
@@ -63,13 +85,24 @@ function WorkRequestShow() {
                         <h4>Work Request Details</h4>
                     </div>
                     <div className="col">
-                    <button 
-                        onClick={goBack}
-                        type="button"
-                        className="btn btn-outline-secondary float-end">
-                        Back to List
-                    </button>
-                </div>
+                        <div className="d-flex justify-content-end gap-2">
+                            {canReview && (
+                                <button 
+                                    onClick={handleReviewClick}
+                                    type="button"
+                                    className="btn btn-primary">
+                                    <i className="bi bi-eye"></i>
+                                    Review & Approve
+                                </button>
+                            )}
+                            <button 
+                                onClick={goBack}
+                                type="button"
+                                className="btn btn-outline-secondary">
+                                Back to List
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 </div>
                     <div className="card-body fw-bold">
@@ -156,8 +189,45 @@ function WorkRequestShow() {
                                 </div>
                             </div>
                         )}
+
+                        {/* {workRequestDetails.offshore_leads && workRequestDetails.offshore_leads.length > 0 && (
+                            <div className="row mt-3">
+                                <div className="col-12">
+                                    <p><b className="text-muted">Offshore Leads: </b></p>
+                                    <div className="table-responsive">
+                                        <table className="table table-sm table-bordered">
+                                            <thead className="table-light">
+                                                <tr>
+                                                    <th>Name</th>
+                                                    <th>Email</th>
+                                                    <th>Role</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {workRequestDetails.offshore_leads.map((lead, index) => (
+                                                    <tr key={index}>
+                                                        <td>{lead.first_name} {lead.last_name}</td>
+                                                        <td>{lead.email || 'N/A'}</td>
+                                                        <td>{lead.role || 'N/A'}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        )} */}
                     </div>
                 </div>
+
+                {/* Offshore Lead Review Modal */}
+                {showReviewModal && (
+                    <OffshoreLeadReviewModal
+                        workRequest={workRequestDetails}
+                        onClose={() => setShowReviewModal(false)}
+                        onStatusUpdate={handleStatusUpdate}
+                    />
+                )}
             </div>
         </Layout>
     );
