@@ -43,8 +43,19 @@ function OffshoreLeadWorkRequestList() {
     }
 
     const handleViewResources = (workRequest) => {
-        setSelectedWorkRequest(workRequest);
-        setShowResourceModal(true);
+        // Fetch detailed work request data to get proper capability areas structure
+        axios.get(`/workRequest/${workRequest.work_request_id}`)
+        .then(function (response) {
+            const detailedWorkRequest = response.data.workRequest;
+            setSelectedWorkRequest(detailedWorkRequest);
+            setShowResourceModal(true);
+        })
+        .catch(function (error) {
+            console.log('Error fetching detailed work request:', error);
+            // Fallback to original work request if detailed fetch fails
+            setSelectedWorkRequest(workRequest);
+            setShowResourceModal(true);
+        });
     };
 
     const handleResourceModalClose = () => {
@@ -228,10 +239,10 @@ function OffshoreLeadWorkRequestList() {
                               <div className="action-buttons-cell">
                                 <button
                                   onClick={() => handleViewResources(workRequest)}
-                                  className="view-btn"
-                                  title="View Resources"
+                                  className={`view-btn ${!workRequest.assigned_resources ? 'no-resources-btn' : ''}`}
+                                  title={!workRequest.assigned_resources ? "Select Resources" : "View Resources"}
                                 >
-                                  <i className="bi bi-people"></i>
+                                  <i className={`bi ${!workRequest.assigned_resources ? 'bi-people-fill' : 'bi-people'}`}></i>
                                 </button>
                                 <Link
                                   className="view-btn"

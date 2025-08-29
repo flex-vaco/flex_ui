@@ -12,15 +12,22 @@ function ResourceManagementModal({ workRequest, onClose, onStatusUpdate, isReadO
     const [rejectionReason, setRejectionReason] = useState('');
     const [showRejectionForm, setShowRejectionForm] = useState(false);
     const [hasExistingResources, setHasExistingResources] = useState(false);
+    const [canSelectResources, setCanSelectResources] = useState(false);
 
     useEffect(() => {
         if (workRequest) {
             fetchExistingResources();
-            // Only fetch available resources if user is offshore lead and status allows selection
-            if (workRequest.capability_areas && workRequest.capability_areas.length > 0 && 
-                currentUser?.role === 'offshore_lead' && 
-                workRequest.status !== 'approved' && 
-                workRequest.status !== 'rejected') {
+            // Check if user can select resources
+            const canSelect = workRequest.capability_areas && 
+                            workRequest.capability_areas.length > 0 && 
+                            (currentUser?.role === 'offshore_lead' || currentUser?.role === 'off_shore_lead') && 
+                            workRequest.status !== 'approved' && 
+                            workRequest.status !== 'rejected';
+            
+            setCanSelectResources(canSelect);
+            
+            // Always fetch available resources if user is offshore lead and status allows
+            if (canSelect) {
                 fetchAvailableResources();
             }
         }
@@ -62,12 +69,11 @@ function ResourceManagementModal({ workRequest, onClose, onStatusUpdate, isReadO
         })
         .then(function (response) {
             if (response && response.data) {
-                console.log(response);
                 setAvailableResources(response.data.resources);
             }
         })
         .catch(function (error) {
-            console.log(error);
+            console.log('Error fetching available resources:', error);
             Swal.fire({
                 icon: 'error',
                 title: 'Error fetching resources',
@@ -84,6 +90,14 @@ function ResourceManagementModal({ workRequest, onClose, onStatusUpdate, isReadO
             setSelectedResources(selectedResources.filter(r => r.emp_id !== resource.emp_id));
         } else {
             setSelectedResources([...selectedResources, resource]);
+        }
+    };
+
+    const handleSelectAll = () => {
+        if (selectedResources.length === availableResources.length) {
+            setSelectedResources([]);
+        } else {
+            setSelectedResources([...availableResources]);
         }
     };
 
@@ -109,7 +123,9 @@ function ResourceManagementModal({ workRequest, onClose, onStatusUpdate, isReadO
             Swal.fire({
                 icon: 'success',
                 title: 'Work Request Approved',
-                text: 'The work request has been approved and resources have been assigned',
+                text: hasExistingResources ? 
+                    'The work request has been approved with existing resources' :
+                    `The work request has been approved and ${selectedResources.length} resource(s) have been assigned`,
                 showConfirmButton: false,
                 timer: 2000
             });
@@ -188,6 +204,16 @@ function ResourceManagementModal({ workRequest, onClose, onStatusUpdate, isReadO
         if (statusLower === 'approved') return 'Approved Resources';
         if (statusLower === 'rejected') return 'Rejected Resources';
         return 'Requested Resources';
+    };
+
+    const getActionButtonText = () => {
+        if (hasExistingResources) {
+            return 'Approve Current Resources';
+        } else if (selectedResources.length > 0) {
+            return `Approve (${selectedResources.length} resource${selectedResources.length > 1 ? 's' : ''})`;
+        } else {
+            return 'Approve';
+        }
     };
 
     return (
@@ -309,13 +335,27 @@ function ResourceManagementModal({ workRequest, onClose, onStatusUpdate, isReadO
                         </div>
                     )}
 
-                    {/* Resource Selection Section (only if no existing resources, not read-only, and status allows selection) */}
-                    {!hasExistingResources && !isReadOnly && workRequest?.status !== 'approved' && workRequest?.status !== 'rejected' && (
+                    {/* Resource Selection Section */}
+                    {canSelectResources && !isReadOnly && (
                         <div className="resource-selection-section">
-                            <h3>Select Resources</h3>
-                            <p className="section-description">
-                                Select resources that match the required capability areas and are under your line of business.
-                            </p>
+                            <div className="section-header">
+                                <h3>
+                                    <i className="bi bi-people-fill"></i>
+                                    {hasExistingResources ? 'Add Additional Resources' : 'Select Resources'}
+                                </h3>
+                                {!hasExistingResources && (
+                                    <p className="section-description">
+                                        Select resources that match the required capability areas and are under your line of business.
+                                    </p>
+                                )}
+                                {hasExistingResources && (
+                                    <p className="section-description">
+                                        You can add additional resources to the existing ones, or approve with current resources only.
+                                    </p>
+                                )}
+                            </div>
+                            
+
 
                             {isLoading ? (
                                 <div className="loading-container">
@@ -328,68 +368,85 @@ function ResourceManagementModal({ workRequest, onClose, onStatusUpdate, isReadO
                                         <div className="empty-state">
                                             <i className="bi bi-people"></i>
                                             <p>No resources found matching the required criteria</p>
+                                            <small>Try adjusting the capability areas or check if resources are available in your line of business.</small>
                                         </div>
                                     ) : (
-                                        <table className="resources-table">
-                                            <thead>
-                                                <tr>
-                                                    <th width="50">Select</th>
-                                                    <th>Name</th>
-                                                    <th>Email</th>
-                                                    <th>Primary Skills</th>
-                                                    <th>Secondary Skills</th>
-                                                    <th>Experience</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {availableResources.map((resource) => {
-                                                    const isSelected = selectedResources.some(r => r.emp_id === resource.emp_id);
-                                                    return (
-                                                        <tr key={resource.emp_id} className={isSelected ? 'selected-row' : ''}>
-                                                            <td>
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={isSelected}
-                                                                    onChange={() => handleResourceToggle(resource)}
-                                                                    className="resource-checkbox"
-                                                                />
-                                                            </td>
-                                                            <td>
-                                                                <div className="resource-name">
-                                                                    <strong>{resource.first_name} {resource.last_name}</strong>
-                                                                </div>
-                                                            </td>
-                                                            <td>{resource.email || '-'}</td>
-                                                            <td>
-                                                                <div className="skills-container">
-                                                                    {resource.primary_skills ? 
-                                                                        resource.primary_skills.split(',').map((skill, index) => (
-                                                                            <span key={index} className="skill-badge primary">
-                                                                                {skill.trim()}
-                                                                            </span>
-                                                                        ))
-                                                                        : '-'
-                                                                    }
-                                                                </div>
-                                                            </td>
-                                                            <td>
-                                                                <div className="skills-container">
-                                                                    {resource.secondary_skills ? 
-                                                                        resource.secondary_skills.split(',').map((skill, index) => (
-                                                                            <span key={index} className="skill-badge secondary">
-                                                                                {skill.trim()}
-                                                                            </span>
-                                                                        ))
-                                                                        : '-'
-                                                                    }
-                                                                </div>
-                                                            </td>
-                                                            <td>{resource.experience || '-'}</td>
-                                                        </tr>
-                                                    );
-                                                })}
-                                            </tbody>
-                                        </table>
+                                        <>
+                                            <div className="table-actions">
+                                                <div className="selection-info">
+                                                    <span className="selection-count">
+                                                        {selectedResources.length} of {availableResources.length} resources selected
+                                                    </span>
+                                                </div>
+                                                <button 
+                                                    type="button" 
+                                                    className="btn btn-outline btn-sm"
+                                                    onClick={handleSelectAll}
+                                                >
+                                                    {selectedResources.length === availableResources.length ? 'Deselect All' : 'Select All'}
+                                                </button>
+                                            </div>
+                                            <table className="resources-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th width="50">Select</th>
+                                                        <th>Name</th>
+                                                        <th>Email</th>
+                                                        <th>Primary Skills</th>
+                                                        <th>Secondary Skills</th>
+                                                        <th>Experience</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {availableResources.map((resource) => {
+                                                        const isSelected = selectedResources.some(r => r.emp_id === resource.emp_id);
+                                                        return (
+                                                            <tr key={resource.emp_id} className={isSelected ? 'selected-row' : ''}>
+                                                                <td>
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={isSelected}
+                                                                        onChange={() => handleResourceToggle(resource)}
+                                                                        className="resource-checkbox"
+                                                                    />
+                                                                </td>
+                                                                <td>
+                                                                    <div className="resource-name">
+                                                                        <strong>{resource.first_name} {resource.last_name}</strong>
+                                                                    </div>
+                                                                </td>
+                                                                <td>{resource.email || '-'}</td>
+                                                                <td>
+                                                                    <div className="skills-container">
+                                                                        {resource.primary_skills ? 
+                                                                            resource.primary_skills.split(',').map((skill, index) => (
+                                                                                <span key={index} className="skill-badge primary">
+                                                                                    {skill.trim()}
+                                                                                </span>
+                                                                            ))
+                                                                            : '-'
+                                                                        }
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div className="skills-container">
+                                                                        {resource.secondary_skills ? 
+                                                                            resource.secondary_skills.split(',').map((skill, index) => (
+                                                                                <span key={index} className="skill-badge secondary">
+                                                                                    {skill.trim()}
+                                                                                </span>
+                                                                            ))
+                                                                            : '-'
+                                                                        }
+                                                                    </div>
+                                                                </td>
+                                                                <td>{resource.experience || '-'}</td>
+                                                            </tr>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        </>
                                     )}
                                 </div>
                             )}
@@ -439,9 +496,7 @@ function ResourceManagementModal({ workRequest, onClose, onStatusUpdate, isReadO
                                 disabled={isSubmitting || (!hasExistingResources && selectedResources.length === 0)}
                             >
                                 <i className="bi bi-check-circle"></i>
-                                {isSubmitting ? 'Processing...' : 
-                                 hasExistingResources ? 'Approve Current Resources' : 
-                                 `Approve (${selectedResources.length} resources)`}
+                                {isSubmitting ? 'Processing...' : getActionButtonText()}
                             </button>
                         </>
                     ) : !isReadOnly && showRejectionForm && workRequest?.status !== 'approved' && workRequest?.status !== 'rejected' ? (

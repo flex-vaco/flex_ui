@@ -288,13 +288,15 @@ function WorkRequestList() {
                                 >
                                   <i className="bi bi-trash"></i>
                                 </button>
-                                <Link
-                                  className="edit-btn"
-                                  to={`/workRequestEdit/${workRequest.work_request_id}`}
-                                  title="Edit Work Request"
-                                >
-                                  <i className="bi bi-pencil"></i>
-                                </Link>
+                                {workRequest.status === 'draft' && (
+                                  <Link
+                                    className="edit-btn"
+                                    to={`/workRequestEdit/${workRequest.work_request_id}`}
+                                    title="Edit Work Request"
+                                  >
+                                    <i className="bi bi-pencil"></i>
+                                  </Link>
+                                )}
                                 <button
                                   onClick={() => handleViewResources(workRequest)}
                                   className="view-btn"
@@ -309,7 +311,7 @@ function WorkRequestList() {
                                 >
                                   <i className="bi bi-eye"></i>
                                 </Link>
-                                {currentUser?.role === 'offshore_lead' && workRequest.status === 'submitted' && (
+                                {(currentUser?.role === 'offshore_lead' || currentUser?.role === 'off_shore_lead') && workRequest.status === 'submitted' && (
                                   <Link
                                     className="review-btn"
                                     to={`/workRequestShow/${workRequest.work_request_id}`}

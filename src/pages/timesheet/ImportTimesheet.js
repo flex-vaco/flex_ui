@@ -3,6 +3,7 @@ import * as XLSX from 'xlsx';
 import TableFromJson from '../../components/TableFromJson'
 import Swal from 'sweetalert2'
 import axios from 'axios'
+import Layout from '../../components/Layout'
 
 function ImportTimesheet() {
   const [file, setFile] = useState(null);
@@ -58,7 +59,7 @@ const handleConvert = () => {
     "Note",
     "Approval_Status",
     "Duration"
-]
+  ]
 
   const columnsMatch = (arr1, arr2) => {
     const set1 = new Set(arr1);
@@ -110,40 +111,95 @@ const handleConvert = () => {
   }
 
   return (
-    <div>
-      <div className="list-page-header">
-        <h1 className="list-page-title">Import Timesheet Data</h1>
-      </div>
-      <div className="search-controls">
-        <div className="search-row">
-          <div className="search-input-group">
-            <input className="search-input" type="file" accept=".xls,.xlsx" onChange={handleFileChange} />
-            <button className="excel-btn" disabled={!file} onClick={handleConvert}>Import</button>
+    <Layout>
+      <div className="list-page-container">
+        <div className="list-page-card">
+          {/* Header Section */}
+          <div className="list-page-header">
+            <h1 className="list-page-title">Import Timesheet Data</h1>
           </div>
-            <div className="action-buttons">
-              <button className="add-btn" onClick={uploadToDB}>Upload to Database</button>
+
+          {/* Search Controls */}
+          <div className="search-controls">
+            <div className="search-row">
+              <div className="search-input-group" style={{ flex: '0 1 auto', minWidth: '300px' }}>
+                <input className="search-input" type="file" accept=".xls,.xlsx" onChange={handleFileChange} />
+              </div>
+              <button className="excel-btn" disabled={!file} onClick={handleConvert}>
+                <i className="bi bi-upload"></i>
+                Import
+              </button>
+              <div className="action-buttons">
+                <button className="add-btn" onClick={uploadToDB} disabled={!jsonData}>
+                  <i className="bi bi-cloud-upload"></i>
+                  Upload to Database
+                </button>
+              </div>
             </div>
+          </div>
+
+          {/* Content Section */}
+          {jsonData && (
+            (!columnsMatch(headers, validHeaders)) ?     
+              <div className="list-table-container">
+                <div style={{ padding: '20px', textAlign: 'center' }}>
+                  <div style={{ 
+                    background: '#fff3cd', 
+                    border: '1px solid #ffeaa7', 
+                    borderRadius: '8px', 
+                    padding: '20px',
+                    margin: '20px'
+                  }}>
+                    <h4 style={{ color: '#856404', marginBottom: '15px' }}>
+                      <i className="bi bi-exclamation-triangle"></i> Invalid Column Headers
+                    </h4>
+                    <p style={{ color: '#856404', marginBottom: '15px' }}>
+                      Please ensure your Excel file has the following column headers:
+                    </p>
+                    <ul style={{ 
+                      listStyle: 'none', 
+                      padding: 0, 
+                      display: 'grid', 
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+                      gap: '10px',
+                      maxWidth: '600px',
+                      margin: '0 auto'
+                    }}>
+                      {validHeaders.map((header, index) => (
+                        <li key={index} style={{ 
+                          background: '#fff', 
+                          padding: '8px 12px', 
+                          borderRadius: '4px', 
+                          border: '1px solid #ffeaa7',
+                          fontSize: '14px',
+                          fontWeight: '500'
+                        }}>
+                          {header}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            :
+              <div className="list-table-container">
+                <div style={{ padding: '20px' }}>
+                  <h4 style={{ 
+                    color: '#072942', 
+                    marginBottom: '20px', 
+                    textAlign: 'center',
+                    fontSize: '18px',
+                    fontWeight: '600'
+                  }}>
+                    <i className="bi bi-table"></i> Data Preview for Import
+                  </h4>
+                  <TableFromJson data={JSON.parse(jsonData)} />
+                </div>
+              </div>
+          )}
         </div>
       </div>
-      {jsonData && (
-        // <div>
-        //   <h3>JSON Output:</h3>
-        //   <pre>{jsonData}</pre>
-        // </div>
-        (!columnsMatch(headers, validHeaders)) ?     
-          <div>
-            <p>Invalid columns, ensure the excel file has below column headers and valid data.</p>
-            <ul>
-              {validHeaders.map(i=> <li>{i}</li>)}
-            </ul>
-          </div>
-        :
-          <div>
-              <h4>Data for Importing</h4>
-              <TableFromJson data={JSON.parse(jsonData)} />
-          </div>
-      )}
-    </div>
+    </Layout>
   );
 }
 

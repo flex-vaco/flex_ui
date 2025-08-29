@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from 'axios';
 import Layout from "../../components/Layout"
 import * as Utils from "../../lib/Utils"
+import Swal from 'sweetalert2';
 
 import OffshoreLeadReviewModal from './OffshoreLeadReviewModal';
  
@@ -28,6 +29,7 @@ function WorkRequestShow() {
     });
     const [currentUser, setCurrentUser] = useState(null);
     const [showReviewModal, setShowReviewModal] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const navigate = useNavigate();
  
     useEffect(() => {
@@ -53,6 +55,50 @@ function WorkRequestShow() {
         setShowReviewModal(true);
     };
 
+    const handleSubmitRequest = () => {
+        Swal.fire({
+            title: 'Submit Work Request?',
+            text: 'Are you sure you want to submit this work request? This action cannot be undone.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, Submit',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                submitWorkRequest();
+            }
+        });
+    };
+
+    const submitWorkRequest = () => {
+        setIsSubmitting(true);
+        axios.post(`/workRequest/submit/${id}`)
+        .then(function (response) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Work Request Submitted!',
+                text: 'The work request has been successfully submitted and is now available for offshore lead review.',
+                showConfirmButton: false,
+                timer: 2000
+            });
+            fetchWorkRequestDetails(); // Refresh the data
+        })
+        .catch(function (error) {
+            console.log(error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Submission Failed',
+                text: error.response?.data?.message || 'Failed to submit work request. Please try again.',
+                showConfirmButton: true
+            });
+        })
+        .finally(() => {
+            setIsSubmitting(false);
+        });
+    };
+
     const handleStatusUpdate = () => {
         fetchWorkRequestDetails();
     };
@@ -69,9 +115,19 @@ function WorkRequestShow() {
     };
 
     // Check if current user is an offshore lead and can review this work request
-    const canReview = currentUser?.role === 'offshore_lead' && 
+    const canReview = (currentUser?.role === 'offshore_lead' || currentUser?.role === 'off_shore_lead') && 
                      workRequestDetails.status === 'submitted' &&
                      workRequestDetails.offshore_leads?.some(lead => lead.user_id === currentUser?.user_id);
+
+    // Check if current user can submit this work request (project manager, draft status, and is the creator)
+    const canSubmit = currentUser?.role === 'project_manager' && 
+                     workRequestDetails.status === 'draft' &&
+                     workRequestDetails.submitted_by === currentUser?.user_id;
+
+    // Check if current user can edit this work request (project manager, draft status, and is the creator)
+    const canEdit = currentUser?.role === 'project_manager' && 
+                   workRequestDetails.status === 'draft' &&
+                   workRequestDetails.submitted_by === currentUser?.user_id;
     
     return (
         <Layout>
@@ -86,6 +142,34 @@ function WorkRequestShow() {
                     </div>
                     <div className="col">
                         <div className="d-flex justify-content-end gap-2">
+                            {canSubmit && (
+                                <button 
+                                    onClick={handleSubmitRequest}
+                                    type="button"
+                                    className="btn btn-success"
+                                    disabled={isSubmitting}>
+                                    {isSubmitting ? (
+                                        <>
+                                            <span className="spinner-border spinner-border-sm me-2"></span>
+                                            Submitting...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <i className="bi bi-send"></i>
+                                            Submit Request
+                                        </>
+                                    )}
+                                </button>
+                            )}
+                            {canEdit && (
+                                <button 
+                                    onClick={() => navigate(`/workRequestEdit/${id}`)}
+                                    type="button"
+                                    className="btn btn-primary">
+                                    <i className="bi bi-pencil"></i>
+                                    Edit
+                                </button>
+                            )}
                             {canReview && (
                                 <button 
                                     onClick={handleReviewClick}

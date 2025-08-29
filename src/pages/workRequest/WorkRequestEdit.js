@@ -26,6 +26,9 @@ function WorkRequestEdit() {
     const [showResourceModal, setShowResourceModal] = useState(false);
     const [selectedResources, setSelectedResources] = useState([]);
     const [selectedOffshoreLeads, setSelectedOffshoreLeads] = useState([]);
+    const [workRequestStatus, setWorkRequestStatus] = useState('');
+    const [currentUser, setCurrentUser] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
     
     // Dropdown data
     const [lineOfBusinesses, setLineOfBusinesses] = useState([]);
@@ -76,6 +79,28 @@ function WorkRequestEdit() {
         axios.get(`/workRequest/${id}`)
         .then(function (response) {
             const workRequest = response.data.workRequest;
+            const user = response.data.user;
+            
+            setCurrentUser(user);
+            setWorkRequestStatus(workRequest.status);
+            
+            // Check if user can edit this work request
+            const canEdit = user?.role === 'project_manager' && 
+                           workRequest.status === 'draft' &&
+                           workRequest.submitted_by === user?.user_id;
+            
+            if (!canEdit) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Access Denied',
+                    text: 'You cannot edit this work request. Only draft work requests created by you can be edited.',
+                    showConfirmButton: true
+                }).then(() => {
+                    navigate("/workRequest");
+                });
+                return;
+            }
+            
             setTitle(workRequest.title);
             setLineOfBusinessId(workRequest.line_of_business_id);
             setServiceLineId(workRequest.service_line_id);
@@ -99,9 +124,12 @@ function WorkRequestEdit() {
             if (workRequest.offshore_leads) {
                 setSelectedOffshoreLeads(workRequest.offshore_leads);
             }
+            
+            setIsLoading(false);
         })
         .catch(function (error) {
             console.log(error);
+            setIsLoading(false);
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
@@ -322,6 +350,26 @@ function WorkRequestEdit() {
     const handleResourceSelection = (resources) => {
         setSelectedResources(resources);
         setShowResourceModal(false);
+    }
+
+    if (isLoading) {
+        return (
+            <Layout>
+                <div className="form-page-container">
+                    <div className="form-page-card">
+                        <div className="form-page-header">
+                            <h1 className="form-page-title">Edit Work Request</h1>
+                        </div>
+                        <div className="form-page-body">
+                            <div className="loading-container">
+                                <div className="loading-spinner"></div>
+                                <p>Loading work request details...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </Layout>
+        );
     }
 
     return (
