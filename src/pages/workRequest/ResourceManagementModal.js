@@ -394,7 +394,8 @@ function ResourceManagementModal({ workRequest, onClose, onStatusUpdate, isReadO
                                                         <th>Email</th>
                                                         <th>Primary Skills</th>
                                                         <th>Secondary Skills</th>
-                                                        <th>Experience</th>
+                                                        <th>Experience</th> 
+                                                        <th>Cost per Hour</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -440,7 +441,8 @@ function ResourceManagementModal({ workRequest, onClose, onStatusUpdate, isReadO
                                                                         }
                                                                     </div>
                                                                 </td>
-                                                                <td>{resource.experience || '-'}</td>
+                                                                <td>{resource.total_work_experience_years || '-'} Years</td>
+                                                                <td>$ {resource.cost_per_hour || '-'}</td>
                                                             </tr>
                                                         );
                                                     })}

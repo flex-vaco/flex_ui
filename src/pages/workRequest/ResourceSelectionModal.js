@@ -133,6 +133,7 @@ function ResourceSelectionModal({ capabilityAreaIds, onResourceSelection, onClos
                                         <th>Primary Skills</th>
                                         <th>Secondary Skills</th>
                                         <th>Experience</th>
+                                        <th>Cost per Hour</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -186,7 +187,8 @@ function ResourceSelectionModal({ capabilityAreaIds, onResourceSelection, onClos
                                                             }
                                                         </div>
                                                     </td>
-                                                    <td>{resource.experience || '-'}</td>
+                                                    <td>{resource.total_work_experience_years || '-'} Years</td>
+                                                    <td>$ {resource.cost_per_hour || '-'}</td>
                                                 </tr>
                                             );
                                         })
