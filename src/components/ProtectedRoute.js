@@ -26,6 +26,11 @@ const ProtectedRoute = ({ children, requiredAccess = null }) => {
     return <Navigate to="/home" replace />;
   }
 
+  if (requiredAccess === 'workRequestViewOnly' && !AppFunc.hasWorkRequestViewOnlyAccess(activeUserRole)) {
+    return <Navigate to="/home" replace />;
+  }
+  
+
   // Add more access checks as needed
   if (requiredAccess === 'employee' && !AppFunc.hasEmployeeAccess(activeUserRole)) {
     return <Navigate to="/home" replace />;

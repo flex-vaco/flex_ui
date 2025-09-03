@@ -30,6 +30,7 @@ import UserEdit from "./pages/UserEdit";
 
 import ForecastHours from "./pages/reports/ForecastHours";
 import AvailableHours from "./pages/reports/AvailableHours";
+import Utilization from "./pages/reports/Utilization";
 
 import ClientList from "./pages/clients/ClientList"
 import ClientCreate from "./pages/clients/ClientCreate"
@@ -114,6 +115,7 @@ function App() {
           <Route path="/userEdit/:id"  element={isLoggedIn ? <UserEdit/> : <Login/>} />
           <Route path="/forecastHours"  element={isLoggedIn ? <ForecastHours/> : <Login/>} />
           <Route path="/availableHours"  element={isLoggedIn ? <AvailableHours/> : <Login/>} />
+          <Route path="/utilization"  element={isLoggedIn ? <Utilization/> : <Login/>} />
           <Route path="/clients"  element={isLoggedIn ? <ClientList/> : <Login/>} />
           <Route path="/clientCreate"  element={isLoggedIn ? <ClientCreate/> : <Login/>} />
           <Route path="/clientEdit/:id"  element={isLoggedIn ? <ClientEdit/> : <Login/>} />
@@ -150,7 +152,7 @@ function App() {
           <Route path="/workRequest"  element={<ProtectedRoute requiredAccess="workRequest"><WorkRequestList/></ProtectedRoute>} />
           <Route path="/workRequestCreate"  element={<ProtectedRoute requiredAccess="workRequest"><WorkRequestCreate/></ProtectedRoute>} />
           <Route path="/workRequestEdit/:id"  element={<ProtectedRoute requiredAccess="workRequest"><WorkRequestEdit/></ProtectedRoute>} />
-          <Route path="/workRequestShow/:id"  element={<ProtectedRoute requiredAccess="workRequest"><WorkRequestShow/></ProtectedRoute>} />
+          <Route path="/workRequestShow/:id"  element={<ProtectedRoute requiredAccess="workRequestViewOnly"><WorkRequestShow/></ProtectedRoute>} />
           <Route path="/offshoreLeadWorkRequests"  element={<ProtectedRoute requiredAccess="offshoreLeadWorkRequest"><OffshoreLeadWorkRequestList/></ProtectedRoute>} />
           <Route path="/userRoleList"  element={isLoggedIn ? <UserRoleList/> : <Login/>} />
           <Route path="/userRoleCreate"  element={isLoggedIn ? <UserRoleCreate/> : <Login/>} />

@@ -7,6 +7,7 @@ function ResourceManagementModal({ workRequest, onClose, onStatusUpdate, isReadO
     const [existingResources, setExistingResources] = useState([]);
     const [availableResources, setAvailableResources] = useState([]);
     const [selectedResources, setSelectedResources] = useState([]);
+    const [resourceAvailability, setResourceAvailability] = useState({});
     const [isLoading, setIsLoading] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [rejectionReason, setRejectionReason] = useState('');
@@ -70,6 +71,10 @@ function ResourceManagementModal({ workRequest, onClose, onStatusUpdate, isReadO
         .then(function (response) {
             if (response && response.data) {
                 setAvailableResources(response.data.resources);
+                // Fetch availability for the loaded resources
+                if (response.data.resources.length > 0) {
+                    fetchResourceAvailability(response.data.resources);
+                }
             }
         })
         .catch(function (error) {
@@ -81,6 +86,47 @@ function ResourceManagementModal({ workRequest, onClose, onStatusUpdate, isReadO
                 showConfirmButton: true
             });
         });
+    };
+
+    const fetchResourceAvailability = (resources) => {
+        if (!workRequest?.duration_from || !workRequest?.duration_to) {
+            return;
+        }
+
+        const empIds = resources.map(r => r.emp_id);
+        
+        axios.post('/projectAllocations/resourceAvailability', {
+            empIds: empIds,
+            fromDate: workRequest.duration_from,
+            toDate: workRequest.duration_to
+        })
+        .then(function (response) {
+            if (response.data.resource_availability) {
+                const availabilityMap = {};
+                response.data.resource_availability.forEach(avail => {
+                    availabilityMap[avail.emp_id] = avail;
+                });
+                setResourceAvailability(availabilityMap);
+            }
+        })
+        .catch(function (error) {
+            console.log('Error fetching resource availability:', error);
+        });
+    };
+
+    const getAvailabilityDisplay = (empId) => {
+        const availability = resourceAvailability[empId];
+        if (!availability) {
+            return { text: 'Loading...', class: 'availability-loading' };
+        }
+        
+        if (availability.is_fully_available) {
+            return { text: '40 hrs/week (Fully Available)', class: 'availability-full' };
+        } else if (availability.available_hours > 0) {
+            return { text: `${availability.available_hours} hrs/week available`, class: 'availability-partial' };
+        } else {
+            return { text: 'Fully Allocated', class: 'availability-none' };
+        }
     };
 
     const handleResourceToggle = (resource) => {
@@ -396,6 +442,7 @@ function ResourceManagementModal({ workRequest, onClose, onStatusUpdate, isReadO
                                                         <th>Secondary Skills</th>
                                                         <th>Experience</th> 
                                                         <th>Cost per Hour</th>
+                                                        <th>Availability</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -443,6 +490,11 @@ function ResourceManagementModal({ workRequest, onClose, onStatusUpdate, isReadO
                                                                 </td>
                                                                 <td>{resource.total_work_experience_years || '-'} Years</td>
                                                                 <td>$ {resource.cost_per_hour || '-'}</td>
+                                                                <td>
+                                                                    <span className={`availability-badge ${getAvailabilityDisplay(resource.emp_id).class}`}>
+                                                                        {getAvailabilityDisplay(resource.emp_id).text}
+                                                                    </span>
+                                                                </td>
                                                             </tr>
                                                         );
                                                     })}

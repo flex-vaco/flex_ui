@@ -641,6 +641,11 @@ function WorkRequestEdit() {
                     capabilityAreaIds={capabilityAreaIds}
                     onResourceSelection={handleResourceSelection}
                     onClose={() => setShowResourceModal(false)}
+                    workRequest={{
+                        duration_from: durationFrom,
+                        duration_to: durationTo,
+                        hours_per_week: hoursPerWeek
+                    }}
                 />
             )}
         </Layout>

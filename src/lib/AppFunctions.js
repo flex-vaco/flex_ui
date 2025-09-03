@@ -53,15 +53,23 @@ const workRequestAccessRoles = [
   APP_CONSTANTS.USER_ROLES.ADMINISTRATOR,
   APP_CONSTANTS.USER_ROLES.LOB_ADMIN,
   APP_CONSTANTS.USER_ROLES.PROJECT_MANAGER,
-  APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD
 ];
 const offshoreLeadWorkRequestAccessRoles = [
+  APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD
+];
+const workRequestViewOnlyAccessRoles = [
+  APP_CONSTANTS.USER_ROLES.ADMINISTRATOR,
+  APP_CONSTANTS.USER_ROLES.LOB_ADMIN,
+  APP_CONSTANTS.USER_ROLES.PROJECT_MANAGER,
   APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD
 ];
 const reportAccessRoles = [
   APP_CONSTANTS.USER_ROLES.MANAGER,
   APP_CONSTANTS.USER_ROLES.ADMINISTRATOR,
-  APP_CONSTANTS.USER_ROLES.PRODUCER
+  APP_CONSTANTS.USER_ROLES.PRODUCER,
+  APP_CONSTANTS.USER_ROLES.PROJECT_MANAGER,
+  APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD,
+  APP_CONSTANTS.USER_ROLES.LOB_ADMIN
 ];
 const reportAccessTimesheetApprove = [
   APP_CONSTANTS.USER_ROLES.MANAGER,
@@ -74,7 +82,7 @@ const hiringAccessRole = [
   APP_CONSTANTS.USER_ROLES.MANAGER,
   APP_CONSTANTS.USER_ROLES.PRODUCER
 ];
-const aiChatAccessRoles = reportAccessRoles;
+const aiChatAccessRoles = [APP_CONSTANTS.USER_ROLES.ADMINISTRATOR, APP_CONSTANTS.USER_ROLES.MANAGER, APP_CONSTANTS.USER_ROLES.PRODUCER];
 const userAccessRoles = [APP_CONSTANTS.USER_ROLES.ADMINISTRATOR, APP_CONSTANTS.USER_ROLES.LOB_ADMIN];
 const userRoleAccessRoles = [APP_CONSTANTS.USER_ROLES.ADMINISTRATOR, APP_CONSTANTS.USER_ROLES.MANAGER];
 const locationAccessRoles = [APP_CONSTANTS.USER_ROLES.ADMINISTRATOR];
@@ -140,6 +148,9 @@ export const hasWorkRequestAccess = (activeUserRole) => {
 };
 export const hasOffshoreLeadWorkRequestAccess = (activeUserRole) => {
   return offshoreLeadWorkRequestAccessRoles.includes(activeUserRole) ? true : false;
+};
+export const hasWorkRequestViewOnlyAccess = (activeUserRole) => {
+  return workRequestViewOnlyAccessRoles.includes(activeUserRole) ? true : false;
 };
 export const hasApproveTimesheetAccess = (activeUserRole) => {
   return reportAccessTimesheetApprove.includes(activeUserRole) ? true : false;

@@ -3,9 +3,10 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 import './ResourceSelectionModal.css';
 
-function ResourceSelectionModal({ capabilityAreaIds, onResourceSelection, onClose }) {
+function ResourceSelectionModal({ capabilityAreaIds, onResourceSelection, onClose, workRequest }) {
     const [resources, setResources] = useState([]);
     const [selectedResources, setSelectedResources] = useState([]);
+    const [resourceAvailability, setResourceAvailability] = useState({});
     const [isLoading, setIsLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -22,6 +23,10 @@ function ResourceSelectionModal({ capabilityAreaIds, onResourceSelection, onClos
         })
         .then(function (response) {
             setResources(response.data.resources);
+            // Fetch availability for the loaded resources if workRequest has duration
+            if (response.data.resources.length > 0 && workRequest?.duration_from && workRequest?.duration_to) {
+                fetchResourceAvailability(response.data.resources);
+            }
         })
         .catch(function (error) {
             console.log(error);
@@ -35,6 +40,47 @@ function ResourceSelectionModal({ capabilityAreaIds, onResourceSelection, onClos
         .finally(() => {
             setIsLoading(false);
         });
+    };
+
+    const fetchResourceAvailability = (resources) => {
+        if (!workRequest?.duration_from || !workRequest?.duration_to) {
+            return;
+        }
+
+        const empIds = resources.map(r => r.emp_id);
+        
+        axios.post('/empPrjAloc/resourceAvailability', {
+            empIds: empIds,
+            fromDate: workRequest.duration_from,
+            toDate: workRequest.duration_to
+        })
+        .then(function (response) {
+            if (response.data.resource_availability) {
+                const availabilityMap = {};
+                response.data.resource_availability.forEach(avail => {
+                    availabilityMap[avail.emp_id] = avail;
+                });
+                setResourceAvailability(availabilityMap);
+            }
+        })
+        .catch(function (error) {
+            console.log('Error fetching resource availability:', error);
+        });
+    };
+
+    const getAvailabilityDisplay = (empId) => {
+        const availability = resourceAvailability[empId];
+        if (!availability) {
+            return { text: 'Loading...', class: 'availability-loading' };
+        }
+        
+        if (availability.is_fully_available) {
+            return { text: '40 hrs/week (Fully Available)', class: 'availability-full' };
+        } else if (availability.available_hours > 0) {
+            return { text: `${availability.available_hours} hrs/week available`, class: 'availability-partial' };
+        } else {
+            return { text: 'Fully Allocated', class: 'availability-none' };
+        }
     };
 
     const handleResourceToggle = (resource) => { 
@@ -134,6 +180,7 @@ function ResourceSelectionModal({ capabilityAreaIds, onResourceSelection, onClos
                                         <th>Secondary Skills</th>
                                         <th>Experience</th>
                                         <th>Cost per Hour</th>
+                                        <th>Availability</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -147,6 +194,7 @@ function ResourceSelectionModal({ capabilityAreaIds, onResourceSelection, onClos
                                     ) : (
                                         filteredResources.map((resource) => {
                                             const isSelected = selectedResources.some(r => r.emp_id === resource.emp_id);
+                                            const availabilityDisplay = getAvailabilityDisplay(resource.emp_id);
                                             return (
                                                 <tr key={resource.emp_id} className={isSelected ? 'selected-row' : ''}>
                                                     <td>
@@ -189,6 +237,11 @@ function ResourceSelectionModal({ capabilityAreaIds, onResourceSelection, onClos
                                                     </td>
                                                     <td>{resource.total_work_experience_years || '-'} Years</td>
                                                     <td>$ {resource.cost_per_hour || '-'}</td>
+                                                    <td>
+                                                        <span className={`availability-badge ${availabilityDisplay.class}`}>
+                                                            {availabilityDisplay.text}
+                                                        </span>
+                                                    </td>
                                                 </tr>
                                             );
                                         })

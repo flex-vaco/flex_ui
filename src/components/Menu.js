@@ -214,11 +214,19 @@ return(
                   Reports
                 </div>
                 <div className="sidebar-submenu">
-                  <div className="sidebar-item sub-item" onClick={() => handleMenuClick('/forecastHours')}>
-                    Forecast Hours
-                  </div>
-                  <div className="sidebar-item sub-item" onClick={() => handleMenuClick('/availableHours')}>
-                    Available Percentage
+                  {activeUserRole !== APP_CONSTANTS.USER_ROLES.PROJECT_MANAGER && 
+                   activeUserRole !== APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD && (
+                    <>
+                      <div className="sidebar-item sub-item" onClick={() => handleMenuClick('/forecastHours')}>
+                        Forecast Hours
+                      </div>
+                      <div className="sidebar-item sub-item" onClick={() => handleMenuClick('/availableHours')}>
+                        Available Percentage
+                      </div>
+                    </>
+                  )}
+                  <div className="sidebar-item sub-item" onClick={() => handleMenuClick('/utilization')}>
+                    Utilization Report
                   </div>
                 </div>
               </div>
