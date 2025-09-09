@@ -186,7 +186,7 @@ function ResourceSelectionModal({ capabilityAreaIds, onResourceSelection, onClos
                                 <tbody>
                                     {filteredResources.length === 0 ? (
                                         <tr>
-                                            <td colSpan="6" className="empty-state">
+                                            <td colSpan="8" className="empty-state">
                                                 <i className="bi bi-people"></i>
                                                 <p>No resources found matching the selected capability areas</p>
                                             </td>

@@ -95,7 +95,7 @@ function ResourceManagementModal({ workRequest, onClose, onStatusUpdate, isReadO
 
         const empIds = resources.map(r => r.emp_id);
         
-        axios.post('/projectAllocations/resourceAvailability', {
+        axios.post('/empPrjAloc/resourceAvailability', {
             empIds: empIds,
             fromDate: workRequest.duration_from,
             toDate: workRequest.duration_to

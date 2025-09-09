@@ -48,6 +48,10 @@ function EmpEdit() {
     const [industries, setIndustries] = useState([]);
     const [software_erp_experience, setSoftwareErpExperience] = useState([]);
     const [hours_preference, setHoursPreference] = useState('40.00');
+    const [service_line_id, setServiceLineId] = useState('');
+    const [capability_area_ids, setCapabilityAreaIds] = useState([]);
+    const [serviceLineList, setServiceLineList] = useState([]);
+    const [capabilityAreaList, setCapabilityAreaList] = useState([]);
 
     // Options for new fields
     const functionalFocusOptions = ['A/F', 'HR', 'Technology', 'Marketing', 'Operations'];
@@ -83,14 +87,29 @@ function EmpEdit() {
     useEffect(() => {
         if (userRole === 'administrator' && lineOfBusiness_id && lineOfBusiness_id !== '' && lineOfBusiness_id !== '-select-') {
             fetchManagersByLineOfBusiness(lineOfBusiness_id);
+            fetchServiceLinesByLineOfBusiness(lineOfBusiness_id);
         } else if (userRole === 'administrator' && (lineOfBusiness_id === '' || lineOfBusiness_id === '-select-')) {
             // Reset manager list when no line of business is selected
             setManagerList([]);
             setSelectedManager("-select-");
             setManagerName('');
             setManagerEmail('');
+            setServiceLineList([]);
+            setServiceLineId('');
+            setCapabilityAreaList([]);
+            setCapabilityAreaIds([]);
         }
     }, [lineOfBusiness_id, userRole]);
+
+    // Handle service line changes
+    useEffect(() => {
+        if (service_line_id && service_line_id !== '') {
+            fetchCapabilityAreasByServiceLine(service_line_id);
+        } else {
+            setCapabilityAreaList([]);
+            setCapabilityAreaIds([]);
+        }
+    }, [service_line_id]);
 
     const handleManagerChange = (event) => {
         const selectedManagerId = event.target.value;
@@ -177,6 +196,36 @@ function EmpEdit() {
         })
     }
 
+    const fetchServiceLinesByLineOfBusiness = (lineOfBusinessId) => {
+        axios.get(`/serviceLine/lineOfBusiness/${lineOfBusinessId}`)
+        .then(function (response) {
+            setServiceLineList(response.data.serviceLines);
+        })
+        .catch(function (error) {
+            console.log(error);
+        })
+    }
+
+    const fetchServiceLinesForOffshoreLead = () => {
+        axios.get('/serviceLine/offshoreLead/assigned')
+        .then(function (response) {
+            setServiceLineList(response.data.serviceLines);
+        })
+        .catch(function (error) {
+            console.log(error);
+        })
+    }
+
+    const fetchCapabilityAreasByServiceLine = (serviceLineId) => {
+        axios.get(`/capabilityArea/serviceLine/${serviceLineId}`)
+        .then(function (response) {
+            setCapabilityAreaList(response.data.capabilityAreas);
+        })
+        .catch(function (error) {
+            console.log(error);
+        })
+    }
+
     const httpConfig = {
         headers: {
           'Content-Type': 'multipart/form-data'
@@ -213,6 +262,23 @@ function EmpEdit() {
             setSoftwareErpExperience(empDetails.erp_software_experience ? empDetails.erp_software_experience.split(',') : []);
             setHoursPreference(empDetails.max_work_hours_prefered || '40.00');
             setLineOfBusinessId(empDetails.line_of_business_id ? empDetails.line_of_business_id : '-select-');
+            
+            // Set service line and capability areas
+            setServiceLineId(empDetails.service_line_id || '');
+            if (empDetails.capability_areas && empDetails.capability_areas.length > 0) {
+                setCapabilityAreaIds(empDetails.capability_areas.map(ca => ca.capability_area_id.toString()));
+            } else {
+                setCapabilityAreaIds([]);
+            }
+            
+            // Load service lines based on user role and line of business
+            if (userRole === 'off_shore_lead') {
+                fetchServiceLinesForOffshoreLead();
+            } else if (userRole !== 'administrator' && empDetails.line_of_business_id) {
+                fetchServiceLinesByLineOfBusiness(empDetails.line_of_business_id);
+            } else if (userRole === 'administrator' && empDetails.line_of_business_id) {
+                fetchServiceLinesByLineOfBusiness(empDetails.line_of_business_id);
+            }
             
             // Handle manager assignment based on user role
             if (userRole === 'administrator') {
@@ -341,6 +407,17 @@ function EmpEdit() {
             }
         }
 
+        // Validate service line selection
+        if (!service_line_id || service_line_id === '') {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Service Line is required!',
+                text: 'Please select a service line for the resource.',
+                showConfirmButton: true
+            })
+            return;
+        }
+
         setIsSaving(true);
         var onSite = Number(is_onsite);
         const data = new FormData();
@@ -373,6 +450,8 @@ function EmpEdit() {
         data.append('industries_experience', industries.join(','));
         data.append('erp_software_experience', software_erp_experience.join(','));  
         data.append('max_work_hours_prefered', hours_preference);
+        data.append('service_line_id', service_line_id);
+        data.append('capability_area_ids', JSON.stringify(capability_area_ids));
         
         if(selected_resume) data.append('resume', selected_resume);
         if(profile_picture) data.append('profile_picture', profile_picture);
@@ -818,6 +897,55 @@ function EmpEdit() {
                                                 <option key={opt} value={opt}>{opt}</option>
                                             ))}
                                         </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="form-section">
+                                <h3 className="form-section-title">Service Line & Capability Areas</h3>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="service_line_id" className="form-label required-field">
+                                            Service Line
+                                        </label>
+                                        <select
+                                            id="service_line_id"
+                                            className="form-select"
+                                            value={service_line_id}
+                                            onChange={(e) => setServiceLineId(e.target.value)}
+                                            required
+                                        >
+                                            <option value="">-- Select Service Line --</option>
+                                            {serviceLineList.map(serviceLine => (
+                                                <option key={serviceLine.service_line_id} value={serviceLine.service_line_id}>
+                                                    {serviceLine.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="capability_area_ids" className="form-label">
+                                            Capability Areas
+                                        </label>
+                                        <select
+                                            id="capability_area_ids"
+                                            multiple
+                                            className="form-select"
+                                            value={capability_area_ids}
+                                            onChange={(e) => setCapabilityAreaIds(Array.from(e.target.selectedOptions, option => option.value))}
+                                            disabled={!service_line_id}
+                                        >
+                                            {capabilityAreaList.map(capabilityArea => (
+                                                <option key={capabilityArea.capability_area_id} value={capabilityArea.capability_area_id}>
+                                                    {capabilityArea.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {!service_line_id && (
+                                            <small className="form-text text-muted">
+                                                Please select a Service Line first to enable Capability Area selection
+                                            </small>
+                                        )}
                                     </div>
                                 </div>
                             </div>
