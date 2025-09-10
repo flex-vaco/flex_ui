@@ -2,12 +2,21 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import './ResourceManagementModal.css';
+import { 
+    generateFourWeeks, 
+    calculateAvailabilityPercentage, 
+    getAvailabilityColorClass, 
+    formatAvailabilityText, 
+    formatWeekDateRange 
+} from '../../lib/WeeklyAvailabilityUtils';
 
 function ResourceManagementModal({ workRequest, onClose, onStatusUpdate, isReadOnly = false, currentUser = null }) {
     const [existingResources, setExistingResources] = useState([]);
     const [availableResources, setAvailableResources] = useState([]);
     const [selectedResources, setSelectedResources] = useState([]);
     const [resourceAvailability, setResourceAvailability] = useState({});
+    const [weeklyAvailability, setWeeklyAvailability] = useState({});
+    const [weeks, setWeeks] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [rejectionReason, setRejectionReason] = useState('');
@@ -95,18 +104,32 @@ function ResourceManagementModal({ workRequest, onClose, onStatusUpdate, isReadO
 
         const empIds = resources.map(r => r.emp_id);
         
+        // Generate weeks on frontend for display
+        const generatedWeeks = generateFourWeeks(workRequest.duration_from);
+        setWeeks(generatedWeeks);
+        
         axios.post('/empPrjAloc/resourceAvailability', {
             empIds: empIds,
             fromDate: workRequest.duration_from,
-            toDate: workRequest.duration_to
+            toDate: workRequest.duration_to,
+            weeklyView: true
         })
         .then(function (response) {
             if (response.data.resource_availability) {
                 const availabilityMap = {};
-                response.data.resource_availability.forEach(avail => {
-                    availabilityMap[avail.emp_id] = avail;
+                const weeklyMap = {};
+                
+                response.data.resource_availability.forEach(empData => {
+                    availabilityMap[empData.emp_id] = empData;
+                    
+                    // Organize weekly data by employee
+                    if (empData.weekly_availability) {
+                        weeklyMap[empData.emp_id] = empData.weekly_availability;
+                    }
                 });
+                
                 setResourceAvailability(availabilityMap);
+                setWeeklyAvailability(weeklyMap);
             }
         })
         .catch(function (error) {
@@ -114,19 +137,27 @@ function ResourceManagementModal({ workRequest, onClose, onStatusUpdate, isReadO
         });
     };
 
-    const getAvailabilityDisplay = (empId) => {
-        const availability = resourceAvailability[empId];
-        if (!availability) {
+    const getWeeklyAvailabilityDisplay = (empId) => {
+        const weeklyData = weeklyAvailability[empId];
+        if (!weeklyData || weeklyData.length === 0) {
             return { text: 'Loading...', class: 'availability-loading' };
         }
         
-        if (availability.is_fully_available) {
-            return { text: '40 hrs/week (Fully Available)', class: 'availability-full' };
-        } else if (availability.available_hours > 0) {
-            return { text: `${availability.available_hours} hrs/week available`, class: 'availability-partial' };
-        } else {
-            return { text: 'Fully Allocated', class: 'availability-none' };
-        }
+        const hoursPerWeek = workRequest?.hours_per_week || 40;
+        
+        return weeklyData.map(weekData => {
+            const percentage = calculateAvailabilityPercentage(weekData.available_hours, hoursPerWeek);
+            const colorClass = getAvailabilityColorClass(percentage);
+            const text = formatAvailabilityText(weekData.available_hours, hoursPerWeek);
+            
+            return {
+                week: weekData.week,
+                text: text,
+                class: colorClass,
+                percentage: percentage,
+                availableHours: weekData.available_hours
+            };
+        });
     };
 
     const handleResourceToggle = (resource) => {
@@ -442,12 +473,18 @@ function ResourceManagementModal({ workRequest, onClose, onStatusUpdate, isReadO
                                                         <th>Secondary Skills</th>
                                                         <th>Experience</th> 
                                                         <th>Cost per Hour</th>
-                                                        <th>Availability</th>
+                                                        {weeks.map(week => (
+                                                            <th key={week.weekNumber} className="week-header">
+                                                                <div className="week-label">{week.label}</div>
+                                                                <div className="week-dates">{formatWeekDateRange(week.startDate, week.endDate)}</div>
+                                                            </th>
+                                                        ))}
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     {availableResources.map((resource) => {
                                                         const isSelected = selectedResources.some(r => r.emp_id === resource.emp_id);
+                                                        const weeklyAvailabilityDisplay = getWeeklyAvailabilityDisplay(resource.emp_id);
                                                         return (
                                                             <tr key={resource.emp_id} className={isSelected ? 'selected-row' : ''}>
                                                                 <td>
@@ -490,11 +527,24 @@ function ResourceManagementModal({ workRequest, onClose, onStatusUpdate, isReadO
                                                                 </td>
                                                                 <td>{resource.total_work_experience_years || '-'} Years</td>
                                                                 <td>$ {resource.cost_per_hour || '-'}</td>
-                                                                <td>
-                                                                    <span className={`availability-badge ${getAvailabilityDisplay(resource.emp_id).class}`}>
-                                                                        {getAvailabilityDisplay(resource.emp_id).text}
-                                                                    </span>
-                                                                </td>
+                                                                {weeks.map((week, index) => {
+                                                                    const weekData = weeklyAvailabilityDisplay[index];
+                                                                    return (
+                                                                        <td key={week.weekNumber}>
+                                                                            {weekData ? (
+                                                                                <div className="weekly-availability-cell">
+                                                                                    <span className={`availability-badge ${weekData.class}`}>
+                                                                                        {weekData.text}
+                                                                                    </span>
+                                                                                </div>
+                                                                            ) : (
+                                                                                <span className="availability-badge availability-loading">
+                                                                                    Loading...
+                                                                                </span>
+                                                                            )}
+                                                                        </td>
+                                                                    );
+                                                                })}
                                                             </tr>
                                                         );
                                                     })}
