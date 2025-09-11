@@ -237,7 +237,7 @@ function CapabilityAreaList() {
                             <td hidden={hasReadOnlyAccess}>
                               <div className="action-buttons-cell">
                                 <button
-                                  onClick={() => handleDelete(capabilityArea.id)}
+                                  onClick={() => handleDelete(capabilityArea.capability_area_id)}
                                   className="delete-btn"
                                   title="Delete Capability Area"
                                 >
@@ -245,7 +245,7 @@ function CapabilityAreaList() {
                                 </button>
                                 <Link
                                   className="edit-btn"
-                                  to={`/capabilityAreaEdit/${capabilityArea.id}`}
+                                  to={`/capabilityAreaEdit/${capabilityArea.capability_area_id}`}
                                   title="Edit Capability Area"
                                 >
                                   <i className="bi bi-pencil"></i>
@@ -255,7 +255,7 @@ function CapabilityAreaList() {
                             <td>
                               <Link
                                 className="project-link"
-                                to={`/capabilityAreaShow/${capabilityArea.id}`}
+                                to={`/capabilityAreaShow/${capabilityArea.capability_area_id}`}
                               >
                                 {capabilityArea.name}
                               </Link>

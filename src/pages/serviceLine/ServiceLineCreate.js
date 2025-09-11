@@ -155,7 +155,7 @@ function ServiceLineCreate() {
                                         >
                                             <option value=""> -- Select a Line of Business -- </option>
                                             {lineOfBusinesses?.map((lineOfBusiness) => (
-                                                <option key={lineOfBusiness.id} value={lineOfBusiness.id}>
+                                                <option key={lineOfBusiness.line_of_business_id} value={lineOfBusiness.line_of_business_id}>
                                                     {lineOfBusiness.name}
                                                 </option>
                                             ))}

@@ -4,50 +4,30 @@ import Swal from 'sweetalert2'
 import axios from 'axios'
 import Layout from "../../components/Layout"
 import * as Utils from "../../lib/Utils"
-
 import APP_CONSTANTS from "../../appConstants";
 import Pagination from "../../components/Pagination";
 import "../ListPages.css";
 import Loader from "../../components/Loader";
 import ResourceManagementModal from './ResourceManagementModal';
 
-function WorkRequestList() {
+function OffshoreLeadWorkRequestList() {
     const [isLoading, setIsLoading] = useState(false);
     const [workRequestList, setWorkRequestList] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
     const [showResourceModal, setShowResourceModal] = useState(false);
     const [selectedWorkRequest, setSelectedWorkRequest] = useState(null);
-    const hasReadOnlyAccess = currentUser?.role === APP_CONSTANTS.USER_ROLES.EMPLOYEE;
 
     const navigate = useNavigate();
 
-    const handleAddButtonClick = () => {
-      navigate("/workRequestCreate");
-    }
-
-    const handleViewResources = (workRequest) => {
-        setSelectedWorkRequest(workRequest);
-        setShowResourceModal(true);
-    };
-
-    const handleResourceModalClose = () => {
-        setShowResourceModal(false);
-        setSelectedWorkRequest(null);
-    };
-
-    const handleStatusUpdate = () => {
-        fetchWorkRequestList();
-    };
-
     useEffect(() => {
-        fetchWorkRequestList()
+        fetchAssignedWorkRequests()
     }, [])
   
-    const fetchWorkRequestList = () => {
+    const fetchAssignedWorkRequests = () => {
         setIsLoading(true);
         
-        // Use the main endpoint - backend handles role-based filtering
-        axios.get('/workRequest')
+        // Use the specific endpoint for offshore lead assigned work requests
+        axios.get('/workRequest/offshoreLead/assigned')
         .then(function (response) {
           setWorkRequestList(response.data.workRequests);
           setFilteredList(response.data.workRequests);
@@ -62,37 +42,29 @@ function WorkRequestList() {
         })
     }
 
-    const handleDelete = (id) => {
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You won't be able to revert this!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, delete it!'
-          }).then((result) => {
-            if (result.isConfirmed) {
-                axios.get(`/workRequest/delete/${id}`)
-                .then(function (response) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Work Request deleted successfully!',
-                        showConfirmButton: false,
-                        timer: 1500
-                    })
-                    fetchWorkRequestList()
-                })
-                .catch(function (error) {
-                    Swal.fire({
-                         icon: 'error',
-                        title: 'An Error Occured!',
-                        showConfirmButton: false,
-                        timer: 1500
-                    })
-                });
-            }
-          })
+    const handleViewResources = (workRequest) => {
+        // Fetch detailed work request data to get proper capability areas structure
+        axios.get(`/workRequest/${workRequest.work_request_id}`)
+        .then(function (response) {
+            const detailedWorkRequest = response.data.workRequest;
+            setSelectedWorkRequest(detailedWorkRequest);
+            setShowResourceModal(true);
+        })
+        .catch(function (error) {
+            console.log('Error fetching detailed work request:', error);
+            // Fallback to original work request if detailed fetch fails
+            setSelectedWorkRequest(workRequest);
+            setShowResourceModal(true);
+        });
+    };
+
+    const handleResourceModalClose = () => {
+        setShowResourceModal(false);
+        setSelectedWorkRequest(null);
+    };
+
+    const handleStatusUpdate = () => {
+        fetchAssignedWorkRequests();
     };
 
   const [filteredList, setFilteredList] = useState(workRequestList);
@@ -135,7 +107,7 @@ function WorkRequestList() {
   };
 
   const handleExcelExport = () => {
-    Utils.exportHTMLTableToExcel('workRequestListTable', 'Work Request List', ["Action"])
+    Utils.exportHTMLTableToExcel('offshoreLeadWorkRequestListTable', 'Offshore Lead Work Request List', ["Action"])
   };
 
   const searchKeysToIgnore = ["id", "service_line_id", "project_id", "submitted_by", "submitted_at", "created_at", "updated_at"];
@@ -174,12 +146,7 @@ function WorkRequestList() {
           <div className="list-page-card">
             {/* Header Section */}
             <div className="list-page-header">
-              <h1 className="list-page-title">
-                {currentUser?.role === 'administrator' ? 'All Work Requests' :
-                 currentUser?.role === 'offshore_lead' ? 'My Assigned Work Requests' :
-                 currentUser?.role === 'project_manager' ? 'My Work Requests' :
-                 'Work Request List'}
-              </h1>
+              <h1 className="list-page-title">My Assigned Work Requests</h1>
             </div>
 
             {/* Search Controls */}
@@ -226,16 +193,6 @@ function WorkRequestList() {
                     <i className="bi bi-filetype-xls"></i>
                     EXCEL
                   </button>
-                  
-                  <button 
-                    type="button"
-                    hidden={hasReadOnlyAccess}
-                    onClick={handleAddButtonClick}
-                    className="add-btn"
-                  >
-                    <i className="bi bi-plus-square"></i>
-                    ADD WORK REQUEST
-                  </button>
                 </div>
               </div>
             </div>
@@ -249,10 +206,10 @@ function WorkRequestList() {
                     containerHeight="200px"
                   />
               ) : (
-                <table className="table list-table" id='workRequestListTable'>
+                <table className="table list-table" id='offshoreLeadWorkRequestListTable'>
                   <thead>
                     <tr>
-                      <th hidden={hasReadOnlyAccess}>Action</th>
+                      <th>Action</th>
                       <th>Title</th>
                       <th>Line of Business</th>
                       <th>Service Line</th>
@@ -260,7 +217,6 @@ function WorkRequestList() {
                       <th>Duration</th>
                       <th>Hours/Week</th>
                       <th>Capability Areas</th>
-                      <th>Offshore Leads</th>
                       <th>Assigned Resources</th>
                       <th>Status</th>
                       <th>Submitted By</th>
@@ -270,39 +226,23 @@ function WorkRequestList() {
                   <tbody>
                     {currentItems.length === 0 ? (
                       <tr>
-                        <td colSpan="11" className="empty-state">
+                        <td colSpan="12" className="empty-state">
                           <i className="bi bi-clipboard-data"></i>
-                          <p>No work requests found</p>
+                          <p>No work requests assigned to you</p>
                         </td>
                       </tr>
                     ) : (
                       currentItems.map((workRequest, key) => {
                         return (
                           <tr key={key}>
-                            <td hidden={hasReadOnlyAccess}>
+                            <td>
                               <div className="action-buttons-cell">
                                 <button
-                                  onClick={() => handleDelete(workRequest.work_request_id)}
-                                  className="delete-btn"
-                                  title="Delete Work Request"
-                                >
-                                  <i className="bi bi-trash"></i>
-                                </button>
-                                {workRequest.status === 'draft' && (
-                                  <Link
-                                    className="edit-btn"
-                                    to={`/workRequestEdit/${workRequest.work_request_id}`}
-                                    title="Edit Work Request"
-                                  >
-                                    <i className="bi bi-pencil"></i>
-                                  </Link>
-                                )}
-                                <button
                                   onClick={() => handleViewResources(workRequest)}
-                                  className="view-btn"
-                                  title="View Resources"
+                                  className={`view-btn ${!workRequest.assigned_resources ? 'no-resources-btn' : ''}`}
+                                  title={!workRequest.assigned_resources ? "Select Resources" : "View Resources"}
                                 >
-                                  <i className="bi bi-people"></i>
+                                  <i className={`bi ${!workRequest.assigned_resources ? 'bi-people-fill' : 'bi-people'}`}></i>
                                 </button>
                                 <Link
                                   className="view-btn"
@@ -311,15 +251,6 @@ function WorkRequestList() {
                                 >
                                   <i className="bi bi-eye"></i>
                                 </Link>
-                                {(currentUser?.role === 'offshore_lead' || currentUser?.role === 'off_shore_lead') && workRequest.status === 'submitted' && (
-                                  <Link
-                                    className="review-btn"
-                                    to={`/workRequestShow/${workRequest.work_request_id}`}
-                                    title="Review Work Request"
-                                  >
-                                    <i className="bi bi-eye"></i>
-                                  </Link>
-                                )}
                               </div>
                             </td>
                             <td>
@@ -338,7 +269,6 @@ function WorkRequestList() {
                             </td>
                             <td>{workRequest.hours_per_week}</td>
                             <td>{workRequest.capability_areas || '-'}</td>
-                            <td>{workRequest.offshore_leads || '-'}</td>
                             <td>{workRequest.assigned_resources || '-'}</td>
                             <td>
                               <span className={`status-badge ${getStatusBadgeClass(workRequest.status)}`}>
@@ -374,7 +304,7 @@ function WorkRequestList() {
                 workRequest={selectedWorkRequest}
                 onClose={handleResourceModalClose}
                 onStatusUpdate={handleStatusUpdate}
-                isReadOnly={true}
+                isReadOnly={false}
                 currentUser={currentUser}
               />
             )}
@@ -384,4 +314,4 @@ function WorkRequestList() {
     );
 }
   
-export default WorkRequestList; 
+export default OffshoreLeadWorkRequestList;

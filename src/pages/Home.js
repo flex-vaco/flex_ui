@@ -13,6 +13,9 @@ function Home() {
   const userIsProducer = useState(
     APP_FUNCTIONS.activeUserRole === APP_CONSTANTS.USER_ROLES.PRODUCER
   );
+  const userIsOffshoreLead = useState(
+    APP_FUNCTIONS.activeUserRole === 'offshore_lead'
+  );
   const imageURL = process.env.REACT_APP_API_BASE_URL + "/uploads/technologies/";
   const navigate = useNavigate();
   const [categoryList, setCategoryList] = useState([]);
@@ -63,11 +66,16 @@ function Home() {
 
   return (
     <HomePageLayout>
-      <div hidden={!userIsProducer} className="container">
+      {/* <div hidden={!userIsProducer} className="container">
         <a href={"/dashboard"} className="btn btn-outline-primary">
           My Dashboard
         </a>
       </div>
+      <div hidden={!userIsOffshoreLead} className="container">
+        <a href={"/dashboard"} className="btn btn-outline-primary">
+          My Dashboard
+        </a>
+      </div> */}
       <div className="container text-center mt-5">
         <h3>
           Hello! <small>What skills are you looking to hire?</small>

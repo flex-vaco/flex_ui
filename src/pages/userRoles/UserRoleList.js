@@ -121,7 +121,7 @@ function UserRoleList() {
                     <thead>
                       <tr>
                         <th hidden={hasReadOnlyAccess}>Action</th>
-                        <th>Role Type</th>
+                        <th>Role</th>
                         <th>Display Name</th>
                         <th>Description</th>
                         <th>Line of Business</th>

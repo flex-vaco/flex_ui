@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom"
 import * as AppFunc from "../lib/AppFunctions";
 import "./Menu.css";
+import APP_CONSTANTS from "../appConstants";
 
 const Menu = () => { 
     const navigate = useNavigate();
@@ -137,6 +138,13 @@ return(
               </div>
             )}
             
+            {activeUserRole === APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD && (
+              <div className="sidebar-item" onClick={() => handleMenuClick('/offshoreLeadWorkRequests')}>
+                <i className="bi bi-clipboard-check-fill me-2"></i>
+                My Assigned Requests
+              </div>
+            )}
+            
             {AppFunc.hasAllocationAccess(activeUserRole) && (
               <div className="sidebar-item" onClick={() => handleMenuClick('/empProjList')}>
                 <i className="bi bi-diagram-3-fill me-2"></i>
@@ -192,6 +200,9 @@ return(
                   <div className="sidebar-item sub-item" onClick={() => handleMenuClick('/timesheet')}>
                     Timesheets
                   </div>
+                  <div className="sidebar-item sub-item" onClick={() => handleMenuClick('/importTimesheet')}>
+                    Import Timesheet
+                  </div>
                 </div>
               </div>
             )}
@@ -203,11 +214,19 @@ return(
                   Reports
                 </div>
                 <div className="sidebar-submenu">
-                  <div className="sidebar-item sub-item" onClick={() => handleMenuClick('/forecastHours')}>
-                    Forecast Hours
-                  </div>
-                  <div className="sidebar-item sub-item" onClick={() => handleMenuClick('/availableHours')}>
-                    Available Percentage
+                  {activeUserRole !== APP_CONSTANTS.USER_ROLES.PROJECT_MANAGER && 
+                   activeUserRole !== APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD && (
+                    <>
+                      <div className="sidebar-item sub-item" onClick={() => handleMenuClick('/forecastHours')}>
+                        Forecast Hours
+                      </div>
+                      <div className="sidebar-item sub-item" onClick={() => handleMenuClick('/availableHours')}>
+                        Available Percentage
+                      </div>
+                    </>
+                  )}
+                  <div className="sidebar-item sub-item" onClick={() => handleMenuClick('/utilization')}>
+                    Utilization Report
                   </div>
                 </div>
               </div>

@@ -149,7 +149,10 @@ function EmpList() {
       "profile_information",
       "resume",
       "education",
-      "manager_email"
+      "manager_email",
+      "line_of_business_id",
+      "service_line_id",
+      "manager_id"
     ];
 
     // Pagination handlers
@@ -257,10 +260,10 @@ function EmpList() {
                       <th>Exp.(yrs.)</th>
                       <th>Rate/hr</th>
                       <th>Join Date</th>
-                      <th>Home Location</th>
                       <th>Office Location</th>
                       <th>Manager</th>
                       <th className="email-column">Manager Email</th>
+                      <th>Service Line</th>
                       <th>On Site</th>
                       <th>Resume</th>
                     </tr>
@@ -314,10 +317,10 @@ function EmpList() {
                             <td>{empDetails.total_work_experience_years}</td>
                             <td>{empDetails.cost_per_hour}</td>
                             <td>{Utils.formatDateYYYYMMDD(empDetails.vaco_join_date)}</td>
-                            <td>{empDetails.home_location_city}</td>
                             <td>{empDetails.office_location_city}</td>
                             <td>{empDetails.manager_name}</td>
                             <td className="email-column">{empDetails.manager_email}</td>
+                            <td>{empDetails.service_line_name || 'N/A'}</td>
                             <td>{empDetails.is_onsite ? "YES" : "NO"}</td>
                             <td>
                               <a

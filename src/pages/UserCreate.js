@@ -19,6 +19,8 @@ function UserCreate() {
     const [roles, setRoles] = useState([]);
     const [clients, setClients] = useState([]);
     const [selectedClients, setSelectedClients] = useState([]);
+    const [serviceLines, setServiceLines] = useState([]);
+    const [selectedServiceLines, setSelectedServiceLines] = useState([]);
 
     const [projects, setProjects] = useState([]);
     const [project, setProject] = useState(null);
@@ -31,6 +33,7 @@ function UserCreate() {
 
     const [showEmpSel, setShowEmpSel] = useState(false);
     const [showClientSel, setShowClientSel] = useState(false);
+    const [showServiceLineSel, setShowServiceLineSel] = useState(false);
     const [showProjectSel, setShowProjectSel] = useState(false);
     const [lineOfBusinessList, setLineOfBusinessList] = useState([]);
     const [lineOfBusiness_id, setLineOfBusinessId] = useState('');
@@ -50,6 +53,12 @@ function UserCreate() {
         fetchEmployees();
         fetchLineofBusinessList();
     }, [hasAccess, navigate]);
+
+    useEffect(() => {
+        if (lineOfBusiness_id && role === APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD) {
+            fetchServiceLines();
+        }
+    }, [lineOfBusiness_id, role]);
 
     const verifyPassword = (pswd) => {
         setChkPassword(pswd)
@@ -86,6 +95,18 @@ function UserCreate() {
         .catch(function (error) {
           console.log(error);
         })
+    }
+    
+    const fetchServiceLines = () => {
+        if (lineOfBusiness_id) {
+            axios.get(`/serviceLine/lineOfBusiness/${lineOfBusiness_id}`)
+            .then(function (response) {
+                setServiceLines(response.data.serviceLines);
+            })
+            .catch(function (error) {
+              console.log(error);
+            })
+        }
     }
     const fetchEmployees = () => {
         axios.get('/employees')
@@ -136,8 +157,11 @@ function UserCreate() {
             setEmail('');
             setFirstName('');
             setLastName('');
-            setDisableLineOfBusiness(false);
-            setLineOfBusinessId('');
+            // Only reset line of business if user is administrator, preserve for LOB Admin
+            if (AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR) {
+                setDisableLineOfBusiness(false);
+                setLineOfBusinessId('');
+            }
         }
         
         if (roleVal === "-select-") {
@@ -148,26 +172,38 @@ function UserCreate() {
             })
         } else {
             setRole(roleVal);
+            console.log(roleVal);
+            console.log(APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD);
             switch (roleVal) {
                 case APP_CONSTANTS.USER_ROLES.EMPLOYEE:
                     setShowEmpSel(true);
                     setShowClientSel(false);
+                    setShowServiceLineSel(false);
                     setShowProjectSel(false)
                     break;
                 case APP_CONSTANTS.USER_ROLES.PRODUCER:
                     setShowEmpSel(false);
                     setShowClientSel(true);
+                    setShowServiceLineSel(false);
+                    setShowProjectSel(false)
+                    break;
+                case APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD:
+                    setShowEmpSel(false);
+                    setShowClientSel(false);
+                    setShowServiceLineSel(true);
                     setShowProjectSel(false)
                     break;
                 case APP_CONSTANTS.USER_ROLES.ADMINISTRATOR:
                 case APP_CONSTANTS.USER_ROLES.MANAGER:
                     setShowEmpSel(false);
                     setShowClientSel(false);
+                    setShowServiceLineSel(false);
                     setShowProjectSel(false)
                     break;
                 default:
                     setShowEmpSel(false);
                     setShowClientSel(false);
+                    setShowServiceLineSel(false);
                     setShowProjectSel(false)
                     break;
             }
@@ -212,7 +248,8 @@ function UserCreate() {
             return;
         }
 
-        if (!lineOfBusiness_id || lineOfBusiness_id === "-- Select line of business --") {
+        // Only validate line of business for administrators, LOB Admins have it auto-selected
+        if (AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR && (!lineOfBusiness_id || lineOfBusiness_id === "-- Select line of business --")) {
             Swal.fire({
                 icon: 'warning',
                 title: 'Please select a line of business!',
@@ -273,6 +310,13 @@ function UserCreate() {
           }
         };
 
+        // Ensure line of business ID is set for LOB Admins
+        let finalLineOfBusinessId = lineOfBusiness_id;
+        if (AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.LOB_ADMIN && !lineOfBusiness_id) {
+            const currentUser = JSON.parse(localStorage.getItem('user'));
+            finalLineOfBusinessId = currentUser?.line_of_business_id;
+        }
+
         let data = {
             first_name: first_name,
             last_name: last_name,
@@ -281,10 +325,12 @@ function UserCreate() {
             password: password,
             emp_id: empId,
             project_id: project,
-            line_of_business_id: lineOfBusiness_id
+            line_of_business_id: finalLineOfBusinessId
         }
 
         const clientIds = selectedClients.map(s=>s.client_id);
+        const serviceLineIds = selectedServiceLines.map(s=>s.service_line_id);
+        
         if ((role === APP_CONSTANTS.USER_ROLES.PRODUCER) && (clientIds.length === 0)) {
             Swal.fire({
                 icon: 'warning',
@@ -294,8 +340,21 @@ function UserCreate() {
                 setIsSaving(false);
                 return;
             })
+        } else if ((role === APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD) && (serviceLineIds.length === 0)) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Please select a Service Line for Offshore Lead',
+                showConfirmButton: true
+            }).then((res) => {
+                setIsSaving(false);
+                return;
+            })
         } else {
-            data.client_ids = clientIds;
+            if (role === APP_CONSTANTS.USER_ROLES.PRODUCER) {
+                data.client_ids = clientIds;
+            } else if (role === APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD) {
+                data.service_line_ids = serviceLineIds;
+            }
         }
 
         axios.post('/users/sign-up', data, config)
@@ -317,8 +376,11 @@ function UserCreate() {
             setEmpId(null);
             setProject(null);
             setSelectedClients([]);
-            setDisableLineOfBusiness(false);
-            setLineOfBusinessId('');
+            // Only reset line of business for administrators, preserve for LOB Admin
+            if (AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR) {
+                setDisableLineOfBusiness(false);
+                setLineOfBusinessId('');
+            }
           })
           .catch(function (error) {
             Swal.fire({
@@ -338,6 +400,14 @@ function UserCreate() {
     const handleClientRemove = (e)=>{
         setSelectedClients(e);
     }
+    
+    const handleServiceLineAdd = (e)=>{
+        setSelectedServiceLines(e);
+    }
+
+    const handleServiceLineRemove = (e)=>{
+        setSelectedServiceLines(e);
+    }
   
     return (
         <Layout>
@@ -350,23 +420,48 @@ function UserCreate() {
                         <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
                             <div className="form-section">
                                 <h3 className="form-section-title">User Role & Assignment</h3>
-                                <div className="form-group full-width">
-                                    <label htmlFor="role" className="form-label required-field">
-                                        Role Name
-                                    </label>
-                                    <select 
-                                        name="role" 
-                                        id="role" 
-                                        className="form-select" 
-                                        onChange={handleRoleChange}
-                                        value={role}
-                                        required
-                                    > 
-                                        <option value=""> -- Select a Role -- </option>
-                                        {roles.map((rl, key) => {
-                                            return <option key={key} value={rl.role}>{rl.role.toUpperCase()}</option>;
-                                        })}
-                                    </select>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="role" className="form-label required-field">
+                                            Role Name
+                                        </label>
+                                        <select 
+                                            name="role" 
+                                            id="role" 
+                                            className="form-select" 
+                                            onChange={handleRoleChange}
+                                            value={role}
+                                            required
+                                        > 
+                                            <option value=""> -- Select a Role -- </option>
+                                            {roles.map((rl, key) => {
+                                                return <option key={key} value={rl.role}>{rl.role.toUpperCase()}</option>;
+                                            })}
+                                        </select>
+                                    </div>
+                                    {AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR && (
+                                        <div className="form-group">
+                                            <label htmlFor="line_of_business" className="form-label required-field">
+                                                Line of Business
+                                            </label>
+                                            <select 
+                                                name="line_of_business" 
+                                                id="line_of_business" 
+                                                className="form-select" 
+                                                onChange={(e) => setLineOfBusinessId(e.target.value)}
+                                                value={lineOfBusiness_id}
+                                                required
+                                                disabled={disableLineOfBusiness}
+                                            >
+                                                <option value=""> -- Select line of business -- </option>
+                                                {lineOfBusinessList.map((lineOfBusiness) => (
+                                                    <option key={lineOfBusiness.line_of_business_id} value={lineOfBusiness.line_of_business_id}>
+                                                        {lineOfBusiness.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    )}
                                 </div>
                                 {showClientSel && (
                                     <div className="form-group full-width">
@@ -381,6 +476,22 @@ function UserCreate() {
                                             displayValue="name" 
                                             closeIcon="close"
                                             placeholder="Select clients..."
+                                        />
+                                    </div>
+                                )}
+                                {showServiceLineSel && (
+                                    <div className="form-group full-width">
+                                        <label htmlFor="serviceLine" className="form-label required-field">
+                                            Service Lines
+                                        </label>
+                                        <Multiselect
+                                            options={serviceLines} 
+                                            onSelect={handleServiceLineAdd} 
+                                            onRemove={handleServiceLineRemove} 
+                                            showCheckbox={true}
+                                            displayValue="name" 
+                                            closeIcon="close"
+                                            placeholder="Select service lines..."
                                         />
                                     </div>
                                 )}
@@ -460,46 +571,21 @@ function UserCreate() {
                                         />
                                     </div>
                                 </div>
-                                <div className="form-row">
-                                    <div className="form-group">
-                                        <label htmlFor="email" className="form-label required-field">
-                                            Email ID
-                                        </label>
-                                        <input 
-                                            onChange={(event)=>{setEmail(event.target.value)}}
-                                            value={email}
-                                            type="email"
-                                            className="form-control"
-                                            id="email"
-                                            name="email"
-                                            placeholder="Enter email address"
-                                            readOnly={role === APP_CONSTANTS.USER_ROLES.EMPLOYEE}
-                                            required
-                                        />
-                                    </div>
-                                    {AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR && (
-                                        <div className="form-group">
-                                            <label htmlFor="line_of_business" className="form-label required-field">
-                                                Line of Business
-                                            </label>
-                                            <select 
-                                                name="line_of_business" 
-                                                id="line_of_business" 
-                                                className="form-select" 
-                                                onChange={(e) => setLineOfBusinessId(e.target.value)}
-                                                value={lineOfBusiness_id}
-                                                required
-                                                disabled={disableLineOfBusiness || AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.LOB_ADMIN}
-                                            >
-                                                <option value=""> -- Select line of business -- </option>
-                                                {lineOfBusinessList.map((lineOfBusiness) => (
-                                                    <option key={lineOfBusiness.id} value={lineOfBusiness.id}>
-                                                        {lineOfBusiness.name}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                    )}
+                                <div className="form-group full-width">
+                                    <label htmlFor="email" className="form-label required-field">
+                                        Email ID
+                                    </label>
+                                    <input 
+                                        onChange={(event)=>{setEmail(event.target.value)}}
+                                        value={email}
+                                        type="email"
+                                        className="form-control"
+                                        id="email"
+                                        name="email"
+                                        placeholder="Enter email address"
+                                        readOnly={role === APP_CONSTANTS.USER_ROLES.EMPLOYEE}
+                                        required
+                                    />
                                 </div>
                             </div>
 

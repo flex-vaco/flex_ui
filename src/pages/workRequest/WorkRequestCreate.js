@@ -23,6 +23,7 @@ function WorkRequestCreate() {
     const [isSaving, setIsSaving] = useState(false);
     const [showResourceModal, setShowResourceModal] = useState(false);
     const [selectedResources, setSelectedResources] = useState([]);
+    const [selectedOffshoreLeads, setSelectedOffshoreLeads] = useState([]);
     
     // Dropdown data
     const [lineOfBusinesses, setLineOfBusinesses] = useState([]);
@@ -54,8 +55,10 @@ function WorkRequestCreate() {
     useEffect(() => {
         if (serviceLineId) {
             fetchCapabilityAreasByServiceLine(serviceLineId);
+            fetchOffshoreLeadsByServiceLine(serviceLineId);
         } else {
             setCapabilityAreas([]);
+            setSelectedOffshoreLeads([]);
         }
     }, [serviceLineId]);
 
@@ -105,6 +108,17 @@ function WorkRequestCreate() {
         })
     }
 
+    const fetchOffshoreLeadsByServiceLine = (serviceLineId) => {
+        axios.get(`/workRequest/offshoreLeads/serviceLine/${serviceLineId}`)
+        .then(function (response) {
+            // Automatically set all offshore leads for the selected service line
+            setSelectedOffshoreLeads(response.data.offshoreLeads);
+        })
+        .catch(function (error) {
+            console.log(error);
+        })
+    }
+
 
 
     const fetchProjects = () => {
@@ -133,12 +147,14 @@ function WorkRequestCreate() {
     }
 
     const handleCapabilityAreaAdd = (selectedList, selectedItem) => {
-        setCapabilityAreaIds(selectedList.map(item => item.id));
+        setCapabilityAreaIds(selectedList.map(item => item.capability_area_id));
     }
 
     const handleCapabilityAreaRemove = (selectedList, removedItem) => {
-        setCapabilityAreaIds(selectedList.map(item => item.id));
+        setCapabilityAreaIds(selectedList.map(item => item.capability_area_id));
     }
+
+
 
     const handleFileChange = (event) => {
         const file = event.target.files[0];
@@ -255,6 +271,10 @@ function WorkRequestCreate() {
             requestData.resource_ids = selectedResources.map(r => r.emp_id);
         }
 
+        if (selectedOffshoreLeads.length > 0) {
+            requestData.offshore_lead_ids = selectedOffshoreLeads.map(r => r.user_id);
+        }
+
         console.log("Submitting work request data:", requestData);
 
         axios.post('/workRequest/add', requestData, {
@@ -355,7 +375,7 @@ function WorkRequestCreate() {
                                         >
                                             <option value=""> -- Select a Line of Business -- </option>
                                             {lineOfBusinesses.map((lineOfBusiness) => (
-                                                <option key={lineOfBusiness.id} value={lineOfBusiness.id}>
+                                                <option key={lineOfBusiness.line_of_business_id} value={lineOfBusiness.line_of_business_id}>
                                                     {lineOfBusiness.name}
                                                 </option>
                                             ))}
@@ -378,7 +398,7 @@ function WorkRequestCreate() {
                                         >
                                             <option value=""> -- Select a Service Line -- </option>
                                             {serviceLines.map((serviceLine) => (
-                                                <option key={serviceLine.id} value={serviceLine.id}>
+                                                <option key={serviceLine.service_line_id} value={serviceLine.service_line_id}>
                                                     {serviceLine.name}
                                                 </option>
                                             ))}
@@ -412,7 +432,7 @@ function WorkRequestCreate() {
                                     </label>
                                     <Multiselect
                                         options={capabilityAreas} 
-                                        selectedValues={capabilityAreas.filter(ca => capabilityAreaIds.includes(ca.id))} 
+                                        selectedValues={capabilityAreas.filter(ca => capabilityAreaIds.includes(ca.capability_area_id))} 
                                         onSelect={handleCapabilityAreaAdd}
                                         onRemove={handleCapabilityAreaRemove}
                                         showCheckbox={true}
@@ -422,6 +442,21 @@ function WorkRequestCreate() {
                                         disabled={!serviceLineId}
                                     />
                                 </div>
+
+                                {selectedOffshoreLeads.length > 0 && (
+                                    <div className="form-group full-width">
+                                        <label htmlFor="offshoreLeads" className="form-label">
+                                            Offshore Leads (Auto-selected based on Service Line)
+                                        </label>
+                                        <div className="p-3 bg-light rounded">
+                                            {selectedOffshoreLeads.map((lead, index) => (
+                                                <span key={index} className="badge bg-info me-2 mb-2">
+                                                    {lead.first_name} {lead.last_name}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
 
                                 <div className="form-row">
                                     <div className="form-group">
@@ -541,7 +576,7 @@ function WorkRequestCreate() {
                                         ) : (
                                             <>
                                                 <i className="bi bi-send"></i>
-                                                Submit to Offshore Lead
+                                                Save Work Request
                                             </>
                                         )}
                                     </button>
@@ -557,6 +592,11 @@ function WorkRequestCreate() {
                     capabilityAreaIds={capabilityAreaIds}
                     onResourceSelection={handleResourceSelection}
                     onClose={handleCloseResourceModal}
+                    workRequest={{
+                        duration_from: durationFrom,
+                        duration_to: durationTo,
+                        hours_per_week: hoursPerWeek
+                    }}
                 />
             )}
         </Layout>

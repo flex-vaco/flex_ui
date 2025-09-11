@@ -2,10 +2,20 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import './ResourceSelectionModal.css';
+import { 
+    generateFourWeeks, 
+    calculateAvailabilityPercentage, 
+    getAvailabilityColorClass, 
+    formatAvailabilityText, 
+    formatWeekDateRange 
+} from '../../lib/WeeklyAvailabilityUtils';
 
-function ResourceSelectionModal({ capabilityAreaIds, onResourceSelection, onClose }) {
+function ResourceSelectionModal({ capabilityAreaIds, onResourceSelection, onClose, workRequest }) {
     const [resources, setResources] = useState([]);
     const [selectedResources, setSelectedResources] = useState([]);
+    const [resourceAvailability, setResourceAvailability] = useState({});
+    const [weeklyAvailability, setWeeklyAvailability] = useState({});
+    const [weeks, setWeeks] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -22,6 +32,10 @@ function ResourceSelectionModal({ capabilityAreaIds, onResourceSelection, onClos
         })
         .then(function (response) {
             setResources(response.data.resources);
+            // Fetch availability for the loaded resources if workRequest has duration
+            if (response.data.resources.length > 0 && workRequest?.duration_from && workRequest?.duration_to) {
+                fetchWeeklyResourceAvailability(response.data.resources);
+            }
         })
         .catch(function (error) {
             console.log(error);
@@ -34,6 +48,69 @@ function ResourceSelectionModal({ capabilityAreaIds, onResourceSelection, onClos
         })
         .finally(() => {
             setIsLoading(false);
+        });
+    };
+
+    const fetchWeeklyResourceAvailability = (resources) => {
+        if (!workRequest?.duration_from || !workRequest?.duration_to) {
+            return;
+        }
+
+        const empIds = resources.map(r => r.emp_id);
+        
+        // Generate weeks on frontend for display
+        const generatedWeeks = generateFourWeeks(workRequest.duration_from);
+        setWeeks(generatedWeeks);
+        
+        axios.post('/empPrjAloc/resourceAvailability', {
+            empIds: empIds,
+            fromDate: workRequest.duration_from,
+            toDate: workRequest.duration_to,
+            weeklyView: true
+        })
+        .then(function (response) {
+            if (response.data.resource_availability) {
+                const availabilityMap = {};
+                const weeklyMap = {};
+                
+                response.data.resource_availability.forEach(empData => {
+                    availabilityMap[empData.emp_id] = empData;
+                    
+                    // Organize weekly data by employee
+                    if (empData.weekly_availability) {
+                        weeklyMap[empData.emp_id] = empData.weekly_availability;
+                    }
+                });
+                
+                setResourceAvailability(availabilityMap);
+                setWeeklyAvailability(weeklyMap);
+            }
+        })
+        .catch(function (error) {
+            console.log('Error fetching weekly resource availability:', error);
+        });
+    };
+
+    const getWeeklyAvailabilityDisplay = (empId) => {
+        const weeklyData = weeklyAvailability[empId];
+        if (!weeklyData || weeklyData.length === 0) {
+            return { text: 'Loading...', class: 'availability-loading' };
+        }
+        
+        const hoursPerWeek = workRequest?.hours_per_week || 40;
+        
+        return weeklyData.map(weekData => {
+            const percentage = calculateAvailabilityPercentage(weekData.available_hours, hoursPerWeek);
+            const colorClass = getAvailabilityColorClass(percentage);
+            const text = formatAvailabilityText(weekData.available_hours, hoursPerWeek);
+            
+            return {
+                week: weekData.week,
+                text: text,
+                class: colorClass,
+                percentage: percentage,
+                availableHours: weekData.available_hours
+            };
         });
     };
 
@@ -133,12 +210,19 @@ function ResourceSelectionModal({ capabilityAreaIds, onResourceSelection, onClos
                                         <th>Primary Skills</th>
                                         <th>Secondary Skills</th>
                                         <th>Experience</th>
+                                        <th>Cost per Hour</th>
+                                        {weeks.map(week => (
+                                            <th key={week.weekNumber} className="week-header">
+                                                <div className="week-label">{week.label}</div>
+                                                <div className="week-dates">{formatWeekDateRange(week.startDate, week.endDate)}</div>
+                                            </th>
+                                        ))}
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {filteredResources.length === 0 ? (
                                         <tr>
-                                            <td colSpan="6" className="empty-state">
+                                            <td colSpan={7 + weeks.length} className="empty-state">
                                                 <i className="bi bi-people"></i>
                                                 <p>No resources found matching the selected capability areas</p>
                                             </td>
@@ -146,6 +230,7 @@ function ResourceSelectionModal({ capabilityAreaIds, onResourceSelection, onClos
                                     ) : (
                                         filteredResources.map((resource) => {
                                             const isSelected = selectedResources.some(r => r.emp_id === resource.emp_id);
+                                            const weeklyAvailabilityDisplay = getWeeklyAvailabilityDisplay(resource.emp_id);
                                             return (
                                                 <tr key={resource.emp_id} className={isSelected ? 'selected-row' : ''}>
                                                     <td>
@@ -186,7 +271,26 @@ function ResourceSelectionModal({ capabilityAreaIds, onResourceSelection, onClos
                                                             }
                                                         </div>
                                                     </td>
-                                                    <td>{resource.experience || '-'}</td>
+                                                    <td>{resource.total_work_experience_years || '-'} Years</td>
+                                                    <td>$ {resource.cost_per_hour || '-'}</td>
+                                                    {weeks.map((week, index) => {
+                                                        const weekData = weeklyAvailabilityDisplay[index];
+                                                        return (
+                                                            <td key={week.weekNumber}>
+                                                                {weekData ? (
+                                                                    <div className="weekly-availability-cell">
+                                                                        <span className={`availability-badge ${weekData.class}`}>
+                                                                            {weekData.text}
+                                                                        </span>
+                                                                    </div>
+                                                                ) : (
+                                                                    <span className="availability-badge availability-loading">
+                                                                        Loading...
+                                                                    </span>
+                                                                )}
+                                                            </td>
+                                                        );
+                                                    })}
                                                 </tr>
                                             );
                                         })
