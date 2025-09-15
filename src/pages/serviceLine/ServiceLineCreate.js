@@ -14,6 +14,7 @@ function ServiceLineCreate() {
     const [lineOfBusinesses, setLineOfBusinesses] = useState([]);
     const [isSaving, setIsSaving] = useState(false)
     const [disableLineOfBusiness, setDisableLineOfBusiness] = useState(false);
+    const [image_name, setSelectedImage] = useState(null);
     const navigate = useNavigate();
     
     const hasAccess = AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR || AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.LOB_ADMIN;
@@ -52,6 +53,14 @@ function ServiceLineCreate() {
         navigate("/serviceLine");
     }
 
+    const handleImageChange = (e) => {
+        if (AppFunc.validateUploadFile(e.target.files[0], "image")) {
+            setSelectedImage(e.target.files[0]);
+        } else {
+            document.getElementById("image_name").value = null;
+        }    
+    };
+
     const handleSave = () => {
         if (!name.trim()) {
             Swal.fire({
@@ -64,16 +73,15 @@ function ServiceLineCreate() {
 
         setIsSaving(true);
         const config = {
-          headers: {
-            "Content-Length": 0,
-            "Content-Type": "application/json",
-          },
-          responseType: "text",
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
         };
         const data = {
           name: name,
           description: description,
           line_of_business_id: lineOfBusinessId,
+          image_name: image_name
         };
         axios.post('/serviceLine/add', data, config)
           .then(function (response) {
@@ -88,6 +96,7 @@ function ServiceLineCreate() {
             setName('');
             setDescription('');
             setLineOfBusinessId('');
+            setSelectedImage(null);
           })
           .catch(function (error) {
             Swal.fire({
@@ -138,6 +147,19 @@ function ServiceLineCreate() {
                                         name="description"
                                         placeholder="Enter description (optional)"
                                         rows="3"
+                                    />
+                                </div>
+                                <div className="form-group full-width">
+                                    <label htmlFor="image_name" className="form-label">
+                                        Service Line Picture
+                                    </label>
+                                    <input
+                                        type="file" 
+                                        className="form-control"
+                                        name="image_name"
+                                        id="image_name"
+                                        onChange={handleImageChange}
+                                        accept="image/*"
                                     />
                                 </div>
                                 {AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR && (

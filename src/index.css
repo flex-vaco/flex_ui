@@ -1232,8 +1232,8 @@ h4.selected_category_name {
 
 /* Smaller image inside left panel */
 .crm-icon-image {
-  width: 60%;
-  height: auto;
+  width: auto;
+  height: 10vh;
   margin-bottom: 10px;
 }
 
@@ -1274,8 +1274,8 @@ h4.selected_category_name {
 }
 
 .crm-services-list img {
-  width: 15%;
-  height: auto;
+  width: auto;
+  height: 3vh;
   margin-right: 10px;
 }
 
