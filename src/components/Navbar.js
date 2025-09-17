@@ -14,7 +14,7 @@ const Navbar = () => {
     });
   };
 
-  if (AppFunc.userIsEmployee()) {
+  if (AppFunc.userIsEmployee() || AppFunc.userIsLeadership()) {
     return (
       <nav className="custom-navbar">
         <div className="navbar-left">

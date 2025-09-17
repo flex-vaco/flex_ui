@@ -7,7 +7,7 @@ const Layout = ({ children }) => {
   return (
     <div className="container-fluid">
       <Navbar/>
-      {AppFunc.userIsEmployee() ? "" : <Menubar/>}
+      {AppFunc.userIsEmployee() || AppFunc.userIsLeadership() ? "" : <Menubar/>}
       <div className="main_container pt-3 col-11 margin-center">
         {children}
       </div>

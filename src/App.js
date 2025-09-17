@@ -31,6 +31,7 @@ import UserEdit from "./pages/UserEdit";
 import ForecastHours from "./pages/reports/ForecastHours";
 import AvailableHours from "./pages/reports/AvailableHours";
 import Utilization from "./pages/reports/Utilization";
+import ComprehensiveReports from "./pages/reports/ComprehensiveReports";
 
 import ClientList from "./pages/clients/ClientList"
 import ClientCreate from "./pages/clients/ClientCreate"
@@ -116,6 +117,7 @@ function App() {
           <Route path="/forecastHours"  element={isLoggedIn ? <ForecastHours/> : <Login/>} />
           <Route path="/availableHours"  element={isLoggedIn ? <AvailableHours/> : <Login/>} />
           <Route path="/utilization"  element={isLoggedIn ? <Utilization/> : <Login/>} />
+          <Route path="/comprehensiveReports"  element={isLoggedIn ? <ComprehensiveReports/> : <Login/>} />
           <Route path="/clients"  element={isLoggedIn ? <ClientList/> : <Login/>} />
           <Route path="/clientCreate"  element={isLoggedIn ? <ClientCreate/> : <Login/>} />
           <Route path="/clientEdit/:id"  element={isLoggedIn ? <ClientEdit/> : <Login/>} />

@@ -228,6 +228,9 @@ return(
                   <div className="sidebar-item sub-item" onClick={() => handleMenuClick('/utilization')}>
                     Utilization Report
                   </div>
+                  <div className="sidebar-item sub-item" onClick={() => handleMenuClick('/comprehensiveReports')}>
+                    Comprehensive Reports
+                  </div>
                 </div>
               </div>
             )}
