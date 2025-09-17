@@ -200,10 +200,14 @@ return(
                   <div className="sidebar-item sub-item" onClick={() => handleMenuClick('/timesheet')}>
                     Timesheets
                   </div>
-                  <div className="sidebar-item sub-item" onClick={() => handleMenuClick('/importTimesheet')}>
-                    Import Timesheet
-                  </div>
                 </div>
+              </div>
+            )}
+            
+            {AppFunc.hasImportTimesheetAccess(activeUserRole) && (
+              <div className="sidebar-item" onClick={() => handleMenuClick('/importTimesheet')}>
+                <i className="bi bi-file-earmark-text-fill me-2"></i>
+                Import Timesheet
               </div>
             )}
             

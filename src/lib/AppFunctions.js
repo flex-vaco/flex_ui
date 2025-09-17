@@ -81,6 +81,12 @@ const hiringAccessRole = [
   APP_CONSTANTS.USER_ROLES.MANAGER,
   APP_CONSTANTS.USER_ROLES.PRODUCER
 ];
+
+const importTimesheetAccessRole = [
+  APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD,
+  APP_CONSTANTS.USER_ROLES.MANAGER
+];
+
 const aiChatAccessRoles = [APP_CONSTANTS.USER_ROLES.ADMINISTRATOR, APP_CONSTANTS.USER_ROLES.MANAGER, APP_CONSTANTS.USER_ROLES.PRODUCER];
 const userAccessRoles = [APP_CONSTANTS.USER_ROLES.ADMINISTRATOR, APP_CONSTANTS.USER_ROLES.LOB_ADMIN];
 const userRoleAccessRoles = [APP_CONSTANTS.USER_ROLES.ADMINISTRATOR, APP_CONSTANTS.USER_ROLES.MANAGER];
@@ -163,6 +169,9 @@ export const hasCategoriesAccess = (activeUserRole) => {
 };
 export const hasHiringAccess = (activeUserRole) => {
   return hiringAccessRole.includes(activeUserRole) ? true : false;
+};
+export const hasImportTimesheetAccess = (activeUserRole) => {
+  return importTimesheetAccessRole.includes(activeUserRole) ? true : false;
 };
 export const validateForm = (valdiationFields) => {
   //remove all previous invalid-feedback divs
