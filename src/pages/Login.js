@@ -57,6 +57,8 @@ function EmpShow() {
             } else {
               if (response.data?.user?.role === APP_CONSTANTS.USER_ROLES.EMPLOYEE) {
                 navigate("/timesheet");
+              } else if (response.data?.user?.role === APP_CONSTANTS.USER_ROLES.LEADERSHIP) {
+                navigate("/comprehensiveReports");
               } else {
                 navigate("/home");
               }

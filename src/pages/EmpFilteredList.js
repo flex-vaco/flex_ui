@@ -92,7 +92,13 @@ function EmpFilteredList() {
                     let found = false;
 
                     selectedSecondarySkill.forEach((secondarySkill) => {
-                        if (emp.secondary_skills.trim().toLowerCase().indexOf(secondarySkill.trim().toLowerCase()) >= 0) {
+                        // Check secondary_skills
+                        if (emp.secondary_skills && emp.secondary_skills.trim().toLowerCase().indexOf(secondarySkill.trim().toLowerCase()) >= 0) {
+                            found = true;
+                            return;    
+                        }
+                        // Check primary_skills
+                        if (emp.primary_skills && emp.primary_skills.trim().toLowerCase().indexOf(secondarySkill.trim().toLowerCase()) >= 0) {
                             found = true;
                             return;    
                         }

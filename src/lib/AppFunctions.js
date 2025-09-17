@@ -7,7 +7,6 @@ const menuAccessRoles = [
   APP_CONSTANTS.USER_ROLES.PRODUCER,
   APP_CONSTANTS.USER_ROLES.USCONSULTANT,
   APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD,
-  APP_CONSTANTS.USER_ROLES.LEADERSHIP,
   APP_CONSTANTS.USER_ROLES.LOB_ADMIN,
   APP_CONSTANTS.USER_ROLES.PROJECT_MANAGER
 ];
@@ -68,7 +67,8 @@ const reportAccessRoles = [
   APP_CONSTANTS.USER_ROLES.ADMINISTRATOR,
   APP_CONSTANTS.USER_ROLES.PRODUCER,
   APP_CONSTANTS.USER_ROLES.PROJECT_MANAGER,
-  APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD
+  APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD,
+  APP_CONSTANTS.USER_ROLES.LEADERSHIP
 ];
 const reportAccessTimesheetApprove = [
   APP_CONSTANTS.USER_ROLES.MANAGER,
@@ -98,6 +98,10 @@ export const userIsProducer = () => {
 
 export const userIsManager = () => {
   return (activeUserRole === APP_CONSTANTS.USER_ROLES.MANAGER) ? true : false;
+};
+
+export const userIsLeadership = () => {
+  return (activeUserRole === APP_CONSTANTS.USER_ROLES.LEADERSHIP) ? true : false;
 };
 
 export const hasMenuAccess = (activeUserRole) => {

@@ -18,8 +18,9 @@ function Home() {
   );
   const imageURL = process.env.REACT_APP_API_BASE_URL + "/uploads/technologies/";
   const navigate = useNavigate();
-  const [categoryList, setCategoryList] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState({});
+  const [serviceLineList, setServiceLineList] = useState([]);
+  const [selectedServiceLine, setSelectedServiceLine] = useState({});
+  const [capabilityAreas, setCapabilityAreas] = useState([]);
 
   const closeModal = () => {
     setIsOpen(false);
@@ -35,31 +36,44 @@ function Home() {
   };
 
   useEffect(() => {
-    fetchCategories();
+    fetchServiceLines();
   }, []);
 
-  const fetchCategories = () => {
+  const fetchServiceLines = () => {
     axios
-      .get(`/application/getCategories`)
+      .get(`/application/getServiceLinesForHome`)
       .then(function (response) {
-        setCategoryList(response.data.categories);
+        setServiceLineList(response.data.serviceLines);
       })
       .catch(function (error) {
         console.log(error);
       });
   };
 
-  const handleClickCategory = (e, category) => {
-    setSelectedCategory(category);
+  const handleClickServiceLine = (e, serviceLine) => {
+    setSelectedServiceLine(serviceLine);
+    fetchCapabilityAreas(serviceLine.service_line_id);
     setIsOpen(true);
   };
 
-  const handleTechClick = (event, technology) => {
+  const fetchCapabilityAreas = (serviceLineId) => {
+    axios
+      .get(`/capabilityArea/serviceLine/${serviceLineId}`)
+      .then(function (response) {
+        setCapabilityAreas(response.data.capabilityAreas);
+      })
+      .catch(function (error) {
+        console.log(error);
+        setCapabilityAreas([]);
+      });
+  };
+
+  const handleCapabilityAreaClick = (event, capabilityArea) => {
     event.preventDefault();
     navigate(`/filter`, {
       state: {
         categoryTech: [],
-        technologies: technology,
+        technologies: capabilityArea.name,
       },
     });
   };
@@ -104,12 +118,16 @@ function Home() {
 
       <div className="container-fluid mt-5 float-left">
         <div className="col-xs-12 col-lg-12 mx-1">
-          {categoryList.map((category, key) => {
+          {serviceLineList.map((serviceLine, key) => {
+            const imageSrc = serviceLine.image_name 
+              ? imageURL + serviceLine.image_name 
+              : imageURL + "more.png";
+            
             return (
               <div
                 className="col-6 col-lg-3 float-left my-1 ps-1 pe-1 cursor"
                 onClick={(e) => {
-                  handleClickCategory(e, category);
+                  handleClickServiceLine(e, serviceLine);
                 }}
                 key={key}
               >
@@ -117,11 +135,11 @@ function Home() {
                   <div className="card text-center min_height">
                     <img
                       className="cat_images mx-auto d-block"
-                      src={ imageURL + category.image_name}
-                      alt={category.category_name}
+                      src={imageSrc}
+                      alt={serviceLine.name}
                     />
                     <div className="card-block">
-                      <p className="card-text">{category.category_name}</p>
+                      <p className="card-text">{serviceLine.name}</p>
                     </div>
                   </div>
                 </div>
@@ -173,19 +191,32 @@ function Home() {
             </div> */}
             <div className="crm-modal-content">
               <div className="crm-modal-left">  
-                <img src={imageURL + selectedCategory?.image_name} alt="" className="crm-icon-image"/>
-                <h2 className="crm-title">{selectedCategory?.category_name}</h2>
+                <img 
+                  src={selectedServiceLine?.image_name 
+                    ? imageURL + selectedServiceLine?.image_name 
+                    : imageURL + "more.png"
+                  } 
+                  alt="" 
+                  className="crm-icon-image"
+                />
+                <h2 className="crm-title">{selectedServiceLine?.name}</h2>
               </div>
               <div className="crm-modal-right">
                 <ul className="crm-services-list">
-                  {selectedCategory?.technologies?.split(",").map((tech, key) => {
+                  {capabilityAreas.map((capabilityArea, key) => {
                     return (
                       <li 
-                        onClick={(event) => handleTechClick(event, tech)}
+                        onClick={(event) => handleCapabilityAreaClick(event, capabilityArea)}
                         key={key}
                       >
-                        <img src={imageURL + selectedCategory?.image_name} alt=""/>
-                        <span>{tech}</span>
+                        <img 
+                          src={selectedServiceLine?.image_name 
+                            ? imageURL + selectedServiceLine?.image_name 
+                            : imageURL + "more.png"
+                          } 
+                          alt=""
+                        />
+                        <span>{capabilityArea.name}</span>
                       </li>
                     );
                   })}

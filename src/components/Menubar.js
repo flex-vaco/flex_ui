@@ -5,29 +5,51 @@ import Menu from "./Menu";
 
 const Menubar = () => {
   const navigate = useNavigate();
-  const [categoryList, setCategoryList] = useState([]);
+  const [serviceLineList, setServiceLineList] = useState([]);
+  const [capabilityAreasMap, setCapabilityAreasMap] = useState({});
 
   useEffect(()=>{
-    fetchCategories();
+    fetchServiceLines();
   },[])
 
-  const fetchCategories = () => {
-    axios.get(`/application/getCategories`)
+  const fetchServiceLines = () => {
+    axios.get(`/application/getServiceLinesForHome`)
     .then(function (response) {
-      setCategoryList(response.data.categories);
+      setServiceLineList(response.data.serviceLines);
+      // Fetch capability areas for each service line
+      response.data.serviceLines.forEach(serviceLine => {
+        fetchCapabilityAreas(serviceLine.service_line_id);
+      });
     })
     .catch(function (error) {
         console.log(error);
     })
   }
 
-  const handleTechClick = (event, technology) => {
+  const fetchCapabilityAreas = (serviceLineId) => {
+    axios.get(`/capabilityArea/serviceLine/${serviceLineId}`)
+    .then(function (response) {
+      setCapabilityAreasMap(prev => ({
+        ...prev,
+        [serviceLineId]: response.data.capabilityAreas
+      }));
+    })
+    .catch(function (error) {
+        console.log(error);
+        setCapabilityAreasMap(prev => ({
+          ...prev,
+          [serviceLineId]: []
+        }));
+    })
+  }
+
+  const handleCapabilityAreaClick = (event, capabilityArea) => {
     document.getElementById('navbarSupportedContent2').classList.remove('show');
     event.preventDefault();    
     navigate(`/filter`,{
       state: {
           categoryTech: [],
-          technologies: technology,
+          technologies: capabilityArea.name,
       },
   });
   }
@@ -44,9 +66,10 @@ const Menubar = () => {
             <Menu />
           </div>
           <ul className="navbar-nav  cat_menubar me-auto mb-2 mb-lg-0">
-            {categoryList.map((category, categoryIndex) => {
+            {serviceLineList.map((serviceLine, serviceLineIndex) => {
+              const capabilityAreas = capabilityAreasMap[serviceLine.service_line_id] || [];
               return (
-                <li className="nav-item menu-item dropdown ps-2" key={categoryIndex}>
+                <li className="nav-item menu-item dropdown ps-2" key={serviceLineIndex}>
                   <a 
                     className="nav-link main_li" 
                     href="#" 
@@ -55,18 +78,18 @@ const Menubar = () => {
                     data-bs-toggle="dropdown" 
                     aria-expanded="false"
                   >
-                    {category.category_name}
+                    {serviceLine.name}
                   </a>
-                  <ul className="dropdown-menu" key={`dropdown-menu-${categoryIndex}`}>
-                    {category.technologies.split(',').map((technology, techIndex) => {
+                  <ul className="dropdown-menu" key={`dropdown-menu-${serviceLineIndex}`}>
+                    {capabilityAreas.map((capabilityArea, capabilityIndex) => {
                       return (
-                        <li className="ps-1" key={`tech-${categoryIndex}-${techIndex}`}>
+                        <li className="ps-1" key={`capability-${serviceLineIndex}-${capabilityIndex}`}>
                           <a 
                             className="dropdown-item" 
-                            onClick={(event) => handleTechClick(event, technology)} 
+                            onClick={(event) => handleCapabilityAreaClick(event, capabilityArea)} 
                             href='#'
                           >
-                            {technology}
+                            {capabilityArea.name}
                           </a>
                         </li>
                       );

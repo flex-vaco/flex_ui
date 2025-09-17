@@ -17,6 +17,8 @@ function ServiceLineEdit() {
     const [isSaving, setIsSaving] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [disableLineOfBusiness, setDisableLineOfBusiness] = useState(false);
+    const [imageFileName, setImageFileName] = useState('');
+    const [image_name, setSelectedImage] = useState(null);
     
     const hasAccess = AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR || AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.LOB_ADMIN;
     
@@ -30,6 +32,14 @@ function ServiceLineEdit() {
         navigate("/serviceLine");
     }
 
+    const handleImageChange = (e) => {
+        if (AppFunc.validateUploadFile(e.target.files[0], "image")) {
+            setSelectedImage(e.target.files[0]);
+        } else {
+            document.getElementById("image_name").value = null;
+        }    
+    };
+
     useEffect(() => {
         fetchLineOfBusinesses();
         axios.get(`/serviceLine/${id}`)
@@ -38,6 +48,7 @@ function ServiceLineEdit() {
             setName(serviceLineDetails.name);
             setDescription(serviceLineDetails.description || '');
             setLineOfBusinessId(serviceLineDetails.line_of_business_id || '');
+            setImageFileName(serviceLineDetails.image_name || '');
             setIsLoading(false);
         })
         .catch(function (error) {
@@ -83,17 +94,18 @@ function ServiceLineEdit() {
 
         setIsSaving(true);
         const config = {
-          headers: {
-            "Content-Length": 0,
-            "Content-Type": "application/json",
-          },
-          responseType: "text",
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
         };
-        const data = {
-          name: name,
-          description: description,
-          line_of_business_id: lineOfBusinessId,
-        };
+        
+        const data = new FormData();
+        data.append('name', name);
+        data.append('description', description);
+        data.append('line_of_business_id', lineOfBusinessId);
+        data.append('image_file_name', imageFileName);
+        if(image_name) data.append('image_name', image_name);
+
         axios.post(`/serviceLine/update/${id}`, data, config)
           .then(function (response) {
             Swal.fire({
@@ -174,6 +186,24 @@ function ServiceLineEdit() {
                                         name="description"
                                         placeholder="Enter description (optional)"
                                         rows="3"
+                                    />
+                                </div>
+                                <div className="form-group full-width">
+                                    <label htmlFor="image_name" className="form-label">
+                                        Service Line Picture
+                                    </label>
+                                    {imageFileName && (
+                                        <div style={{ marginBottom: '10px', padding: '8px 12px', backgroundColor: '#f8f9fa', borderRadius: '6px', fontSize: '14px', color: '#6c757d' }}>
+                                            Current file: {imageFileName}
+                                        </div>
+                                    )}
+                                    <input
+                                        type="file" 
+                                        className="form-control"
+                                        name="image_name"
+                                        id="image_name"
+                                        onChange={handleImageChange}
+                                        accept="image/*"
                                     />
                                 </div>
                                 {AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR && (
