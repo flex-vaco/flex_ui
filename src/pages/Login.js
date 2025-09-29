@@ -89,7 +89,6 @@ function EmpShow() {
       
       // Call API to get Microsoft OAuth URL
       const response = await axios.get('/microsoftAuth/microsoft');
-      console.log(response);
       if (response.data && response.data.authUrl) {
         // Redirect to Microsoft OAuth URL from API
         window.location.href = response.data.authUrl;
@@ -189,7 +188,7 @@ function EmpShow() {
                   <h4 className="login_header">Log in to HighspringFlex</h4>
                 </div>
                 <form className="col-lg-12 col-md-12 col-sm-12 d-flex justify-content-center login_form">
-                  {(errMessage)? <p className="text-danger ms-5"> {errMessage}</p> : ""}
+                  
                   <div className="col-lg-8 col-md-8 col-sm-12 p-4 text-center">
                     <div className="input-group mb-3">
                       <span className="input-group-text"><i className="bi bi-person-fill text-gray"></i></span>
@@ -241,6 +240,7 @@ function EmpShow() {
                     </div>
                   </div>    
                 </form>
+                {(errMessage)? <p className="text-danger text-center"> {errMessage}</p> : ""}
                 <div className="text-center poweredby_logo">
                   Powered by <img src='images/VacoBinary_Logo.png' alt="Logo" />
                 </div>
