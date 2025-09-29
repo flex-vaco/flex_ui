@@ -235,7 +235,7 @@ function EmpShow() {
                       <div className="login-divider-line"></div>
                     </div>
                     <div className="input-group mb-3">
-                      <button className="btn btn-primary text-center mt-2 p-2 signup_button" onClick={handleMicrosoftLogin}>
+                      <button type="button" className="btn btn-primary text-center mt-2 p-2 signup_button" onClick={handleMicrosoftLogin}>
                         Sign In With Microsoft
                       </button>
                     </div>
