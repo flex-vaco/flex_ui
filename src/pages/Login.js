@@ -231,7 +231,7 @@ function EmpShow() {
                     <p onClick={handleForgotPassword} className="forgot-password">Forgot password?</p>
                     <div className="login-divider">
                       <div className="login-divider-line"></div>
-                      <span className="login-divider-text">Don't Have Highspring Account</span>
+                      <span className="login-divider-text">OR</span>
                       <div className="login-divider-line"></div>
                     </div>
                     <div className="input-group mb-3">
