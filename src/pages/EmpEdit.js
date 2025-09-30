@@ -424,6 +424,17 @@ function EmpEdit() {
             }
         }
 
+        // Validate join date
+        if (!vaco_join_date.trim()) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Join date is required!',
+                text: 'Please enter the Vaco join date for the resource.',
+                showConfirmButton: true
+            })
+            return;
+        }
+
         // Validate service line selection
         if (!service_line_id || service_line_id === '') {
             Swal.fire({
@@ -724,7 +735,7 @@ function EmpEdit() {
                                         </div>
                                     </div>
                                     <div className="form-group">
-                                        <label htmlFor="vaco_join_date" className="form-label">
+                                        <label htmlFor="vaco_join_date" className="form-label required-field">
                                             Joining Date at Vaco
                                         </label>
                                         <input 
@@ -734,6 +745,7 @@ function EmpEdit() {
                                             className="form-date"
                                             id="vaco_join_date"
                                             name="vaco_join_date"
+                                            required
                                         />
                                     </div>
                                 </div>
