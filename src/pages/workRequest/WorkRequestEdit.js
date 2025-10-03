@@ -85,7 +85,7 @@ function WorkRequestEdit() {
             setWorkRequestStatus(workRequest.status);
             
             // Check if user can edit this work request
-            const canEdit = user?.role === 'project_manager' && 
+            const canEdit = (user?.role === 'project_manager' || user?.role === 'producer') && 
                            workRequest.status === 'draft' &&
                            workRequest.submitted_by === user?.user_id;
             

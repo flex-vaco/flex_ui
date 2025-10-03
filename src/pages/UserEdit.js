@@ -226,6 +226,7 @@ function UserEdit() {
             roleHasValidDependencies = true;
             break;
         case APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD:
+        case APP_CONSTANTS.USER_ROLES.MANAGER:
             setShowEmpSel(false);
             setShowClientSel(false);
             setShowServiceLineSel(true);
@@ -235,7 +236,6 @@ function UserEdit() {
             roleHasValidDependencies = true;
             break;
         case APP_CONSTANTS.USER_ROLES.ADMINISTRATOR:
-        case APP_CONSTANTS.USER_ROLES.MANAGER:
             setShowEmpSel(false);
             setShowClientSel(false);
             setShowServiceLineSel(false);
@@ -255,7 +255,7 @@ function UserEdit() {
     }, [role])
 
     useEffect(() => {
-        if (lineOfBusiness_id && role === APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD) {
+        if (lineOfBusiness_id && (role === APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD || role === APP_CONSTANTS.USER_ROLES.MANAGER)) {
             fetchServiceLines();
         }
     }, [lineOfBusiness_id, role]);
@@ -333,12 +333,12 @@ function UserEdit() {
                 } else {
                     updatedData.client_ids = clientIds;
                 }
-            } else if (role === APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD) {
+            } else if (role === APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD || role === APP_CONSTANTS.USER_ROLES.MANAGER) {
                 const serviceLineIds = (selectedServiceLines?.length > 0) ? selectedServiceLines.map(s=>s.service_line_id) : offshoreLeadServiceLineIds;
                 if ((!serviceLineIds) || (serviceLineIds.length === 0)) {
                     const { value: isConfirmed } = await Swal.fire({
                         icon: 'warning',
-                        title: 'Service Line is Required \n for Offshore Lead Role',
+                        title: 'Service Line is Required \n for Offshore Lead/Manager Role',
                         showConfirmButton: true
                     })
                     if (isConfirmed) {
