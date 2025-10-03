@@ -209,13 +209,6 @@ function Home() {
                         onClick={(event) => handleCapabilityAreaClick(event, capabilityArea)}
                         key={key}
                       >
-                        <img 
-                          src={selectedServiceLine?.image_name 
-                            ? imageURL + selectedServiceLine?.image_name 
-                            : imageURL + "more.png"
-                          } 
-                          alt=""
-                        />
                         <span>{capabilityArea.name}</span>
                       </li>
                     );

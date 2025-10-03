@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Swal from "sweetalert2";
 import axios from "axios";
 import Footer from "../components/Footer";
@@ -13,11 +13,99 @@ function EmpShow() {
   const [errMessage, setErrMessage] = useState("");
 
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Handle Microsoft login response from URL params
+  useEffect(() => {
+    const error = searchParams.get('error');
+    const token = searchParams.get('token');
+    const user = searchParams.get('user');
+
+    if (error) {
+      const decodedError = decodeURIComponent(error);
+      setErrMessage(decodedError);
+      Swal.fire({
+        icon: 'error',
+        title: 'Microsoft Login Error',
+        text: decodedError,
+        showConfirmButton: false,
+        timer: 3000,
+      });
+      // Clear the error from URL without redirecting
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.delete('error');
+      navigate(`/login?${newSearchParams.toString()}`, { replace: true });
+    } else if (token && user) {
+      // Handle successful Microsoft login
+      try {
+        localStorage.setItem("jwt-access-token", token);
+        localStorage.setItem("user", user);
+        
+        const userData = JSON.parse(decodeURIComponent(user));
+        localStorage.setItem("user_role", userData.role);
+
+        Swal.fire({
+          icon: "success",
+          title: `Welcome! Logged in as ${userData.role}`,
+          showConfirmButton: false,
+          timer: 2500,
+        });
+
+        // Navigate based on user role
+        if (userData.role === APP_CONSTANTS.USER_ROLES.EMPLOYEE) {
+          navigate("/timesheet");
+        } else if (userData.role === APP_CONSTANTS.USER_ROLES.LEADERSHIP) {
+          navigate("/comprehensiveReports");
+        } else {
+          navigate("/home");
+        }
+        
+        // Reload to ensure state is updated
+        window.location.reload(true);
+      } catch (parseError) {
+        console.error('Error parsing user data:', parseError);
+        setErrMessage('Failed to process login data');
+        Swal.fire({
+          icon: 'error',
+          title: 'Login Error',
+          text: 'Failed to process login data',
+          showConfirmButton: false,
+          timer: 3000,
+        });
+      }
+    }
+  }, [searchParams, navigate]);
 
   const handleForgotPassword = (e) => {
     e.preventDefault();
     setIsModalOpen(true);
+  };
+
+  const handleMicrosoftLogin = async () => {
+    try {
+      setTryingLogin(true);
+      Swal.showLoading();
+      
+      // Call API to get Microsoft OAuth URL
+      const response = await axios.get('/microsoftAuth/microsoft');
+      if (response.data && response.data.authUrl) {
+        // Redirect to Microsoft OAuth URL from API
+        window.location.href = response.data.authUrl;
+      } else {
+        throw new Error('Failed to get Microsoft OAuth URL from API');
+      }
+    } catch (error) {
+      console.error('Microsoft login error:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Microsoft Login Error',
+        text: error.response?.data?.message || 'Failed to initiate Microsoft login',
+        showConfirmButton: false,
+        timer: 3000,
+      });
+      setTryingLogin(false);
+    }
   };
 
 
@@ -100,7 +188,7 @@ function EmpShow() {
                   <h4 className="login_header">Log in to HighspringFlex</h4>
                 </div>
                 <form className="col-lg-12 col-md-12 col-sm-12 d-flex justify-content-center login_form">
-                  {(errMessage)? <p className="text-danger ms-5"> {errMessage}</p> : ""}
+                  
                   <div className="col-lg-8 col-md-8 col-sm-12 p-4 text-center">
                     <div className="input-group mb-3">
                       <span className="input-group-text"><i className="bi bi-person-fill text-gray"></i></span>
@@ -140,18 +228,19 @@ function EmpShow() {
                       </button>
                     </div>
                     <p onClick={handleForgotPassword} className="forgot-password">Forgot password?</p>
-                    {/* <div className="login-divider">
+                    <div className="login-divider">
                       <div className="login-divider-line"></div>
-                      <span className="login-divider-text">Don't Have Highspring Account</span>
+                      <span className="login-divider-text">OR</span>
                       <div className="login-divider-line"></div>
                     </div>
                     <div className="input-group mb-3">
-                      <button className="btn btn-primary text-center mt-2 p-2 signup_button" type="submit">
-                        Sign Up
+                      <button type="button" className="btn btn-primary text-center mt-2 p-2 signup_button" onClick={handleMicrosoftLogin}>
+                        Sign In With Microsoft
                       </button>
-                    </div> */}
+                    </div>
                   </div>    
                 </form>
+                {(errMessage)? <p className="text-danger text-center"> {errMessage}</p> : ""}
                 <div className="text-center poweredby_logo">
                   Powered by <img src='images/VacoBinary_Logo.png' alt="Logo" />
                 </div>

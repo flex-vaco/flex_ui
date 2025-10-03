@@ -55,7 +55,7 @@ function UserCreate() {
     }, [hasAccess, navigate]);
 
     useEffect(() => {
-        if (lineOfBusiness_id && role === APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD) {
+        if (lineOfBusiness_id && (role === APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD || role === APP_CONSTANTS.USER_ROLES.MANAGER)) {
             fetchServiceLines();
         }
     }, [lineOfBusiness_id, role]);
@@ -188,13 +188,13 @@ function UserCreate() {
                     setShowProjectSel(false)
                     break;
                 case APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD:
+                case APP_CONSTANTS.USER_ROLES.MANAGER:
                     setShowEmpSel(false);
                     setShowClientSel(false);
                     setShowServiceLineSel(true);
                     setShowProjectSel(false)
                     break;
                 case APP_CONSTANTS.USER_ROLES.ADMINISTRATOR:
-                case APP_CONSTANTS.USER_ROLES.MANAGER:
                     setShowEmpSel(false);
                     setShowClientSel(false);
                     setShowServiceLineSel(false);
@@ -340,10 +340,10 @@ function UserCreate() {
                 setIsSaving(false);
                 return;
             })
-        } else if ((role === APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD) && (serviceLineIds.length === 0)) {
+        } else if ((role === APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD || role === APP_CONSTANTS.USER_ROLES.MANAGER) && (serviceLineIds.length === 0)) {
             Swal.fire({
                 icon: 'warning',
-                title: 'Please select a Service Line for Offshore Lead',
+                title: 'Please select a Service Line for Offshore Lead/Manager',
                 showConfirmButton: true
             }).then((res) => {
                 setIsSaving(false);
@@ -352,7 +352,7 @@ function UserCreate() {
         } else {
             if (role === APP_CONSTANTS.USER_ROLES.PRODUCER) {
                 data.client_ids = clientIds;
-            } else if (role === APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD) {
+            } else if (role === APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD || role === APP_CONSTANTS.USER_ROLES.MANAGER) {
                 data.service_line_ids = serviceLineIds;
             }
         }

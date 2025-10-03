@@ -176,8 +176,8 @@ function WorkRequestList() {
             <div className="list-page-header">
               <h1 className="list-page-title">
                 {currentUser?.role === 'administrator' ? 'All Work Requests' :
-                 currentUser?.role === 'offshore_lead' ? 'My Assigned Work Requests' :
-                 currentUser?.role === 'project_manager' ? 'My Work Requests' :
+                 currentUser?.role === 'offshore_lead' || currentUser?.role === 'manager' ? 'My Assigned Work Requests' :
+                 currentUser?.role === 'project_manager' || currentUser?.role === 'producer' ? 'My Work Requests' :
                  'Work Request List'}
               </h1>
             </div>

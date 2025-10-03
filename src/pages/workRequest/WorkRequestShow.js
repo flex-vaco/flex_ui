@@ -114,18 +114,18 @@ function WorkRequestShow() {
         return 'status-pending';
     };
 
-    // Check if current user is an offshore lead and can review this work request
-    const canReview = (currentUser?.role === 'offshore_lead' || currentUser?.role === 'off_shore_lead') && 
+    // Check if current user is an offshore lead or manager and can review this work request
+    const canReview = (currentUser?.role === 'offshore_lead' || currentUser?.role === 'off_shore_lead' || currentUser?.role === 'manager') && 
                      workRequestDetails.status === 'submitted' &&
                      workRequestDetails.offshore_leads?.some(lead => lead.user_id === currentUser?.user_id);
 
-    // Check if current user can submit this work request (project manager, draft status, and is the creator)
-    const canSubmit = currentUser?.role === 'project_manager' && 
+    // Check if current user can submit this work request (project manager or producer, draft status, and is the creator)
+    const canSubmit = (currentUser?.role === 'project_manager' || currentUser?.role === 'producer') && 
                      workRequestDetails.status === 'draft' &&
                      workRequestDetails.submitted_by === currentUser?.user_id;
 
-    // Check if current user can edit this work request (project manager, draft status, and is the creator)
-    const canEdit = currentUser?.role === 'project_manager' && 
+    // Check if current user can edit this work request (project manager or producer, draft status, and is the creator)
+    const canEdit = (currentUser?.role === 'project_manager' || currentUser?.role === 'producer') && 
                    workRequestDetails.status === 'draft' &&
                    workRequestDetails.submitted_by === currentUser?.user_id;
     

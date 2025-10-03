@@ -58,6 +58,12 @@ function EmpCreate() {
         if (userRole === 'administrator') {
             // For admin, fetch all managers initially
             fetchAllManagers();
+        } else if (userRole === 'lobadmin') {
+            // For LOB Admin, fetch offshore leads from their line of business
+            const currentUser = JSON.parse(localStorage.getItem("user"));
+            if (currentUser && currentUser.line_of_business_id) {
+                fetchManagersByLineOfBusiness(currentUser.line_of_business_id);
+            }
         } else {
             // For manager/offshorelead, set their own details
             const currentUser = JSON.parse(localStorage.getItem("user"));
@@ -339,12 +345,34 @@ function EmpCreate() {
             return;
         }
 
+        // Validate manager selection for users with dropdown
+        if ((userRole === 'administrator' || userRole === 'lobadmin') && (!manager_id || manager_id === '-select-')) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Manager selection is required!',
+                text: 'Please select a manager for the resource.',
+                showConfirmButton: true
+            })
+            return;
+        }
+
         // Validate line of business for non-administrator users
         if (userRole !== 'administrator' && (!line_of_business_id || line_of_business_id === '-select-')) {
             Swal.fire({
                 icon: 'warning',
                 title: 'Line of Business is required!',
                 text: 'Please ensure you have a valid line of business assigned.',
+                showConfirmButton: true
+            })
+            return;
+        }
+
+        // Validate join date
+        if (!vaco_join_date.trim()) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Join date is required!',
+                text: 'Please enter the Vaco join date for the resource.',
                 showConfirmButton: true
             })
             return;
@@ -661,7 +689,7 @@ function EmpCreate() {
                                         </div>
                                     </div>
                                     <div className="form-group">
-                                        <label htmlFor="vaco_join_date" className="form-label">
+                                        <label htmlFor="vaco_join_date" className="form-label required-field">
                                             Joining Date at Vaco
                                         </label>
                                         <input 
@@ -671,6 +699,7 @@ function EmpCreate() {
                                             className="form-date"
                                             id="vaco_join_date"
                                             name="vaco_join_date"
+                                            required
                                         />
                                     </div>
                                 </div>
@@ -914,20 +943,21 @@ function EmpCreate() {
                                 <h3 className="form-section-title">Manager Assignment</h3>
                                 <div className="form-row">
                                     <div className="form-group">
-                                        <label htmlFor="manager_id" className="form-label">
+                                        <label htmlFor="manager_id" className="form-label required-field">
                                             Manager Name
                                         </label>
-                                        {userRole === 'administrator' ? (
+                                        {(userRole === 'administrator' || userRole === 'lobadmin') ? (
                                             <select 
                                                 name="manager_id" 
                                                 id="manager_id" 
                                                 className="form-select" 
                                                 value={manager_id} 
                                                 onChange={handleManagerChange}
-                                                disabled={!line_of_business_id || line_of_business_id === '-select-'}
+                                                disabled={userRole === 'administrator' && (!line_of_business_id || line_of_business_id === '-select-')}
+                                                required
                                             > 
                                                 <option value="-select-"> 
-                                                    {!line_of_business_id || line_of_business_id === '-select-' 
+                                                    {userRole === 'administrator' && (!line_of_business_id || line_of_business_id === '-select-')
                                                         ? '-- Select Line of Business First --' 
                                                         : '-- Select Manager --'} 
                                                 </option>

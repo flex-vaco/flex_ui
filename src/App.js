@@ -92,12 +92,12 @@ function App() {
     <Router>
       <Routes>
           <Route exact path="/"  element={<Login/>} />
+          <Route path="/login"  element={<Login/>} />
           <Route path="/employees"  element={isLoggedIn ? <EmpList/> : <Login/>} />
           <Route path="/empCreate"  element={isLoggedIn ? <EmpCreate/> : <Login/>} />
           <Route path="/empEdit/:id"  element={isLoggedIn ? <EmpEdit/> : <Login/>} />
           <Route path="/empShow/:id"  element={isLoggedIn ? <EmpShow/> : <Login/>} />
           <Route path="/filter/:searchSkill?"  element={isLoggedIn ? <EmpFilteredList/> : <Login/>} />
-          <Route path="/home"  element={isLoggedIn ? <Home/> : <Login/>} />
           <Route path="/create"   element={isLoggedIn ? <EmpCreate/> : <Login/>} />
           <Route path="/edit/:id"  element={isLoggedIn ? <EmpEdit/> : <Login/>} />
           <Route path="/show/:id"  element={isLoggedIn ? <EmpShow/> : <Login/>} />
@@ -117,14 +117,12 @@ function App() {
           <Route path="/forecastHours"  element={isLoggedIn ? <ForecastHours/> : <Login/>} />
           <Route path="/availableHours"  element={isLoggedIn ? <AvailableHours/> : <Login/>} />
           <Route path="/utilization"  element={isLoggedIn ? <Utilization/> : <Login/>} />
-          <Route path="/comprehensiveReports"  element={isLoggedIn ? <ComprehensiveReports/> : <Login/>} />
           <Route path="/clients"  element={isLoggedIn ? <ClientList/> : <Login/>} />
           <Route path="/clientCreate"  element={isLoggedIn ? <ClientCreate/> : <Login/>} />
           <Route path="/clientEdit/:id"  element={isLoggedIn ? <ClientEdit/> : <Login/>} />
           <Route path="/clientShow/:id"  element={isLoggedIn ? <ClientShow/> : <Login/>} />
           <Route path="/ichat"  element={isLoggedIn ? <InteliChat/> : <Login/>} />
           <Route path="/resetPassword"  element={(needsPasswordReset === 1) ? <ResetPassword/> : <Login/>} />
-          <Route path="/timesheet"  element={isLoggedIn ? <TimeSheet/> : <Login/>} />
           <Route path="/approveTimesheet"  element={isLoggedIn ? <ApproveTimesheet/> : <Login/>} />
           <Route path="/approveEmpTimesheet/:project_id/:emp_id"  element={isLoggedIn ? <ApproveEmpTimesheet/> : <Login/>} />
           <Route path="/dashboard"  element={isLoggedIn ? <Dashboard/> : <Login/>} />
@@ -161,6 +159,9 @@ function App() {
           <Route path="/userRoleEdit/:id"  element={isLoggedIn ? <UserRoleEdit/> : <Login/>} />
           <Route path="/userRoleShow/:id"  element={isLoggedIn ? <UserRoleShow/> : <Login/>} />
           <Route path="/importTimesheet"  element={isLoggedIn ? <ImportTimesheet/> : <Login/>} />
+          <Route path="/home"  element={isLoggedIn ? <Home/> : <Login/>} />
+          <Route path="/timesheet"  element={isLoggedIn ? <TimeSheet/> : <Login/>} />
+          <Route path="/comprehensiveReports"  element={isLoggedIn ? <ComprehensiveReports/> : <Login/>} />
       </Routes>
     </Router>
   );
