@@ -287,7 +287,7 @@ function EmpEdit() {
             }
             
             // Handle manager assignment based on user role
-            if (userRole === 'administrator') {
+            if (userRole === 'administrator' || userRole === 'lobadmin') {
                 const selectedManagerDetails = managerList.find((manager) => manager.email === empDetails.manager_email);
                 if (selectedManagerDetails) {
                     setSelectedManager(selectedManagerDetails.user_id);
@@ -410,8 +410,8 @@ function EmpEdit() {
             return;
         }
 
-        // Validate manager assignment for non-administrator users
-        if (userRole !== 'administrator') {
+        // Validate manager assignment for non-administrator and non-lobadmin users
+        if (userRole !== 'administrator' && userRole !== 'lobadmin') {
             const currentUser = JSON.parse(localStorage.getItem("user"));
             if (currentUser && manager_id !== currentUser.user_id) {
                 Swal.fire({

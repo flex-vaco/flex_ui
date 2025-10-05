@@ -185,6 +185,14 @@ function UserEdit() {
             setEmployee(userDetatils.emp_id);
             setShowEmpSel(userDetatils.role === APP_CONSTANTS.USER_ROLES.EMPLOYEE);
             setLineOfBusinessId(userDetatils.line_of_business_id);
+            
+            // Handle service line assignments for offshore leads and managers
+            if (userDetatils.role === APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD || userDetatils.role === APP_CONSTANTS.USER_ROLES.MANAGER) {
+                const serviceLineIds = userDetatils?.offshore_lead_service_lines?.map(sl => sl.service_line_id) || [];
+                setOffshoreLeadServiceLineIds(serviceLineIds);
+                setShowServiceLineSel(true);
+            }
+            
             setIsLoading(false);
             setDisableLineOfBusiness(userDetatils.role === APP_CONSTANTS.USER_ROLES.EMPLOYEE);
         })
@@ -259,6 +267,14 @@ function UserEdit() {
             fetchServiceLines();
         }
     }, [lineOfBusiness_id, role]);
+
+    // Update selected service lines when service lines are loaded and we have offshore lead service line IDs
+    useEffect(() => {
+        if (serviceLines.length > 0 && offshoreLeadServiceLineIds.length > 0) {
+            const selectedServiceLines = serviceLines.filter(sl => offshoreLeadServiceLineIds.includes(sl.service_line_id));
+            setSelectedServiceLines(selectedServiceLines);
+        }
+    }, [serviceLines, offshoreLeadServiceLineIds]);
 
     const handleSave = async () => {
         if (!first_name.trim()) {
