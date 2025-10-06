@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import './OffshoreLeadReviewModal.css';
+import * as Utils from '../../lib/Utils';
 
 function OffshoreLeadReviewModal({ workRequest, onClose, onStatusUpdate }) {
     const [selectedResources, setSelectedResources] = useState([]);
@@ -182,8 +183,7 @@ function OffshoreLeadReviewModal({ workRequest, onClose, onStatusUpdate }) {
                                 <span>{workRequest?.project_name}</span>
                             </div>
                             <div className="detail-item">
-                                <label>Duration:</label>
-                                <span>{workRequest?.duration_from} - {workRequest?.duration_to}</span>
+                                <span>{Utils.formatDateYYYYMMDD(workRequest?.duration_from)} - {Utils.formatDateYYYYMMDD(workRequest?.duration_to)}</span>
                             </div>
                             <div className="detail-item">
                                 <label>Hours per Week:</label>

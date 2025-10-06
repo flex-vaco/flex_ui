@@ -341,7 +341,7 @@ function ProjectCreate() {
                                         />
                                     </div>
                                     <div className="form-group">
-                                        <label htmlFor="expected_end_date" className="form-label">
+                                        <label htmlFor="expected_end_date" className="form-label required-field">
                                             Expected End Date
                                         </label>
                                         <input 
@@ -351,12 +351,13 @@ function ProjectCreate() {
                                             className="form-date"
                                             id="expected_end_date"
                                             name="expected_end_date"
+                                            required
                                         />
                                     </div>
                                 </div>
                                 <div className="form-row">
                                     <div className="form-group">
-                                        <label htmlFor="actual_end_date" className="form-label">
+                                        <label htmlFor="actual_end_date" className="form-label required-field">
                                             Actual End Date
                                         </label>
                                         <input 
@@ -366,6 +367,7 @@ function ProjectCreate() {
                                             className="form-date"
                                             id="actual_end_date"
                                             name="actual_end_date"
+                                            required
                                         />
                                     </div>
                                     <div className="form-group">
