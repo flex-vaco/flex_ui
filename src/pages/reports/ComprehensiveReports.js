@@ -9,6 +9,7 @@ import * as AppFunc from "../../lib/AppFunctions";
 function ComprehensiveReports() {
     const [filterOptions, setFilterOptions] = useState({
         verticals: [],
+        serviceLines: [],
         datePresets: []
     });
     // Set default to next 8 weeks
@@ -21,27 +22,25 @@ function ComprehensiveReports() {
     const isAdministrator = AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR;
     
     const [selectedFilters, setSelectedFilters] = useState({
-        // Global filters (for backward compatibility)
+        // Global filters
         vertical: isAdministrator ? 'all' : userLineOfBusinessId || 'all',
-        datePreset: 'next_8_weeks',
-        startDate: today.toISOString().split('T')[0],
-        endDate: next8Weeks.toISOString().split('T')[0],
+        serviceLine: 'all',
         
         // Individual section filters
         metrics: {
             vertical: isAdministrator ? 'all' : userLineOfBusinessId || 'all',
-            datePreset: 'next_8_weeks',
-            startDate: today.toISOString().split('T')[0],
-            endDate: next8Weeks.toISOString().split('T')[0]
+            serviceLine: 'all'
         },
         utilization: {
             vertical: isAdministrator ? 'all' : userLineOfBusinessId || 'all',
+            serviceLine: 'all',
             datePreset: 'last_month',
             startDate: '',
             endDate: ''
         },
         allocation: {
             vertical: isAdministrator ? 'all' : userLineOfBusinessId || 'all',
+            serviceLine: 'all',
             datePreset: 'next_8_weeks',
             startDate: today.toISOString().split('T')[0],
             endDate: next8Weeks.toISOString().split('T')[0]
@@ -77,44 +76,23 @@ function ComprehensiveReports() {
         setError(null);
         
         try {
-            // Build metrics parameters
+            // Build metrics parameters using global filters
             const metricsParams = new URLSearchParams({
-                metricsVertical: selectedFilters.metrics.vertical,
-                metricsDatePreset: selectedFilters.metrics.datePreset
+                metricsVertical: selectedFilters.vertical,
+                metricsServiceLine: selectedFilters.serviceLine
             });
-            
-            if (selectedFilters.metrics.datePreset === 'custom') {
-                metricsParams.append('metricsStartDate', selectedFilters.metrics.startDate);
-                metricsParams.append('metricsEndDate', selectedFilters.metrics.endDate);
-            } else if (selectedFilters.metrics.datePreset === 'next_8_weeks') {
-                metricsParams.append('metricsStartDate', selectedFilters.metrics.startDate);
-                metricsParams.append('metricsEndDate', selectedFilters.metrics.endDate);
-            }
 
-            // Build utilization parameters
+            // Build utilization parameters using global filters
             const utilizationParams = new URLSearchParams({
-                utilizationVertical: selectedFilters.utilization.vertical,
-                utilizationDatePreset: selectedFilters.utilization.datePreset
+                utilizationVertical: selectedFilters.vertical,
+                utilizationServiceLine: selectedFilters.serviceLine
             });
-            
-            if (selectedFilters.utilization.datePreset === 'custom') {
-                utilizationParams.append('utilizationStartDate', selectedFilters.utilization.startDate);
-                utilizationParams.append('utilizationEndDate', selectedFilters.utilization.endDate);
-            }
 
-            // Build allocation parameters
+            // Build allocation parameters using global filters
             const allocationParams = new URLSearchParams({
-                allocationVertical: selectedFilters.allocation.vertical,
-                allocationDatePreset: selectedFilters.allocation.datePreset
+                allocationVertical: selectedFilters.vertical,
+                allocationServiceLine: selectedFilters.serviceLine
             });
-            
-            if (selectedFilters.allocation.datePreset === 'custom') {
-                allocationParams.append('allocationStartDate', selectedFilters.allocation.startDate);
-                allocationParams.append('allocationEndDate', selectedFilters.allocation.endDate);
-            } else if (selectedFilters.allocation.datePreset === 'next_8_weeks') {
-                allocationParams.append('allocationStartDate', selectedFilters.allocation.startDate);
-                allocationParams.append('allocationEndDate', selectedFilters.allocation.endDate);
-            }
 
             // Combine all parameters
             const allParams = new URLSearchParams();
@@ -126,9 +104,10 @@ function ComprehensiveReports() {
             const metricsResponse = await axios.get(`/reports/dashboard-metrics?${allParams}`);
             setMetrics(metricsResponse.data.metrics);
 
-            // Fetch utilization trends
+            // Fetch utilization trends using global filters and section-specific date filters
             const trendsPayload = {
-                vertical: selectedFilters.utilization.vertical,
+                vertical: selectedFilters.vertical,
+                serviceLine: selectedFilters.serviceLine,
                 datePreset: selectedFilters.utilization.datePreset,
                 groupBy: 'month'
             };
@@ -141,10 +120,18 @@ function ComprehensiveReports() {
             const trendsResponse = await axios.post('/reports/utilization-trends', trendsPayload);
             setUtilizationTrends(trendsResponse.data.chartData);
 
-            // Fetch allocation forecast
-            const forecastResponse = await axios.post('/reports/allocation-forecast', {
-                vertical: selectedFilters.allocation.vertical
-            });
+            // Fetch allocation forecast using global filters and section-specific date filters
+            const forecastPayload = {
+                vertical: selectedFilters.vertical,
+                serviceLine: selectedFilters.serviceLine
+            };
+            
+            if (selectedFilters.allocation.datePreset === 'custom') {
+                forecastPayload.startDate = selectedFilters.allocation.startDate;
+                forecastPayload.endDate = selectedFilters.allocation.endDate;
+            }
+            
+            const forecastResponse = await axios.post('/reports/allocation-forecast', forecastPayload);
             setAllocationForecast(forecastResponse.data.chartData);
 
         } catch (error) {
@@ -155,11 +142,65 @@ function ComprehensiveReports() {
         }
     };
 
-    const handleFilterChange = (filterType, value) => {
+    const handleFilterChange = async (filterType, value) => {
+        if (filterType === 'vertical') {
+            // When line of business changes, fetch service lines for that line of business
+            try {
+                const response = await axios.get(`/reports/service-lines/${value}`);
+                setFilterOptions(prev => ({
+                    ...prev,
+                    serviceLines: response.data.serviceLines
+                }));
+                
+                // Reset service line to 'all' when line of business changes and update all sections
+                setSelectedFilters(prev => ({
+                    ...prev,
+                    [filterType]: value,
+                    serviceLine: 'all',
+                    metrics: {
+                        ...prev.metrics,
+                        vertical: value,
+                        serviceLine: 'all'
+                    },
+                    utilization: {
+                        ...prev.utilization,
+                        vertical: value,
+                        serviceLine: 'all'
+                    },
+                    allocation: {
+                        ...prev.allocation,
+                        vertical: value,
+                        serviceLine: 'all'
+                    }
+                }));
+            } catch (error) {
+                console.error('Error fetching service lines:', error);
+                setError('Failed to load service lines');
+            }
+        } else if (filterType === 'serviceLine') {
+            // When service line changes, update all sections
+            setSelectedFilters(prev => ({
+                ...prev,
+                [filterType]: value,
+                metrics: {
+                    ...prev.metrics,
+                    serviceLine: value
+                },
+                utilization: {
+                    ...prev.utilization,
+                    serviceLine: value
+                },
+                allocation: {
+                    ...prev.allocation,
+                    serviceLine: value
+                }
+            }));
+        } else {
         setSelectedFilters(prev => ({
             ...prev,
             [filterType]: value
         }));
+        }
     };
 
     const handleSectionFilterChange = (section, filterType, value) => {
@@ -179,7 +220,8 @@ function ComprehensiveReports() {
     const fetchUtilizationTrends = async () => {
         try {
             const trendsPayload = {
-                vertical: selectedFilters.utilization.vertical,
+                vertical: selectedFilters.vertical,
+                serviceLine: selectedFilters.serviceLine,
                 datePreset: selectedFilters.utilization.datePreset,
                 groupBy: 'month'
             };
@@ -199,9 +241,17 @@ function ComprehensiveReports() {
 
     const fetchAllocationForecast = async () => {
         try {
-            const forecastResponse = await axios.post('/reports/allocation-forecast', {
-                vertical: selectedFilters.allocation.vertical
-            });
+            const forecastPayload = {
+                vertical: selectedFilters.vertical,
+                serviceLine: selectedFilters.serviceLine
+            };
+            
+            if (selectedFilters.allocation.datePreset === 'custom') {
+                forecastPayload.startDate = selectedFilters.allocation.startDate;
+                forecastPayload.endDate = selectedFilters.allocation.endDate;
+            }
+            
+            const forecastResponse = await axios.post('/reports/allocation-forecast', forecastPayload);
             setAllocationForecast(forecastResponse.data.chartData);
         } catch (error) {
             console.error('Error fetching allocation forecast:', error);
@@ -290,46 +340,20 @@ function ComprehensiveReports() {
                         )}
 
                         <div className="filter-group">
-                            <label htmlFor="date-preset-filter">Date Range</label>
+                            <label htmlFor="service-line-filter">Service Line</label>
                             <select
-                                id="date-preset-filter"
-                                value={selectedFilters.datePreset}
-                                onChange={(e) => handleFilterChange('datePreset', e.target.value)}
+                                id="service-line-filter"
+                                value={selectedFilters.serviceLine}
+                                onChange={(e) => handleFilterChange('serviceLine', e.target.value)}
                                 className="filter-select"
                             >
-                                {filterOptions.datePresets.map(preset => (
-                                    <option key={preset.id} value={preset.id}>
-                                        {preset.name}
+                                {filterOptions.serviceLines.map(serviceLine => (
+                                    <option key={serviceLine.id} value={serviceLine.id}>
+                                        {serviceLine.name}
                                     </option>
                                 ))}
-                                <option value="custom">Custom Range</option>
                             </select>
                         </div>
-
-                        {selectedFilters.datePreset === 'custom' && (
-                            <>
-                                <div className="filter-group">
-                                    <label htmlFor="start-date">Start Date</label>
-                                    <input
-                                        type="date"
-                                        id="start-date"
-                                        value={selectedFilters.startDate}
-                                        onChange={(e) => handleFilterChange('startDate', e.target.value)}
-                                        className="filter-input"
-                                    />
-                                </div>
-                                <div className="filter-group">
-                                    <label htmlFor="end-date">End Date</label>
-                                    <input
-                                        type="date"
-                                        id="end-date"
-                                        value={selectedFilters.endDate}
-                                        onChange={(e) => handleFilterChange('endDate', e.target.value)}
-                                        className="filter-input"
-                                    />
-                                </div>
-                            </>
-                        )}
 
                         <div className="filter-actions">
                             <button
@@ -395,25 +419,16 @@ function ComprehensiveReports() {
                         <div className="chart-header">
                             <div className="chart-title-section">
                                 <h3>Utilization Trends</h3>
-                                <p>Monthly utilization percentage by line of business</p>
+                                <p>
+                                    {isAdministrator ? 'Monthly utilization percentage by line of business' :
+                                     (AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.LOB_ADMIN || 
+                                      AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.PROJECT_MANAGER || 
+                                      AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.LEADERSHIP) ? 
+                                     'Monthly utilization percentage by service line' :
+                                     'Monthly utilization percentage by line of business'}
+                                </p>
                             </div>
                             <div className="chart-filters">
-                                {isAdministrator && (
-                                    <div className="filter-group">
-                                        <label>Line of Business</label>
-                                        <select
-                                            value={selectedFilters.utilization.vertical}
-                                            onChange={(e) => handleSectionFilterChange('utilization', 'vertical', e.target.value)}
-                                            className="filter-select"
-                                        >
-                                            {filterOptions.verticals.map(vertical => (
-                                                <option key={vertical.id} value={vertical.id}>
-                                                    {vertical.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                )}
                                 <div className="filter-group">
                                     <label>Date Range</label>
                                     <select
@@ -492,26 +507,17 @@ function ComprehensiveReports() {
                     <div className="chart-container">
                         <div className="chart-header">
                             <div className="chart-title-section">
-                                <h3>Allocation Forecast (Next 8 Weeks)</h3>
-                                <p>Forecasted allocation vs bookable hours</p>
+                                <h3>Allocation Forecast</h3>
+                                <p>
+                                    {isAdministrator ? 'Forecasted allocation vs bookable hours by line of business' :
+                                     (AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.LOB_ADMIN || 
+                                      AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.PROJECT_MANAGER || 
+                                      AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.LEADERSHIP) ? 
+                                     'Forecasted allocation vs bookable hours by service line' :
+                                     'Forecasted allocation vs bookable hours by line of business'}
+                                </p>
                             </div>
                             <div className="chart-filters">
-                                {isAdministrator && (
-                                    <div className="filter-group">
-                                        <label>Line of Business</label>
-                                        <select
-                                            value={selectedFilters.allocation.vertical}
-                                            onChange={(e) => handleSectionFilterChange('allocation', 'vertical', e.target.value)}
-                                            className="filter-select"
-                                        >
-                                            {filterOptions.verticals.map(vertical => (
-                                                <option key={vertical.id} value={vertical.id}>
-                                                    {vertical.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                )}
                                 <div className="filter-group">
                                     <label>Date Range</label>
                                     <select
