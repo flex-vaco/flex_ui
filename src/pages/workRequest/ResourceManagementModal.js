@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import './ResourceManagementModal.css';
+import * as Utils from '../../lib/Utils';
 import { 
     generateFourWeeks, 
     calculateAvailabilityPercentage, 
@@ -326,8 +327,7 @@ function ResourceManagementModal({ workRequest, onClose, onStatusUpdate, isReadO
                                 <span>{workRequest?.project_name}</span>
                             </div>
                             <div className="detail-item">
-                                <label>Duration:</label>
-                                <span>{workRequest?.duration_from} - {workRequest?.duration_to}</span>
+                                <span>{Utils.formatDateYYYYMMDD(workRequest?.duration_from)} - {Utils.formatDateYYYYMMDD(workRequest?.duration_to)}</span>
                             </div>
                             <div className="detail-item">
                                 <label>Hours per Week:</label>

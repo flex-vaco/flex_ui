@@ -29,6 +29,7 @@ function WorkRequestEdit() {
     const [workRequestStatus, setWorkRequestStatus] = useState('');
     const [currentUser, setCurrentUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [isLoadingWorkRequest, setIsLoadingWorkRequest] = useState(true);
     
     // Dropdown data
     const [lineOfBusinesses, setLineOfBusinesses] = useState([]);
@@ -44,8 +45,10 @@ function WorkRequestEdit() {
 
     useEffect(() => {
         fetchLineOfBusinesses();
-        fetchProjects();
-        fetchWorkRequest();
+        // Fetch projects first, then work request to ensure project list is available
+        fetchProjects().then(() => {
+            fetchWorkRequest();
+        });
     }, []);
 
     useEffect(() => {
@@ -54,19 +57,25 @@ function WorkRequestEdit() {
         } else {
             setServiceLines([]);
         }
-        setServiceLineId('');
-        setCapabilityAreas([]);
-    }, [lineOfBusinessId]);
+        // Only reset serviceLineId if we're not loading work request data
+        if (!isLoadingWorkRequest) {
+            setServiceLineId('');
+            setCapabilityAreas([]);
+        }
+    }, [lineOfBusinessId, isLoadingWorkRequest]);
 
     useEffect(() => {
         if (serviceLineId) {
             fetchCapabilityAreasByServiceLine(serviceLineId);
             fetchOffshoreLeadsByServiceLine(serviceLineId);
         } else {
-            setCapabilityAreas([]);
-            setSelectedOffshoreLeads([]);
+            // Only reset if we're not loading work request data
+            if (!isLoadingWorkRequest) {
+                setCapabilityAreas([]);
+                setSelectedOffshoreLeads([]);
+            }
         }
-    }, [serviceLineId]);
+    }, [serviceLineId, isLoadingWorkRequest]);
 
     useEffect(() => {
         // Reset "to" date when "from" date changes to ensure it's not before the "from" date
@@ -74,6 +83,33 @@ function WorkRequestEdit() {
             setDurationTo('');
         }
     }, [durationFrom]);
+
+    // Fetch service lines and capability areas after work request data is loaded
+    useEffect(() => {
+        if (!isLoadingWorkRequest && lineOfBusinessId && serviceLineId) {
+            // Ensure service lines are loaded for the line of business
+            if (serviceLines.length === 0) {
+                fetchServiceLinesByLineOfBusiness(lineOfBusinessId);
+            }
+            // Ensure capability areas are loaded for the service line
+            if (capabilityAreas.length === 0) {
+                fetchCapabilityAreasByServiceLine(serviceLineId);
+                fetchOffshoreLeadsByServiceLine(serviceLineId);
+            }
+        }
+    }, [isLoadingWorkRequest, lineOfBusinessId, serviceLineId, serviceLines.length, capabilityAreas.length]);
+
+    // Ensure project gets selected when projects list is loaded
+    useEffect(() => {
+        if (!isLoadingWorkRequest && projectId && projects.length > 0) {
+            // Check if the projectId exists in the projects list
+            const projectExists = projects.some(project => project.project_id == projectId);
+            if (!projectExists) {
+                console.log('Project not found in projects list, resetting projectId');
+                setProjectId('');
+            }
+        }
+    }, [isLoadingWorkRequest, projectId, projects]);
 
     const fetchWorkRequest = () => {
         axios.get(`/workRequest/${id}`)
@@ -125,10 +161,12 @@ function WorkRequestEdit() {
                 setSelectedOffshoreLeads(workRequest.offshore_leads);
             }
             
+            setIsLoadingWorkRequest(false);
             setIsLoading(false);
         })
         .catch(function (error) {
             console.log(error);
+            setIsLoadingWorkRequest(false);
             setIsLoading(false);
             Swal.fire({
                 icon: 'error',
@@ -187,7 +225,7 @@ function WorkRequestEdit() {
     const fetchProjects = () => {
         if (AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.ADMINISTRATOR) {
             // For Administrator, fetch all projects
-            axios.get('/projects')
+            return axios.get('/projects')
             .then(function (response) {
                 setProjects(response.data.projects);
             })
@@ -198,7 +236,7 @@ function WorkRequestEdit() {
             // For non-administrator users, fetch projects by their line of business
             const user = JSON.parse(localStorage.getItem("user"));
             if (user && user.line_of_business_id) {
-                axios.get(`/projects/lineOfBusiness/${user.line_of_business_id}`)
+                return axios.get(`/projects/lineOfBusiness/${user.line_of_business_id}`)
                 .then(function (response) {
                     setProjects(response.data.projects);
                 })
@@ -206,6 +244,7 @@ function WorkRequestEdit() {
                     console.log(error);
                 })
             }
+            return Promise.resolve(); // Return resolved promise if no user or line_of_business_id
         }
     }
 
@@ -344,6 +383,50 @@ function WorkRequestEdit() {
         })
         .finally(() => {
             setIsSaving(false);
+        });
+    }
+
+    const handleSubmitToOffshoreLead = () => {
+        if (!validateForm()) {
+            return;
+        }
+
+        // Show confirmation dialog
+        Swal.fire({
+            title: 'Submit Work Request',
+            text: 'Do you want to submit this request to offshore lead?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, Submit',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                setIsSaving(true);
+                
+                axios.post(`/workRequest/submit/${id}`)
+                .then(function (response) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: 'Work Request submitted to offshore lead successfully'
+                    }).then(() => {
+                        navigate("/workRequest");
+                    });
+                })
+                .catch(function (error) {
+                    console.log(error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Failed to submit work request'
+                    });
+                })
+                .finally(() => {
+                    setIsSaving(false);
+                });
+            }
         });
     }
 
@@ -612,6 +695,24 @@ function WorkRequestEdit() {
                                     </button>
                                 </div>
                                 <div className="form-actions-right">
+                                    <button 
+                                        type="button"
+                                        onClick={handleSubmitToOffshoreLead}
+                                        className="btn btn-primary me-2"
+                                        disabled={isSaving}
+                                    >
+                                        {isSaving ? (
+                                            <>
+                                                <span className="loading-spinner"></span>
+                                                Submitting...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <i className="bi bi-send"></i>
+                                                Submit to Offshore Lead
+                                            </>
+                                        )}
+                                    </button>
                                     <button 
                                         type="submit"
                                         className="btn btn-success"

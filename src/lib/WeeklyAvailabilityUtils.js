@@ -107,8 +107,8 @@ export const getAvailabilityColorClass = (percentage) => {
  * @returns {string} - Formatted display text
  */
 export const formatAvailabilityText = (availableHours, hoursPerWeek = 40) => {
-    const percentage = calculateAvailabilityPercentage(availableHours, hoursPerWeek);
-    return `${availableHours}/${hoursPerWeek}h (${percentage}%)`;
+    // Show only available hours (e.g., "40" instead of "40/40h (100%)")
+    return `${availableHours}`;
 };
 
 /**
