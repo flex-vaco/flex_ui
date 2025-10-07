@@ -58,10 +58,10 @@ function WorkRequestEdit() {
             setServiceLines([]);
         }
         // Only reset serviceLineId if we're not loading work request data
-        if (!isLoadingWorkRequest) {
-            setServiceLineId('');
-            setCapabilityAreas([]);
-        }
+        // if (!isLoadingWorkRequest) {
+        //     setServiceLineId('');
+        //     setCapabilityAreas([]);
+        // }
     }, [lineOfBusinessId, isLoadingWorkRequest]);
 
     useEffect(() => {

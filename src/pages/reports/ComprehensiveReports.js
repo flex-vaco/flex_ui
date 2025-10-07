@@ -12,10 +12,8 @@ function ComprehensiveReports() {
         serviceLines: [],
         datePresets: []
     });
-    // Set default to next 8 weeks
+    // Set default date range
     const today = new Date();
-    const next8Weeks = new Date();
-    next8Weeks.setDate(today.getDate() + 56); // 8 weeks
     
     // Get user's line of business ID for non-administrator users
     const userLineOfBusinessId = AppFunc.activeUser?.line_of_business_id;
@@ -44,9 +42,9 @@ function ComprehensiveReports() {
         allocation: {
             vertical: isAdministrator ? 'all' : userLineOfBusinessId || 'all',
             serviceLine: 'all',
-            datePreset: 'next_8_weeks',
-            startDate: today.toISOString().split('T')[0],
-            endDate: next8Weeks.toISOString().split('T')[0]
+            datePreset: 'last_month',
+            startDate: '',
+            endDate: ''
         }
     });
     const [metrics, setMetrics] = useState({
@@ -305,15 +303,36 @@ function ComprehensiveReports() {
         
         const sortedPeriods = Array.from(allPeriods).sort();
         
-        // Transform data for chart
-        return sortedPeriods.map(period => {
-            const dataPoint = { period };
-            data.forEach(series => {
-                const point = series.data.find(p => p.period === period);
-                dataPoint[series.name] = point ? point.utilization : 0;
+        // If showing overall data (serviceLine === 'all'), aggregate all service lines
+        if (selectedFilters.serviceLine === 'all') {
+            return sortedPeriods.map(period => {
+                const dataPoint = { period };
+                let totalUtilization = 0;
+                let totalWeight = 0;
+                
+                data.forEach(series => {
+                    const point = series.data.find(p => p.period === period);
+                    if (point) {
+                        // Weight by the number of data points to get proper average
+                        totalUtilization += point.utilization;
+                        totalWeight += 1;
+                    }
+                });
+                
+                dataPoint['Overall'] = totalWeight > 0 ? (totalUtilization / totalWeight) : 0;
+                return dataPoint;
             });
-            return dataPoint;
-        });
+        } else {
+            // Show individual service line data
+            return sortedPeriods.map(period => {
+                const dataPoint = { period };
+                data.forEach(series => {
+                    const point = series.data.find(p => p.period === period);
+                    dataPoint[series.name] = point ? point.utilization : 0;
+                });
+                return dataPoint;
+            });
+        }
     };
 
     const formatAllocationData = (data) => {
@@ -327,19 +346,45 @@ function ComprehensiveReports() {
         
         const sortedWeeks = Array.from(allWeeks).sort();
         
-        // Transform data for chart
-        return sortedWeeks.map(week => {
-            const dataPoint = { week };
-            data.forEach(series => {
-                const point = series.data.find(p => p.week === week);
-                if (point) {
-                    dataPoint[`${series.name}_forecasted`] = point.forecastedHours;
-                    dataPoint[`${series.name}_bookable`] = point.bookableHours;
-                    dataPoint[`${series.name}_percentage`] = point.allocationPercentage;
-                }
+        // If showing overall data (serviceLine === 'all'), aggregate all service lines
+        if (selectedFilters.serviceLine === 'all') {
+            return sortedWeeks.map(week => {
+                const dataPoint = { week };
+                let totalForecasted = 0;
+                let totalBookable = 0;
+                let totalPercentage = 0;
+                let count = 0;
+                
+                data.forEach(series => {
+                    const point = series.data.find(p => p.week === week);
+                    if (point) {
+                        totalForecasted += point.forecastedHours;
+                        totalBookable += point.bookableHours;
+                        totalPercentage += point.allocationPercentage;
+                        count += 1;
+                    }
+                });
+                
+                dataPoint['Overall_forecasted'] = totalForecasted;
+                dataPoint['Overall_bookable'] = totalBookable;
+                dataPoint['Overall_percentage'] = count > 0 ? (totalPercentage / count) : 0;
+                return dataPoint;
             });
-            return dataPoint;
-        });
+        } else {
+            // Show individual service line data
+            return sortedWeeks.map(week => {
+                const dataPoint = { week };
+                data.forEach(series => {
+                    const point = series.data.find(p => p.week === week);
+                    if (point) {
+                        dataPoint[`${series.name}_forecasted`] = point.forecastedHours;
+                        dataPoint[`${series.name}_bookable`] = point.bookableHours;
+                        dataPoint[`${series.name}_percentage`] = point.allocationPercentage;
+                    }
+                });
+                return dataPoint;
+            });
+        }
     };
 
     const utilizationChartData = formatUtilizationData(utilizationTrends);
@@ -497,7 +542,7 @@ function ComprehensiveReports() {
                                     <div className="metric-content">
                                         <h3 className="metric-value">{metrics.allocationForecastPercentage}%</h3>
                                         <p className="metric-label">Allocation Forecast %</p>
-                                        <p className="metric-description">Next 8 weeks allocation (not affected by date filter)</p>
+                                        <p className="metric-description">Current allocation forecast percentage</p>
                                     </div>
                                 </div>
                             </div>
@@ -513,12 +558,9 @@ function ComprehensiveReports() {
                             <div className="chart-title-section">
                                 <h3>Utilization Trends</h3>
                                 <p>
-                                    {isAdministrator ? 'Monthly utilization percentage by line of business' :
-                                     (AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.LOB_ADMIN || 
-                                      AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.PROJECT_MANAGER || 
-                                      AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.LEADERSHIP) ? 
-                                     'Monthly utilization percentage by service line' :
-                                     'Monthly utilization percentage by line of business'}
+                                    {selectedFilters.serviceLine === 'all' ? 
+                                     'Monthly utilization percentage - Combined data from all service lines' :
+                                     'Monthly utilization percentage - Data for selected service line only'}
                                 </p>
                             </div>
                             <div className="chart-filters">
@@ -578,16 +620,27 @@ function ComprehensiveReports() {
                                     <YAxis label={{ value: 'Utilization %', angle: -90, position: 'insideLeft' }} />
                                     <Tooltip formatter={(value) => [`${value}%`, 'Utilization']} />
                                     <Legend />
-                                    {utilizationTrends.map((series, index) => (
+                                    {selectedFilters.serviceLine === 'all' ? (
                                         <Line
-                                            key={series.name}
+                                            key="Overall"
                                             type="monotone"
-                                            dataKey={series.name}
-                                            stroke={`hsl(${index * 60}, 70%, 50%)`}
-                                            strokeWidth={2}
-                                            dot={{ r: 4 }}
+                                            dataKey="Overall"
+                                            stroke="#8884d8"
+                                            strokeWidth={3}
+                                            dot={{ r: 5 }}
                                         />
-                                    ))}
+                                    ) : (
+                                        utilizationTrends.map((series, index) => (
+                                            <Line
+                                                key={series.name}
+                                                type="monotone"
+                                                dataKey={series.name}
+                                                stroke={`hsl(${index * 60}, 70%, 50%)`}
+                                                strokeWidth={2}
+                                                dot={{ r: 4 }}
+                                            />
+                                        ))
+                                    )}
                                 </LineChart>
                             </ResponsiveContainer>
                         </div>
@@ -602,12 +655,9 @@ function ComprehensiveReports() {
                             <div className="chart-title-section">
                                 <h3>Allocation Forecast</h3>
                                 <p>
-                                    {isAdministrator ? 'Forecasted allocation vs bookable hours by line of business' :
-                                     (AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.LOB_ADMIN || 
-                                      AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.PROJECT_MANAGER || 
-                                      AppFunc.activeUserRole === APP_CONSTANTS.USER_ROLES.LEADERSHIP) ? 
-                                     'Forecasted allocation vs bookable hours by service line' :
-                                     'Forecasted allocation vs bookable hours by line of business'}
+                                    {selectedFilters.serviceLine === 'all' ? 
+                                     'Forecasted allocation vs bookable hours - Combined data from all service lines' :
+                                     'Forecasted allocation vs bookable hours - Data for selected service line only'}
                                 </p>
                             </div>
                             {/* <div className="chart-filters">
@@ -668,32 +718,59 @@ function ComprehensiveReports() {
                                     <YAxis yAxisId="percentage" orientation="right" label={{ value: 'Allocation %', angle: 90, position: 'insideRight' }} />
                                     <Tooltip />
                                     <Legend />
-                                    {allocationForecast.map((series, index) => (
-                                        <React.Fragment key={series.name}>
+                                    {selectedFilters.serviceLine === 'all' ? (
+                                        <React.Fragment key="Overall">
                                             <Bar
                                                 yAxisId="hours"
-                                                dataKey={`${series.name}_forecasted`}
+                                                dataKey="Overall_forecasted"
                                                 stackId="a"
-                                                fill={`hsl(${index * 60}, 70%, 50%)`}
-                                                name={`${series.name} - Forecasted`}
+                                                fill="#8884d8"
+                                                name="Overall - Forecasted"
                                             />
                                             <Bar
                                                 yAxisId="hours"
-                                                dataKey={`${series.name}_bookable`}
+                                                dataKey="Overall_bookable"
                                                 stackId="a"
-                                                fill={`hsl(${index * 60}, 70%, 80%)`}
-                                                name={`${series.name} - Bookable`}
+                                                fill="#82ca9d"
+                                                name="Overall - Bookable"
                                             />
                                             <Line
                                                 yAxisId="percentage"
                                                 type="monotone"
-                                                dataKey={`${series.name}_percentage`}
-                                                stroke={`hsl(${index * 60}, 70%, 30%)`}
-                                                strokeWidth={2}
-                                                name={`${series.name} - Allocation %`}
+                                                dataKey="Overall_percentage"
+                                                stroke="#ff7300"
+                                                strokeWidth={3}
+                                                name="Overall - Allocation %"
                                             />
                                         </React.Fragment>
-                                    ))}
+                                    ) : (
+                                        allocationForecast.map((series, index) => (
+                                            <React.Fragment key={series.name}>
+                                                <Bar
+                                                    yAxisId="hours"
+                                                    dataKey={`${series.name}_forecasted`}
+                                                    stackId="a"
+                                                    fill={`hsl(${index * 60}, 70%, 50%)`}
+                                                    name={`${series.name} - Forecasted`}
+                                                />
+                                                <Bar
+                                                    yAxisId="hours"
+                                                    dataKey={`${series.name}_bookable`}
+                                                    stackId="a"
+                                                    fill={`hsl(${index * 60}, 70%, 80%)`}
+                                                    name={`${series.name} - Bookable`}
+                                                />
+                                                <Line
+                                                    yAxisId="percentage"
+                                                    type="monotone"
+                                                    dataKey={`${series.name}_percentage`}
+                                                    stroke={`hsl(${index * 60}, 70%, 30%)`}
+                                                    strokeWidth={2}
+                                                    name={`${series.name} - Allocation %`}
+                                                />
+                                            </React.Fragment>
+                                        ))
+                                    )}
                                 </ComposedChart>
                             </ResponsiveContainer>
                         </div>
