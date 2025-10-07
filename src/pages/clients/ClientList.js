@@ -111,28 +111,30 @@ function ClientList() {
             {/* Action Buttons */}
             <div className="search-controls">
               <div className="search-row">
-                <div className="search-input-group" style={{ flex: '0 1 auto' }}>
+                <div className="search-input-group">
                   {/* Placeholder for future search functionality */}
                 </div>
                 
-                <div className="action-buttons">
-                  <button
-                    type="button"
-                    onClick={handleExcelExport}
-                    className="excel-btn"
-                  >
-                    <i className="bi bi-filetype-xls"></i>
-                    EXCEL
-                  </button>
-                  
-                  <button 
-                    type="button"
-                    onClick={handleAddButtonClick}
-                    className="add-btn"
-                  >
-                    <i className="bi bi-plus-square"></i>
-                    ADD CLIENT
-                  </button>
+                <div className="right-side-buttons">
+                  <div className="action-buttons">
+                    <button
+                      type="button"
+                      onClick={handleExcelExport}
+                      className="excel-btn"
+                    >
+                      <i className="bi bi-filetype-xls"></i>
+                      EXCEL
+                    </button>
+                    
+                    <button 
+                      type="button"
+                      onClick={handleAddButtonClick}
+                      className="add-btn"
+                    >
+                      <i className="bi bi-plus-square"></i>
+                      ADD CLIENT
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

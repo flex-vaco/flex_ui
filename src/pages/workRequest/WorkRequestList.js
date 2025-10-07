@@ -138,7 +138,7 @@ function WorkRequestList() {
     Utils.exportHTMLTableToExcel('workRequestListTable', 'Work Request List', ["Action"])
   };
 
-  const searchKeysToIgnore = ["id", "service_line_id", "project_id", "submitted_by", "submitted_at", "created_at", "updated_at"];
+  const searchKeysToIgnore = ["id", "service_line_id", "project_id", "submitted_by", "submitted_at", "created_at", "updated_at", "line_of_business_id", "work_request_id","last_name"];
 
   const getStatusBadgeClass = (status) => {
     const statusLower = status?.toLowerCase();
@@ -185,57 +185,61 @@ function WorkRequestList() {
             {/* Search Controls */}
             <div className="search-controls">
               <div className="search-row">
-                <div className="search-input-group">
-                  <span className="search-icon">
-                    <i className="bi bi-search"></i>
-                  </span>
-                  <select 
-                    className="search-select" 
-                    name="searchKey" 
-                    id="search-key"  
-                    onChange={handleSearchKeyChange}
-                  > 
-                    <option value="-select-">-- Search Key --</option>
-                    {searchKeys.map((k) => (!searchKeysToIgnore.includes(k)) ? 
-                      <option key={k} value={k}>{k.replace(/_/g, ' ').toUpperCase()}</option> : ""
-                    )}
-                  </select>
-                  <input 
-                    className="search-input" 
-                    id="search-value" 
-                    type={inputType} 
-                    placeholder="Type a value" 
-                    onChange={handleSearch} 
-                  />
-                </div>
-                
-                <button 
-                  className="search-refresh-btn"
-                  onClick={handleSearchRefreshClick}
-                >
-                  <i className="bi bi-arrow-counterclockwise"></i>
-                  Refresh
-                </button>
-
-                <div className="action-buttons">
-                  <button
-                    type="button"
-                    onClick={handleExcelExport}
-                    className="excel-btn"
-                  >
-                    <i className="bi bi-filetype-xls"></i>
-                    EXCEL
-                  </button>
+                <div className="search-and-filter">
+                  <div className="search-input-group">
+                    <span className="search-icon">
+                      <i className="bi bi-search"></i>
+                    </span>
+                    <select 
+                      className="search-select" 
+                      name="searchKey" 
+                      id="search-key"  
+                      onChange={handleSearchKeyChange}
+                    > 
+                      <option value="-select-">-- Search Key --</option>
+                      {searchKeys.map((k) => (!searchKeysToIgnore.includes(k)) ? 
+                        <option key={k} value={k}>{k.replace(/_/g, ' ').toUpperCase()}</option> : ""
+                      )}
+                    </select>
+                    <input 
+                      className="search-input" 
+                      id="search-value" 
+                      type={inputType} 
+                      placeholder="Type a value" 
+                      onChange={handleSearch} 
+                    />
+                  </div>
                   
                   <button 
-                    type="button"
-                    hidden={hasReadOnlyAccess}
-                    onClick={handleAddButtonClick}
-                    className="add-btn"
+                    className="search-refresh-btn"
+                    onClick={handleSearchRefreshClick}
                   >
-                    <i className="bi bi-plus-square"></i>
-                    ADD WORK REQUEST
+                    <i className="bi bi-arrow-counterclockwise"></i>
+                    Clear Filter
                   </button>
+                </div>
+                
+                <div className="right-side-buttons">
+                  <div className="action-buttons">
+                    <button
+                      type="button"
+                      onClick={handleExcelExport}
+                      className="excel-btn"
+                    >
+                      <i className="bi bi-filetype-xls"></i>
+                      EXCEL
+                    </button>
+                    
+                    <button 
+                      type="button"
+                      hidden={hasReadOnlyAccess}
+                      onClick={handleAddButtonClick}
+                      className="add-btn"
+                    >
+                      <i className="bi bi-plus-square"></i>
+                      ADD WORK REQUEST
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
