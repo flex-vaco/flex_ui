@@ -29,7 +29,10 @@ function ComprehensiveReports() {
         // Individual section filters
         metrics: {
             vertical: isAdministrator ? 'all' : userLineOfBusinessId || 'all',
-            serviceLine: 'all'
+            serviceLine: 'all',
+            datePreset: 'last_month',
+            startDate: '',
+            endDate: ''
         },
         utilization: {
             vertical: isAdministrator ? 'all' : userLineOfBusinessId || 'all',
@@ -76,11 +79,19 @@ function ComprehensiveReports() {
         setError(null);
         
         try {
-            // Build metrics parameters using global filters
+            // Build metrics parameters using global filters and date filters
             const metricsParams = new URLSearchParams({
                 metricsVertical: selectedFilters.vertical,
                 metricsServiceLine: selectedFilters.serviceLine
             });
+
+            // Add date filters for metrics
+            if (selectedFilters.metrics.datePreset === 'custom') {
+                metricsParams.append('metricsStartDate', selectedFilters.metrics.startDate);
+                metricsParams.append('metricsEndDate', selectedFilters.metrics.endDate);
+            } else {
+                metricsParams.append('metricsDatePreset', selectedFilters.metrics.datePreset);
+            }
 
             // Build utilization parameters using global filters
             const utilizationParams = new URLSearchParams({
@@ -259,6 +270,30 @@ function ComprehensiveReports() {
         }
     };
 
+    const fetchMetricsData = async () => {
+        try {
+            // Build metrics parameters with date filters
+            const metricsParams = new URLSearchParams({
+                metricsVertical: selectedFilters.vertical,
+                metricsServiceLine: selectedFilters.serviceLine
+            });
+
+            // Add date filters for metrics
+            if (selectedFilters.metrics.datePreset === 'custom') {
+                metricsParams.append('metricsStartDate', selectedFilters.metrics.startDate);
+                metricsParams.append('metricsEndDate', selectedFilters.metrics.endDate);
+            } else {
+                metricsParams.append('metricsDatePreset', selectedFilters.metrics.datePreset);
+            }
+
+            const metricsResponse = await axios.get(`/reports/dashboard-metrics?${metricsParams}`);
+            setMetrics(metricsResponse.data.metrics);
+        } catch (error) {
+            console.error('Error fetching metrics data:', error);
+            setError('Failed to load metrics data');
+        }
+    };
+
     const formatUtilizationData = (data) => {
         if (!data || data.length === 0) return [];
         
@@ -373,43 +408,101 @@ function ComprehensiveReports() {
                     </div>
                 )}
 
-                {/* Metrics Section */}
+                {/* Top Level Metrics Section */}
                 <div className="report-section">
-                    {/* Metrics Cards */}
-                <div className="metrics-cards">
-                    <div className="metric-card">
-                        <div className="metric-icon">
-                            <i className="fas fa-users"></i>
+                    <div className="chart-container">
+                        <div className="chart-header">
+                            <div className="chart-title-section">
+                                <h3>Top Level Metrics</h3>
+                                <p>Key performance indicators for the selected time period</p>
+                            </div>
+                            <div className="chart-filters">
+                                <div className="filter-group">
+                                    <label>Date Range (for Active HC & Utilization %)</label>
+                                    <select
+                                        value={selectedFilters.metrics.datePreset}
+                                        onChange={(e) => handleSectionFilterChange('metrics', 'datePreset', e.target.value)}
+                                        className="filter-select"
+                                    >
+                                        {filterOptions.datePresets.map(preset => (
+                                            <option key={preset.id} value={preset.id}>
+                                                {preset.name}
+                                            </option>
+                                        ))}
+                                        <option value="custom">Custom Range</option>
+                                    </select>
+                                </div>
+                                {selectedFilters.metrics.datePreset === 'custom' && (
+                                    <>
+                                        <div className="filter-group">
+                                            <label>Start Date</label>
+                                            <input
+                                                type="date"
+                                                value={selectedFilters.metrics.startDate}
+                                                onChange={(e) => handleSectionFilterChange('metrics', 'startDate', e.target.value)}
+                                                className="filter-input"
+                                            />
+                                        </div>
+                                        <div className="filter-group">
+                                            <label>End Date</label>
+                                            <input
+                                                type="date"
+                                                value={selectedFilters.metrics.endDate}
+                                                onChange={(e) => handleSectionFilterChange('metrics', 'endDate', e.target.value)}
+                                                className="filter-input"
+                                            />
+                                        </div>
+                                    </>
+                                )}
+                                <button
+                                    onClick={() => {
+                                        // Fetch metrics data with date filters
+                                        fetchMetricsData();
+                                    }}
+                                    className="btn btn-primary apply-filter-btn"
+                                >
+                                    Apply Filter
+                                </button>
+                            </div>
                         </div>
-                        <div className="metric-content">
-                            <h3 className="metric-value">{metrics.activeHC}</h3>
-                            <p className="metric-label">Active Head Count</p>
-                            <p className="metric-description">Resources allocated to projects</p>
-                        </div>
-                    </div>
+                        <div className="chart-content">
+                            {/* Metrics Cards */}
+                            <div className="metrics-cards">
+                                <div className="metric-card">
+                                    <div className="metric-icon">
+                                        <i className="fas fa-users"></i>
+                                    </div>
+                                    <div className="metric-content">
+                                        <h3 className="metric-value">{metrics.activeHC}</h3>
+                                        <p className="metric-label">Active Head Count</p>
+                                        <p className="metric-description">Resources allocated to projects in the selected time period</p>
+                                    </div>
+                                </div>
 
-                    <div className="metric-card">
-                        <div className="metric-icon">
-                            <i className="fas fa-chart-line"></i>
-                        </div>
-                        <div className="metric-content">
-                            <h3 className="metric-value">{metrics.utilizationPercentage}%</h3>
-                            <p className="metric-label">Utilization %</p>
-                            <p className="metric-description">Billed hours vs available hours</p>
-                        </div>
-                    </div>
+                                <div className="metric-card">
+                                    <div className="metric-icon">
+                                        <i className="fas fa-chart-line"></i>
+                                    </div>
+                                    <div className="metric-content">
+                                        <h3 className="metric-value">{metrics.utilizationPercentage}%</h3>
+                                        <p className="metric-label">Utilization %</p>
+                                        <p className="metric-description">Billed hours vs available hours in the selected time period</p>
+                                    </div>
+                                </div>
 
-                    <div className="metric-card">
-                        <div className="metric-icon">
-                            <i className="fas fa-calendar-alt"></i>
-                        </div>
-                        <div className="metric-content">
-                            <h3 className="metric-value">{metrics.allocationForecastPercentage}%</h3>
-                            <p className="metric-label">Allocation Forecast %</p>
-                            <p className="metric-description">Next 8 weeks allocation</p>
+                                <div className="metric-card">
+                                    <div className="metric-icon">
+                                        <i className="fas fa-calendar-alt"></i>
+                                    </div>
+                                    <div className="metric-content">
+                                        <h3 className="metric-value">{metrics.allocationForecastPercentage}%</h3>
+                                        <p className="metric-label">Allocation Forecast %</p>
+                                        <p className="metric-description">Next 8 weeks allocation (not affected by date filter)</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
                 </div>
 
                 {/* Utilization Trends Section */}
@@ -517,7 +610,7 @@ function ComprehensiveReports() {
                                      'Forecasted allocation vs bookable hours by line of business'}
                                 </p>
                             </div>
-                            <div className="chart-filters">
+                            {/* <div className="chart-filters">
                                 <div className="filter-group">
                                     <label>Date Range</label>
                                     <select
@@ -564,7 +657,7 @@ function ComprehensiveReports() {
                                 >
                                     Apply Filter
                                 </button>
-                            </div>
+                            </div> */}
                         </div>
                         <div className="chart-content">
                             <ResponsiveContainer width="100%" height={400}>
