@@ -252,6 +252,76 @@ function WorkRequestCreate() {
     const handleSubmitToOffshoreLead = () => {
         if (!validateForm()) return;
 
+        // Show confirmation dialog
+        Swal.fire({
+            title: 'Submit Work Request',
+            text: 'Do you want to submit this request to offshore lead?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, Submit',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                setIsSaving(true);
+                const requestData = {
+                    title: title,
+                    line_of_business_id: lineOfBusinessId,
+                    service_line_id: serviceLineId,
+                    capability_area_ids: capabilityAreaIds,
+                    project_id: projectId,
+                    duration_from: durationFrom,
+                    duration_to: durationTo,
+                    hours_per_week: hoursPerWeek,
+                    notes: notes,
+                    status: 'submitted'
+                };
+
+                console.log("Selected resources: ", selectedResources);
+
+                if (selectedResources.length > 0) {
+                    requestData.resource_ids = selectedResources.map(r => r.emp_id);
+                }
+
+                if (selectedOffshoreLeads.length > 0) {
+                    requestData.offshore_lead_ids = selectedOffshoreLeads.map(r => r.user_id);
+                }
+
+                console.log("Submitting work request data:", requestData);
+
+                axios.post('/workRequest/add', requestData, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(function (response) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Work Request submitted to offshore lead successfully!',
+                        showConfirmButton: false,
+                        timer: 1500
+                    })
+                    navigate("/workRequest");
+                })
+                .catch(function (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'An Error Occurred!',
+                        text: error.response?.data?.message || 'Something went wrong',
+                        showConfirmButton: true
+                    })
+                })
+                .finally(() => {
+                    setIsSaving(false);
+                });
+            }
+        });
+    }
+
+    const handleSaveWorkRequest = () => {
+        if (!validateForm()) return;
+
         setIsSaving(true);
         const requestData = {
             title: title,
@@ -262,7 +332,8 @@ function WorkRequestCreate() {
             duration_from: durationFrom,
             duration_to: durationTo,
             hours_per_week: hoursPerWeek,
-            notes: notes
+            notes: notes,
+            status: 'draft'
         };
 
         console.log("Selected resources: ", selectedResources);
@@ -285,7 +356,7 @@ function WorkRequestCreate() {
         .then(function (response) {
             Swal.fire({
                 icon: 'success',
-                title: 'Work Request submitted successfully!',
+                title: 'Work Request saved successfully!',
                 showConfirmButton: false,
                 timer: 1500
             })
@@ -565,7 +636,7 @@ function WorkRequestCreate() {
                                     <button 
                                         type="button"
                                         onClick={handleSubmitToOffshoreLead}
-                                        className="btn btn-success"
+                                        className="btn btn-primary me-2"
                                         disabled={isSaving}
                                     >
                                         {isSaving ? (
@@ -576,6 +647,24 @@ function WorkRequestCreate() {
                                         ) : (
                                             <>
                                                 <i className="bi bi-send"></i>
+                                                Submit to Offshore Lead
+                                            </>
+                                        )}
+                                    </button>
+                                    <button 
+                                        type="button"
+                                        onClick={handleSaveWorkRequest}
+                                        className="btn btn-success"
+                                        disabled={isSaving}
+                                    >
+                                        {isSaving ? (
+                                            <>
+                                                <span className="loading-spinner"></span>
+                                                Saving...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <i className="bi bi-check-circle"></i>
                                                 Save Work Request
                                             </>
                                         )}

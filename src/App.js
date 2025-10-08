@@ -43,6 +43,7 @@ import TimeSheet from './pages/timesheet/Timesheet';
 import ApproveTimesheet from './pages/timesheet/ApproveTimesheetList';
 import ApproveEmpTimesheet from './pages/timesheet/ApproveEmpTimesheet';
 import ImportTimesheet from './pages/timesheet/ImportTimesheet';
+import OffshoreTimesheetEntries from './pages/timesheet/OffshoreTimesheetEntries';
 import Dashboard from "./pages/Dashboard";
 import HireResource from "./pages/HireResource";
 import IntelliDB from './pages/aiChat/InteliDB'
@@ -159,6 +160,7 @@ function App() {
           <Route path="/userRoleEdit/:id"  element={isLoggedIn ? <UserRoleEdit/> : <Login/>} />
           <Route path="/userRoleShow/:id"  element={isLoggedIn ? <UserRoleShow/> : <Login/>} />
           <Route path="/importTimesheet"  element={isLoggedIn ? <ImportTimesheet/> : <Login/>} />
+          <Route path="/offshoreTimesheetEntries"  element={isLoggedIn ? <OffshoreTimesheetEntries/> : <Login/>} />
           <Route path="/home"  element={isLoggedIn ? <Home/> : <Login/>} />
           <Route path="/timesheet"  element={isLoggedIn ? <TimeSheet/> : <Login/>} />
           <Route path="/comprehensiveReports"  element={isLoggedIn ? <ComprehensiveReports/> : <Login/>} />
