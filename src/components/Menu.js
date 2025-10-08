@@ -145,6 +145,13 @@ return(
               </div>
             )}
             
+            {activeUserRole === APP_CONSTANTS.USER_ROLES.OFF_SHORE_LEAD && (
+              <div className="sidebar-item" onClick={() => handleMenuClick('/offshoreTimesheetEntries')}>
+                <i className="bi bi-calendar-check-fill me-2"></i>
+                Timesheet Entries
+              </div>
+            )}
+            
             {AppFunc.hasAllocationAccess(activeUserRole) && (
               <div className="sidebar-item" onClick={() => handleMenuClick('/empProjList')}>
                 <i className="bi bi-diagram-3-fill me-2"></i>

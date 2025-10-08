@@ -354,6 +354,7 @@ function WorkRequestEdit() {
         formData.append('capability_area_ids', JSON.stringify(capabilityAreaIds));
         formData.append('resource_ids', JSON.stringify(selectedResources.map(r => r.emp_id)));
         formData.append('offshore_lead_ids', JSON.stringify(selectedOffshoreLeads.map(r => r.user_id)));
+        formData.append('status', 'draft');
         
         if (projectAttachment) {
             formData.append('project_attachment', projectAttachment);
@@ -404,8 +405,30 @@ function WorkRequestEdit() {
         }).then((result) => {
             if (result.isConfirmed) {
                 setIsSaving(true);
+
+                const formData = new FormData();
+                formData.append('title', title);
+                formData.append('line_of_business_id', lineOfBusinessId);
+                formData.append('service_line_id', serviceLineId);
+                formData.append('project_id', projectId);
+                formData.append('duration_from', durationFrom);
+                formData.append('duration_to', durationTo);
+                formData.append('hours_per_week', hoursPerWeek);
+                formData.append('notes', notes);
+                formData.append('capability_area_ids', JSON.stringify(capabilityAreaIds));
+                formData.append('resource_ids', JSON.stringify(selectedResources.map(r => r.emp_id)));
+                formData.append('offshore_lead_ids', JSON.stringify(selectedOffshoreLeads.map(r => r.user_id)));
+                formData.append('status', 'submitted');
                 
-                axios.post(`/workRequest/submit/${id}`)
+                if (projectAttachment) {
+                    formData.append('project_attachment', projectAttachment);
+                }
+                
+                axios.post(`/workRequest/update/${id}`, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                })
                 .then(function (response) {
                     Swal.fire({
                         icon: 'success',

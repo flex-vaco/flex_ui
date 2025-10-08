@@ -208,9 +208,9 @@
   transform: none !important;
 }
 
-/* .btn-primary {
+.btn-primary {
   background: linear-gradient(135deg, #072942 0%, #0d4a6b 100%);
-  color: white;
+  color: white !important;
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -228,7 +228,7 @@
   background: #5a6268;
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(108, 117, 125, 0.2);
-} */
+}
 
 .btn-outline {
   background: transparent;
@@ -431,6 +431,11 @@
 
 .radio-option span {
   user-select: none;
+}
+
+/* Utility Classes */
+.me-2 {
+  margin-right: 0.5rem;
 }
 
 /* Responsive adjustments */
