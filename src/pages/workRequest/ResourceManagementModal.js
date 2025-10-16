@@ -44,6 +44,17 @@ function ResourceManagementModal({ workRequest, onClose, onStatusUpdate, isReadO
         }
     }, [workRequest, currentUser]);
 
+    // Set pre-selected resources when available resources are loaded
+    useEffect(() => {
+        if (availableResources.length > 0 && existingResources.length > 0) {
+            // Pre-select resources that were already assigned during creation
+            const preSelectedResources = availableResources.filter(availableResource => 
+                existingResources.some(existingResource => existingResource.emp_id === availableResource.emp_id)
+            );
+            setSelectedResources(preSelectedResources);
+        }
+    }, [availableResources, existingResources]);
+
     const fetchExistingResources = () => {
         setIsLoading(true);
         axios.get(`/workRequest/${workRequest.work_request_id}`)

@@ -5,7 +5,7 @@ import Layout from "../../components/Layout"
 import * as Utils from "../../lib/Utils"
 import Swal from 'sweetalert2';
 
-import OffshoreLeadReviewModal from './OffshoreLeadReviewModal';
+import ResourceManagementModal from './ResourceManagementModal';
  
 function WorkRequestShow() {
     const { id } = useParams();
@@ -304,12 +304,14 @@ function WorkRequestShow() {
                     </div>
                 </div>
 
-                {/* Offshore Lead Review Modal */}
+                {/* Resource Management Modal */}
                 {showReviewModal && (
-                    <OffshoreLeadReviewModal
+                    <ResourceManagementModal
                         workRequest={workRequestDetails}
                         onClose={() => setShowReviewModal(false)}
                         onStatusUpdate={handleStatusUpdate}
+                        isReadOnly={false}
+                        currentUser={currentUser}
                     />
                 )}
             </div>

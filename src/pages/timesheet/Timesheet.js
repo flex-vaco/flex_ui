@@ -374,7 +374,7 @@ return (
                 <button
                   onClick={(e) => handleExcelExport(e)}
                   className="form-control btn btn-outline-info me-2">
-                  XLS <i className="bi bi-filetype-xls"></i>
+                  XLS <i className="bi bi-download"></i>
                 </button>
             </div>
 

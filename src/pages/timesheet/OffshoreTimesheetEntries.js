@@ -220,7 +220,7 @@ function OffshoreTimesheetEntries() {
                   onClick={handleExcelExport}
                   className="filter-btn excel"
                 >
-                  <i className="bi bi-filetype-xls"></i>
+                  <i className="bi bi-download"></i>
                   Export Excel
                 </button>
               </div>
