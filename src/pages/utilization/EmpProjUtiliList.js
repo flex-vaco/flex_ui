@@ -224,7 +224,7 @@ function EmpProjUtiliList() {
                       onClick={handleExcelExport}
                       className="excel-btn"
                     >
-                      <i className="bi bi-filetype-xls"></i>
+                      <i className="bi bi-download"></i>
                       EXCEL
                     </button>
                     
